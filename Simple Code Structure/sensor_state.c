@@ -6,10 +6,8 @@
  */
 
 #include "sensor_state.h"
-#include <ti/drivers/Timer.h>
 #include <stdio.h>
 
-void timerCallback(Timer_Handle myHandle);
 
 int fsm(STATES curState, int timeInc, int sensorVal)
 {
@@ -120,25 +118,25 @@ void *mainThread(void *arg0)
     params.period = 75000;
     params.periodUnits = Timer_PERIOD_US;
     params.timerMode = Timer_CONTINUOUS_CALLBACK;
-    params.timerCallback = timerCallback;
+    params.timerCallback = timer75Callback;
 
     timer0 = Timer_open(CONFIG_TIMER_0, &params);
     if (timer0 == NULL)
     {
-        /* Failed to initialized timer */
-        while (1) {}
+        halt();
     }
 
-    if (Timer_start(timer0) == Timer_STATUS_ERROR) {
-        /* Failed to start timer */
-        while (1) {}
+    if (Timer_start(timer0) == Timer_STATUS_ERROR)
+    {
+        halt();
     }
 
     return (NULL);
 }
 
-void timerCallback(Timer_Handle myHandle)
+void timer75Callback(Timer_Handle myHandle)
 {
-    //read adc
+    //read from queue
+    //fsm(curState, timeInc, sensorVal);
 }
 

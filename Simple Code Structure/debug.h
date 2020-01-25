@@ -12,7 +12,7 @@
 #include <ti/drivers/GPIO.h>
 #include "ti_drivers_config.h"
 
-int DBG_ERROR=255;
+#define DBG_ERROR (127)
 
 void dbgUARTVal(unsigned char outVal);
 void dbgOutputLoc(unsigned int outVal);

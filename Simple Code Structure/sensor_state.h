@@ -10,7 +10,9 @@
 
 #include <ti/drivers/GPIO.h>
 #include <ti/drivers/UART.h>
+#include <ti/drivers/Timer.h>
 #include "ti_drivers_config.h"
+#include "debug.h"
 
 
 char *uartOut;
@@ -25,9 +27,10 @@ typedef enum
     WaitingForTime3,
 } STATES;
 
-//curTime needs to be based on timer!!!!
 int curTime, sensorTotal, sensorCount, sensorAvg;
+STATES curState = Init;
 
 int fsm(STATES curState, int timeInc, int sensorVal);
+void timer75Callback(Timer_Handle myHandle);
 
 #endif /* SENSOR_STATE_H_ */
