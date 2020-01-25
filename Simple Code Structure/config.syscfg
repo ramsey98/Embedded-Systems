@@ -17,6 +17,8 @@ var GPIO7 = GPIO.addInstance();
 var GPIO8 = GPIO.addInstance();
 var UART = scripting.addModule("/ti/drivers/UART", {}, false);
 var UART1 = UART.addInstance();
+var LED = scripting.addModule("/ti/drivers/apps/LED", {}, false);
+var LED1 = LED.addInstance();
 // name - Select the RTOS being used
 RTOS.name = "FreeRTOS";
 // Name - The C/C++ identifier used in applications as the index parameter passed to Timer runtime APIs
@@ -68,6 +70,10 @@ UART1.$name = "CONFIG_UART_0";
 UART1.$hardware = system.deviceData.board.components.XDS110UART;
 // Name
 UART1.uart.$name = "MyUART1";
+// Name - The C/C++ identifier used in applications as the index parameter passed to LED runtime APIs
+LED1.$name = "CONFIG_LED_0";
+// Use Hardware - Select the hardware to use, or 'None' to use available header pins
+LED1.gpioPin.$hardware = system.deviceData.board.components.LED_RED;
 // Suggest solution
 Timer1.timer.$suggestSolution = "Timer1";
 // Suggest solution
@@ -92,3 +98,5 @@ UART1.uart.$suggestSolution = "UART0";
 UART1.uart.txPin.$suggestSolution = "55";
 // Suggest solution
 UART1.uart.rxPin.$suggestSolution = "57";
+// Suggest solution
+LED1.gpioPin.gpioPin.$suggestSolution = "64";

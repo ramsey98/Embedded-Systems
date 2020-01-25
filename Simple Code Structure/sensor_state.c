@@ -6,6 +6,10 @@
  */
 
 #include "sensor_state.h"
+#include <ti/drivers/Timer.h>
+#include <stdio.h>
+
+void timerCallback(Timer_Handle myHandle);
 
 int fsm(STATES curState, int timeInc, int sensorVal)
 {
@@ -16,6 +20,13 @@ int fsm(STATES curState, int timeInc, int sensorVal)
         {
             GPIO_init();
             UART_init();
+            UART_Params_init(&uartParams);
+            uartParams.writeDataMode = UART_DATA_BINARY;
+            uartParams.readDataMode = UART_DATA_BINARY;
+            uartParams.readReturnMode = UART_RETURN_FULL;
+            uartParams.readEcho = UART_ECHO_OFF;
+            uartParams.baudRate = 115200;
+            uart = UART_open(CONFIG_UART_0, &uartParams);
             curTime = 0;
             sensorTotal = 0;
             sensorCount = 0;
@@ -35,8 +46,10 @@ int fsm(STATES curState, int timeInc, int sensorVal)
                 sensorAvg = sensorTotal/sensorCount;
                 uartOut = "Sensor=:\r\n";
                 UART_write(uart, uartOut, sizeof(uartOut));
-                UART_write(uart, sensorAvg, sizeof(sensorAvg));
-                UART_write(uart, sensorCount, sizeof(sensorCount));
+                sprintf(uartOut, "%d", sensorAvg);
+                UART_write(uart, uartOut, sizeof(uartOut));
+                sprintf(uartOut, "%d", sensorCount);
+                UART_write(uart, uartOut, sizeof(uartOut));
                 sensorTotal = 0;
                 sensorCount = 0;
             }
@@ -55,8 +68,10 @@ int fsm(STATES curState, int timeInc, int sensorVal)
                 sensorAvg = sensorTotal/sensorCount;
                 uartOut = "Sensor=:\r\n";
                 UART_write(uart, uartOut, sizeof(uartOut));
-                UART_write(uart, sensorAvg, sizeof(sensorAvg));
-                UART_write(uart, sensorCount, sizeof(sensorCount));
+                sprintf(uartOut, "%d", sensorAvg);
+                UART_write(uart, uartOut, sizeof(uartOut));
+                sprintf(uartOut, "%d", sensorCount);
+                UART_write(uart, uartOut, sizeof(uartOut));
                 sensorTotal = 0;
                 sensorCount = 0;
             }
@@ -75,18 +90,17 @@ int fsm(STATES curState, int timeInc, int sensorVal)
                 sensorAvg = sensorTotal/sensorCount;
                 uartOut = "Sensor=:\r\n";
                 UART_write(uart, uartOut, sizeof(uartOut));
-                uartOut = sensorAvg;
+                sprintf(uartOut, "%d", sensorAvg);
                 UART_write(uart, uartOut, sizeof(uartOut));
-                uartOut = sensorCount;
+                sprintf(uartOut, "%d", sensorCount);
                 UART_write(uart, uartOut, sizeof(uartOut));
                 uartOut = "CurTime=:\r\n";
                 UART_write(uart, uartOut, sizeof(uartOut));
-                uartOut = curTime;
+                sprintf(uartOut, "%d", curTime);
                 UART_write(uart, uartOut, sizeof(uartOut));
                 sensorTotal = 0;
                 sensorCount = 0;
                 curState = WaitingForTime1;
-
             }
         }
         default:
@@ -99,10 +113,32 @@ int fsm(STATES curState, int timeInc, int sensorVal)
 
 void *mainThread(void *arg0)
 {
-    while(1)
+    Timer_Handle timer0;
+    Timer_Params params;
+    Timer_init();
+    Timer_Params_init(&params);
+    params.period = 75000;
+    params.periodUnits = Timer_PERIOD_US;
+    params.timerMode = Timer_CONTINUOUS_CALLBACK;
+    params.timerCallback = timerCallback;
+
+    timer0 = Timer_open(CONFIG_TIMER_0, &params);
+    if (timer0 == NULL)
     {
-        //receive from queue
+        /* Failed to initialized timer */
+        while (1) {}
     }
+
+    if (Timer_start(timer0) == Timer_STATUS_ERROR) {
+        /* Failed to start timer */
+        while (1) {}
+    }
+
+    return (NULL);
 }
 
+void timerCallback(Timer_Handle myHandle)
+{
+    //read adc
+}
 
