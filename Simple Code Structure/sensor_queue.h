@@ -9,7 +9,8 @@
 #define SENSOR_QUEUE_H_
 
 
-
+int sendTimeMsgToQ1(unsigned int timeVal);
+int sendSensorMsgToQ1(int mmDist);
 
 
 #endif /* SENSOR_QUEUE_H_ */
