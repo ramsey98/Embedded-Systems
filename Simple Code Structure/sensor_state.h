@@ -9,15 +9,9 @@
 #define SENSOR_STATE_H_
 
 #include <ti/drivers/GPIO.h>
-#include <ti/drivers/UART.h>
-#include <ti/drivers/Timer.h>
 #include "ti_drivers_config.h"
 #include "debug.h"
 
-
-char *uartOut;
-UART_Handle uart;
-UART_Params uartParams;
 
 typedef enum
 {
@@ -28,9 +22,8 @@ typedef enum
 } STATES;
 
 int curTime, sensorTotal, sensorCount, sensorAvg;
-STATES curState = Init;
+STATES curState;
 
 int fsm(STATES curState, int timeInc, int sensorVal);
-void timer75Callback(Timer_Handle myHandle);
 
 #endif /* SENSOR_STATE_H_ */
