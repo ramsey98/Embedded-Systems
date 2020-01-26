@@ -6,27 +6,22 @@
  */
 #include "debug.h"
 #include "sensor_state.h"
+#include "sensor_queue.h"
+#include "timerone.h"
+#include "timertwo.h"
 
 void *mainThread(void *arg0)
 {
-    UART_init();
-
-    GPIO_init();
-    GPIO_setConfig(CONFIG_GPIO_0, GPIO_CFG_OUT_STD | GPIO_CFG_OUT_LOW);
-    GPIO_setConfig(CONFIG_GPIO_1, GPIO_CFG_OUT_STD | GPIO_CFG_OUT_LOW);
-    GPIO_setConfig(CONFIG_GPIO_2, GPIO_CFG_OUT_STD | GPIO_CFG_OUT_LOW);
-    GPIO_setConfig(CONFIG_GPIO_3, GPIO_CFG_OUT_STD | GPIO_CFG_OUT_LOW);
-    GPIO_setConfig(CONFIG_GPIO_4, GPIO_CFG_OUT_STD | GPIO_CFG_OUT_LOW);
-    GPIO_setConfig(CONFIG_GPIO_5, GPIO_CFG_OUT_STD | GPIO_CFG_OUT_LOW);
-    GPIO_setConfig(CONFIG_GPIO_6, GPIO_CFG_OUT_STD | GPIO_CFG_OUT_LOW);
-    GPIO_setConfig(CONFIG_GPIO_7, GPIO_CFG_OUT_STD | GPIO_CFG_OUT_LOW);
 
     curState = Init;
+    index = 0;
+    dbgUARTInit();
+    dbgGPIOInit();
+    timerOneInit();
+    timerTwoInit();
 
-    while(1)
-    {
-        dbgOutputLoc(WHILE1);
-    }
+    dbgOutputLoc(WHILE1);
+    while(1) {}
 
 }
 

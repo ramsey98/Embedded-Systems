@@ -12,11 +12,10 @@
 #include "debug.h"
 #include "sensor_queue.h"
 
-void timerSecondCallback(Timer_Handle myHandle);
-void timerOneInit();
 Timer_Handle timer0;
 Timer_Params params;
 
-
+void timerSecondCallback(Timer_Handle myHandle);
+void timerOneInit();
 
 #endif /* TIMERONE_H_ */

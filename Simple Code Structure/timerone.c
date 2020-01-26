@@ -15,7 +15,6 @@ void timerSecondCallback(Timer_Handle myHandle)
 
 void timerOneInit()
 {
-
     Timer_init();
     Timer_Params_init(&params);
     params.period = 1000000;

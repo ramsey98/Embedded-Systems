@@ -28,7 +28,8 @@
 #define AFTER_SEND_QUEUE_ISR (11)
 #define AFTER_RECEIVE_QUEUE_ISR (12)
 
-
+void dbgGPIOInit();
+void dbgUARTInit();
 void dbgUARTVal(unsigned char outVal);
 void dbgUARTStr(char uartOut[]);
 void dbgOutputLoc(unsigned int outVal);

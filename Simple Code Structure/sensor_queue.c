@@ -9,13 +9,19 @@
 
 int sendTimeMsgToQ1(unsigned int timeVal)
 {
-    int success = 1;
+    q1.timeVals[index] = timeVal;
+    index+=1;
+    //trigger interrupt
+    success = 1;
     return success;
 }
 
 int sendSensorMsgToQ1(int mmDist)
 {
-    int success = 1;
+    q1.mmDists[index] = mmDist;
+    index+=1;
+    //trigger interrupt
+    success = 1;
     return success;
 }
 
