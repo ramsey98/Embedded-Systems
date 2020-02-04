@@ -53,40 +53,36 @@ void dbgOutputLoc(unsigned int outLoc)
     GPIO_write(CONFIG_GPIO_0, CONFIG_GPIO_LED_OFF);
     if (outLoc <= 127)
     {
-        if (outLoc & 0b100000 > 0)
+        if (outLoc & 0b100000)
         {
             GPIO_write(CONFIG_GPIO_6, CONFIG_GPIO_LED_ON);
         }
-        if (outLoc & 0b100000 > 0)
+        if (outLoc & 0b100000)
         {
             GPIO_write(CONFIG_GPIO_5, CONFIG_GPIO_LED_ON);
         }
-        if (outLoc & 0b010000 > 0)
+        if (outLoc & 0b010000)
         {
             GPIO_write(CONFIG_GPIO_4, CONFIG_GPIO_LED_ON);
         }
-        if (outLoc & 0b001000 > 0)
+        if (outLoc & 0b001000)
         {
             GPIO_write(CONFIG_GPIO_3, CONFIG_GPIO_LED_ON);
         }
-        if (outLoc & 0b000100 > 0)
+        if (outLoc & 0b000100)
         {
             GPIO_write(CONFIG_GPIO_2, CONFIG_GPIO_LED_ON);
         }
-        if (outLoc & 0b000010 > 0)
+        if (outLoc & 0b000010)
         {
             GPIO_write(CONFIG_GPIO_1, CONFIG_GPIO_LED_ON);
         }
-        if (outLoc & 0b000001 > 0)
+        if (outLoc & 0b000001)
         {
             GPIO_write(CONFIG_GPIO_0, CONFIG_GPIO_LED_ON);
         }
-        GPIO_toggle(CONFIG_GPIO_7);
     }
-    else
-    {
-        halt();
-    }
+    GPIO_toggle(CONFIG_GPIO_7);
 }
 
 void halt()
@@ -99,4 +95,6 @@ void halt()
     GPIO_write(CONFIG_GPIO_5, CONFIG_GPIO_LED_ON);
     GPIO_write(CONFIG_GPIO_6, CONFIG_GPIO_LED_ON);
     GPIO_write(CONFIG_GPIO_7, CONFIG_GPIO_LED_ON);
+    vTaskSuspendAll();
+    while(1) {}
 }

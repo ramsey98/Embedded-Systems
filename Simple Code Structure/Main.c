@@ -12,16 +12,17 @@
 
 void *mainThread(void *arg0)
 {
-
     curState = Init;
-    index = 0;
     dbgUARTInit();
     dbgGPIOInit();
     timerOneInit();
     timerTwoInit();
 
     dbgOutputLoc(WHILE1);
-    while(1) {}
+    while(1)
+    {
+        receiveFromQ1();
+    }
 
 }
 

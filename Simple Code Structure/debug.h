@@ -12,7 +12,8 @@
 #include <ti/drivers/GPIO.h>
 #include <ti/drivers/UART.h>
 #include "ti_drivers_config.h"
-
+#include "FreeRTOS.h"
+#include "task.h"
 
 #define DBG_HALT (255)
 #define ENTER_TASK (1)

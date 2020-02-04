@@ -7,22 +7,49 @@
 
 #include "sensor_queue.h"
 
+void createQ1()
+{
+    xQueue = xQueueCreate(16, sizeof(uint32_t));
+    if(!xQueue)
+    {
+        dbgOutputLoc(DBG_HALT);
+    }
+}
+
 int sendTimeMsgToQ1(unsigned int timeVal)
 {
-    q1.timeVals[index] = timeVal;
-    index+=1;
-    //trigger interrupt
-    success = 1;
-    return success;
+    dbgOutputLoc(BEFORE_SEND_QUEUE);
+    if(xQueueSendFromISR(xQueue, &timeVal, 0))
+    {
+        return 0;
+    }
+    else
+    {
+        return -1;
+    }
 }
 
 int sendSensorMsgToQ1(int mmDist)
 {
-    q1.mmDists[index] = mmDist;
-    index+=1;
-    //trigger interrupt
-    success = 1;
-    return success;
+    dbgOutputLoc(BEFORE_SEND_QUEUE);
+    if(xQueueSendFromISR(xQueue, &mmDist, 0))
+    {
+        return 0;
+    }
+    else
+    {
+        return -1;
+    }
 }
 
-
+int receiveFromQ1()
+{
+    if(xQueueReceive(xQueue, &itemToReceive, portMAX_DELAY))
+    {
+        return 0;
+    }
+    else
+    {
+        return -1;
+    }
+}
