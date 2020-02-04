@@ -15,4 +15,5 @@
 	<templateProperties value="id=timerled_CC3220SF_LAUNCHXL_freertos_ccs.projectspec.timerled_CC3220SF_LAUNCHXL_freertos_ccs,buildProfile=release,isHybrid=true"/>
 	<origin value="C:\ti\simplelink_cc32xx_sdk_3_30_01_02\examples\rtos\CC3220SF_LAUNCHXL\drivers\timerled\freertos\ccs\timerled_CC3220SF_LAUNCHXL_freertos_ccs.projectspec"/>
 	<filesToOpen value=""/>
+	<isTargetManual value="false"/>
 </projectOptions>
