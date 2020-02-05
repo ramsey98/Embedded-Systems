@@ -6,8 +6,9 @@
  */
 
 #include "sensor_queue.h"
+static QueueHandle_t xQueue = NULL;
 
-void createQ1()
+void createSensorQueue()
 {
     xQueue = xQueueCreate(16, sizeof(uint32_t));
     if(!xQueue)

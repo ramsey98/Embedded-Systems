@@ -19,6 +19,7 @@ void *mainThread(void *arg0)
     timerTwoInit();
 
     dbgOutputLoc(WHILE1);
+    createSensorQueue();
     while(1)
     {
         receiveFromQ1();

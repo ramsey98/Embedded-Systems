@@ -11,10 +11,10 @@
 #include "debug.h"
 #include "queue.h"
 
-QueueHandle_t xQueue;
 unsigned int itemToReceive;
 int sendTimeMsgToQ1(unsigned int timeVal);
 int sendSensorMsgToQ1(int mmDist);
 int receiveFromQ1();
+void createSensorQueue();
 
 #endif /* SENSOR_QUEUE_H_ */
