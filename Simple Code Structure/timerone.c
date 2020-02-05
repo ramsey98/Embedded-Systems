@@ -7,12 +7,10 @@
 
 
 #include "timerone.h"
-uint32_t count;
-Timer_Handle timer0;
-Timer_Params timer_params;
 
 void timerSecondCallback(Timer_Handle myHandle)
 {
+    static uint32_t count;
     dbgOutputLoc(ENTER_ISR);
     count = Timer_getCount(myHandle) - count;
     unsigned int time = count/1000;
@@ -22,6 +20,8 @@ void timerSecondCallback(Timer_Handle myHandle)
 
 void timerOneInit()
 {
+    Timer_Handle timer0;
+    Timer_Params timer_params;
     Timer_Params_init(&timer_params);
     timer_params.period = 1000000;
     timer_params.periodUnits = Timer_PERIOD_US;
@@ -38,6 +38,5 @@ void timerOneInit()
     {
         halt();
     }
-    count = Timer_getCount(timer0);
 
 }

@@ -7,7 +7,7 @@
 #include "debug.h"
 #include <string.h>
 
-UART_Handle uart;
+static UART_Handle uart;
 
 void dbgUARTInit()
 {
@@ -36,8 +36,8 @@ void dbgGPIOInit()
     GPIO_setConfig(CONFIG_GPIO_6, GPIO_CFG_OUT_STD | GPIO_CFG_OUT_LOW);
     GPIO_setConfig(CONFIG_GPIO_7, GPIO_CFG_OUT_STD | GPIO_CFG_OUT_LOW);
     GPIO_setConfig(CONFIG_LED_0_GPIO, GPIO_CFG_OUT_STD | GPIO_CFG_OUT_LOW);
-    GPIO_write(CONFIG_GPIO_7, CONFIG_GPIO_LED_OFF);
-    GPIO_write(CONFIG_LED_0_GPIO, CONFIG_GPIO_LED_OFF);
+    //GPIO_write(CONFIG_GPIO_7, CONFIG_GPIO_LED_OFF);
+    //GPIO_write(CONFIG_LED_0_GPIO, CONFIG_GPIO_LED_OFF);
 }
 
 void dbgUARTVal(unsigned char outVal)
@@ -50,7 +50,7 @@ void dbgUARTStr(char * uartOut)
     int i;
     for (i = 0; i < strlen(uartOut); i++)
     {
-        UART_write(uart, uartOut[i], sizeof(uartOut[i]));
+        UART_write(uart, &uartOut[i], sizeof(uartOut[i]));
     }
 }
 
@@ -65,31 +65,31 @@ void dbgOutputLoc(unsigned int outLoc)
     GPIO_write(CONFIG_GPIO_0, CONFIG_GPIO_LED_OFF);
     if (outLoc <= 127)
     {
-        if (outLoc & 0b1000000)
+        if (outLoc & 0b01000000)
         {
             GPIO_write(CONFIG_GPIO_6, CONFIG_GPIO_LED_ON);
         }
-        if (outLoc & 0b0100000)
+        if (outLoc & 0b00100000)
         {
             GPIO_write(CONFIG_GPIO_5, CONFIG_GPIO_LED_ON);
         }
-        if (outLoc & 0b0010000)
+        if (outLoc & 0b00010000)
         {
             GPIO_write(CONFIG_GPIO_4, CONFIG_GPIO_LED_ON);
         }
-        if (outLoc & 0b0001000)
+        if (outLoc & 0b00001000)
         {
             GPIO_write(CONFIG_GPIO_3, CONFIG_GPIO_LED_ON);
         }
-        if (outLoc & 0b0000100)
+        if (outLoc & 0b00000100)
         {
             GPIO_write(CONFIG_GPIO_2, CONFIG_GPIO_LED_ON);
         }
-        if (outLoc & 0b0000010)
+        if (outLoc & 0b00000010)
         {
             GPIO_write(CONFIG_GPIO_1, CONFIG_GPIO_LED_ON);
         }
-        if (outLoc & 0b0000001)
+        if (outLoc & 0b00000001)
         {
             GPIO_write(CONFIG_GPIO_0, CONFIG_GPIO_LED_ON);
         }

@@ -22,7 +22,7 @@ int sendTimeMsgToQ1(unsigned int timeVal)
     int ret;
     BaseType_t success;
     dbgOutputLoc(BEFORE_SEND_QUEUE_ISR);
-    unsigned long msg = 0x00010000 | timeVal;
+    unsigned long msg = 0x0000000100000000 | timeVal;
     success = xQueueSendFromISR(xQueue, (void *) &msg, pdFALSE);
     if(success == pdTRUE)
     {
@@ -41,7 +41,7 @@ int sendSensorMsgToQ1(int mmDist)
     int ret;
     BaseType_t success;
     dbgOutputLoc(BEFORE_SEND_QUEUE_ISR);
-    unsigned long msg = 0x00020000 | mmDist;
+    unsigned long msg = 0x0000000200000000 | mmDist;
     success = xQueueSendFromISR(xQueue, (void *) &msg, pdFALSE);
     if(success == pdTRUE)
     {

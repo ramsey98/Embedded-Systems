@@ -20,5 +20,6 @@ void timerTwoInit();
 
 //ADC function
 int conversion(ADC_Handle adc);
+void adcInit();
 
 #endif /* TIMERTWO_H_ */
