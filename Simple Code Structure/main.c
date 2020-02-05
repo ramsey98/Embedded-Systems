@@ -13,10 +13,8 @@
 void *mainThread(void *arg0)
 {
     Board_init();
-    //Power_enablePolicy();
     dbgUARTInit();
     dbgGPIOInit();
-
     adcInit();
     createSensorQueue();
     Timer_init();
@@ -28,23 +26,13 @@ void *mainThread(void *arg0)
     int timeInc = 0;
     int sensorVal = 0;
     int success = fsm(&curState, timeInc, sensorVal);
-    unsigned long received;
+    int received = 0;
     dbgOutputLoc(WHILE1);
     while(1)
     {
-        receiveFromQ1((void *) received);
-        if (received & 0x0000000100000000 == 0x0000000100000000)
-        {
-            timeInc = received & 0xffffffff;
-            sensorVal = 0;
-        }
-        else if (received & 0x0000000200000000 == 0x0000000200000000)
-        {
-            sensorVal = received & 0xffffffff;
-            timeInc = 0;
-        }
+        received = receiveFromQ1(&timeInc, &sensorVal);
         success = fsm(&curState, timeInc, sensorVal);
-        if(success == -1)
+        if(success == -1 || received == -1)
         {
             halt();
         }

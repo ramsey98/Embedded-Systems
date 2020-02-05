@@ -10,7 +10,7 @@ static QueueHandle_t xQueue = NULL;
 
 void createSensorQueue()
 {
-    xQueue = xQueueCreate(16, sizeof(unsigned long));
+    xQueue = xQueueCreate(16, sizeof(uint64_t));
     if(xQueue == NULL)
     {
         halt();
@@ -19,16 +19,12 @@ void createSensorQueue()
 
 int sendTimeMsgToQ1(unsigned int timeVal)
 {
-    int ret;
+    int ret = 0;
     BaseType_t success;
     dbgOutputLoc(BEFORE_SEND_QUEUE_ISR);
-    unsigned long msg = 0x0000000100000000 | timeVal;
+    uint64_t msg = 0x0000000100000000 | timeVal;
     success = xQueueSendFromISR(xQueue, (void *) &msg, pdFALSE);
-    if(success == pdTRUE)
-    {
-        ret = 0;
-    }
-    else
+    if(success == pdFALSE)
     {
         ret = -1;
     }
@@ -38,16 +34,13 @@ int sendTimeMsgToQ1(unsigned int timeVal)
 
 int sendSensorMsgToQ1(int mmDist)
 {
-    int ret;
+    int ret = 0;
     BaseType_t success;
     dbgOutputLoc(BEFORE_SEND_QUEUE_ISR);
-    unsigned long msg = 0x0000000200000000 | mmDist;
+
+    uint64_t msg = 0x1000000000000000 | mmDist;
     success = xQueueSendFromISR(xQueue, (void *) &msg, pdFALSE);
-    if(success == pdTRUE)
-    {
-        ret = 0;
-    }
-    else
+    if(success == pdFALSE)
     {
         ret = -1;
     }
@@ -55,17 +48,26 @@ int sendSensorMsgToQ1(int mmDist)
     return ret;
 }
 
-int receiveFromQ1( void * itemToReceive )
+int receiveFromQ1(int * timeInc, int * sensorVal)
 {
-    int ret;
+    int ret = 0;
     BaseType_t success;
     dbgOutputLoc(BEFORE_RECEIVE_QUEUE);
-    success = xQueueReceive(xQueue, &itemToReceive, portMAX_DELAY);
-    if(success == pdTRUE)
+    uint64_t received;
+    success = xQueueReceive(xQueue, &received, portMAX_DELAY);
+
+    if (received >> 32 == 0x00000001)
     {
-        ret = 0;
+
+        *timeInc = received & 0xffffffff;
+        *sensorVal = 0;
     }
-    else
+    else if (received >> 32 == 0x10000000)
+    {
+        *sensorVal = received & 0xffffffff;
+        *timeInc = 0;
+    }
+    if(success == pdFALSE)
     {
         ret = -1;
     }

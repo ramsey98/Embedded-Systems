@@ -13,7 +13,7 @@
 
 int sendTimeMsgToQ1(unsigned int timeVal);
 int sendSensorMsgToQ1(int mmDist);
-int receiveFromQ1(void * itemToReceive);
+int receiveFromQ1(int * timeInc, int * sensorVal);
 void createSensorQueue();
 
 #endif /* SENSOR_QUEUE_H_ */

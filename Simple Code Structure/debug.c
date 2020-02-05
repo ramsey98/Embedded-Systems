@@ -45,7 +45,6 @@ void dbgGPIOInit()
 
 void dbgUARTVal(unsigned char outVal)
 {
-    GPIO_write(CONFIG_LED_0_GPIO, CONFIG_GPIO_LED_ON);
     UART_write(uart, &outVal, sizeof(outVal));
 }
 
