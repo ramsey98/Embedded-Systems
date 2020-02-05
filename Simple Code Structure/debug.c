@@ -51,7 +51,6 @@ void dbgUARTStr(char * uartOut)
 void dbgOutputLoc(unsigned int outLoc)
 {
     GPIO_toggle(CONFIG_GPIO_7);
-    GPIO_write(CONFIG_GPIO_7, CONFIG_GPIO_LED_ON);
     GPIO_write(CONFIG_GPIO_6, CONFIG_GPIO_LED_OFF);
     GPIO_write(CONFIG_GPIO_5, CONFIG_GPIO_LED_OFF);
     GPIO_write(CONFIG_GPIO_4, CONFIG_GPIO_LED_OFF);
