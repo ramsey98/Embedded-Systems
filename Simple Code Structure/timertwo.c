@@ -11,11 +11,11 @@ static ADC_Handle adc;
 
 void timer75Callback(Timer_Handle myHandle)
 {
-    dbgOutputLoc(ENTER_ISR);
+    dbgOutputLoc(ENTER_ISR_TIMER2);
     int res;
     res = conversion(adc);
     sendSensorMsgToQ1(res);
-    dbgOutputLoc(LEAVE_ISR);
+    dbgOutputLoc(LEAVE_ISR_TIMER2);
 }
 
 int conversion(ADC_Handle adc)

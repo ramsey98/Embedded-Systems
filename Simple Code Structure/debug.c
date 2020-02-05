@@ -5,7 +5,6 @@
  *      Author: Team 20
  */
 #include "debug.h"
-
 static UART_Handle uart;
 
 void dbgUARTInit()
@@ -14,13 +13,11 @@ void dbgUARTInit()
     UART_Params uartParams;
     UART_Params_init(&uartParams);
     uartParams.writeMode = UART_MODE_BLOCKING;
-    uartParams.readMode = UART_MODE_BLOCKING;
     uartParams.writeDataMode = UART_DATA_BINARY;
-    uartParams.readDataMode = UART_DATA_BINARY;
     uartParams.baudRate = 115200;
     uartParams.readEcho = UART_ECHO_OFF;
     uart = UART_open(CONFIG_UART_0, &uartParams);
-    UART_control(uart, UART_CMD_RXDISABLE, NULL);
+    //UART_control(uart, UART_CMD_RXDISABLE, NULL);
     if (uart == NULL)
     {
         halt();
@@ -39,8 +36,6 @@ void dbgGPIOInit()
     GPIO_setConfig(CONFIG_GPIO_6, GPIO_CFG_OUT_STD | GPIO_CFG_OUT_LOW);
     GPIO_setConfig(CONFIG_GPIO_7, GPIO_CFG_OUT_STD | GPIO_CFG_OUT_LOW);
     GPIO_setConfig(CONFIG_LED_0_GPIO, GPIO_CFG_OUT_STD | GPIO_CFG_OUT_LOW);
-    //GPIO_write(CONFIG_GPIO_7, CONFIG_GPIO_LED_OFF);
-    //GPIO_write(CONFIG_LED_0_GPIO, CONFIG_GPIO_LED_ON);
 }
 
 void dbgUARTVal(unsigned char outVal)
@@ -50,11 +45,13 @@ void dbgUARTVal(unsigned char outVal)
 
 void dbgUARTStr(char * uartOut)
 {
-    UART_write(uart, (const void *)uartOut, sizeof(uartOut));
+    UART_write(uart, uartOut, sizeof(uartOut));
 }
 
 void dbgOutputLoc(unsigned int outLoc)
 {
+    GPIO_toggle(CONFIG_GPIO_7);
+    GPIO_write(CONFIG_GPIO_7, CONFIG_GPIO_LED_ON);
     GPIO_write(CONFIG_GPIO_6, CONFIG_GPIO_LED_OFF);
     GPIO_write(CONFIG_GPIO_5, CONFIG_GPIO_LED_OFF);
     GPIO_write(CONFIG_GPIO_4, CONFIG_GPIO_LED_OFF);
@@ -92,7 +89,6 @@ void dbgOutputLoc(unsigned int outLoc)
         {
             GPIO_write(CONFIG_GPIO_0, CONFIG_GPIO_LED_ON);
         }
-        GPIO_toggle(CONFIG_GPIO_7);
     }
     else
     {

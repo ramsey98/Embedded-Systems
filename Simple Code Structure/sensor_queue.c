@@ -21,14 +21,14 @@ int sendTimeMsgToQ1(unsigned int timeVal)
 {
     int ret = 0;
     BaseType_t success;
-    dbgOutputLoc(BEFORE_SEND_QUEUE_ISR);
+    dbgOutputLoc(BEFORE_SEND_QUEUE_ISR_TIMER1);
     uint64_t msg = 0x0000000100000000 | timeVal;
     success = xQueueSendFromISR(xQueue, (void *) &msg, pdFALSE);
     if(success == pdFALSE)
     {
         ret = -1;
     }
-    dbgOutputLoc(AFTER_SEND_QUEUE_ISR);
+    dbgOutputLoc(AFTER_SEND_QUEUE_ISR_TIMER1);
     return ret;
 }
 
@@ -36,7 +36,7 @@ int sendSensorMsgToQ1(int mmDist)
 {
     int ret = 0;
     BaseType_t success;
-    dbgOutputLoc(BEFORE_SEND_QUEUE_ISR);
+    dbgOutputLoc(BEFORE_SEND_QUEUE_ISR_TIMER2);
 
     uint64_t msg = 0x1000000000000000 | mmDist;
     success = xQueueSendFromISR(xQueue, (void *) &msg, pdFALSE);
@@ -44,7 +44,7 @@ int sendSensorMsgToQ1(int mmDist)
     {
         ret = -1;
     }
-    dbgOutputLoc(AFTER_SEND_QUEUE_ISR);
+    dbgOutputLoc(AFTER_SEND_QUEUE_ISR_TIMER2);
     return ret;
 }
 

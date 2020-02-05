@@ -11,11 +11,11 @@
 void timerSecondCallback(Timer_Handle myHandle)
 {
     static uint32_t count;
-    dbgOutputLoc(ENTER_ISR);
+    dbgOutputLoc(ENTER_ISR_TIMER1);
     count = Timer_getCount(myHandle) - count;
     unsigned int time = count/1000;
     sendTimeMsgToQ1(time);
-    dbgOutputLoc(LEAVE_ISR);
+    dbgOutputLoc(LEAVE_ISR_TIMER1);
 }
 
 void timerOneInit()
