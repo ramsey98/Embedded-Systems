@@ -44,14 +44,9 @@ void *mainThread(void *arg0)
             timeInc = 0;
         }
         success = fsm(&curState, timeInc, sensorVal);
-
         if(success == -1)
         {
             halt();
-        }
-        if (curState.state == Init)//WaitingForTime1)
-        {
-            GPIO_write(CONFIG_LED_0_GPIO, CONFIG_GPIO_LED_ON);
         }
     }
 }

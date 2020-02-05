@@ -81,8 +81,8 @@ int fsm(SENSOR_DATA *curState, int timeInc, int sensorVal)
                 dbgUARTVal(curState->curTime);
                 curState->sensorTotal = 0;
                 curState->sensorCount = 0;
-                curState->state = WaitingForTime1;
             }
+            curState->state = WaitingForTime1;
             break;
         }
         default:
