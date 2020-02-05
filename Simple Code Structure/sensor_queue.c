@@ -10,7 +10,7 @@ static QueueHandle_t xQueue = NULL;
 
 void createSensorQueue()
 {
-    xQueue = xQueueCreate(16, sizeof(uint32_t));
+    xQueue = xQueueCreate(16, sizeof(uint64_t));
     if(!xQueue)
     {
         dbgOutputLoc(DBG_HALT);

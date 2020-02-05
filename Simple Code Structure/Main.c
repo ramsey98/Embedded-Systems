@@ -22,13 +22,22 @@ void *mainThread(void *arg0)
     uint32_t timeInc = 0;
     uint32_t sensorVal = 0;
     createSensorQueue();
-    dbgOutputLoc(WHILE1);
     fsm(&curState, timeInc, sensorVal);
     unsigned int received;
+    int type;
+    dbgOutputLoc(WHILE1);
     while(1)
     {
         receiveFromQ1((void *) received);
-        //determine what is received here
+        type = (received & 0xffffffff);
+        if (type == 0x00010000)
+        {
+            timeInc = received & 0x0000ffff;
+        }
+        else if (type == 0x00020000)
+        {
+            sensorVal = received & 0x0000ffff;
+        }
         if(!fsm(&curState, timeInc, sensorVal))
         {
             halt();
