@@ -6,6 +6,9 @@
  */
 #include "debug.h"
 
+UART_Handle uart;
+UART_Params uartParams;
+
 void dbgUARTInit()
 {
     UART_init();
@@ -81,8 +84,12 @@ void dbgOutputLoc(unsigned int outLoc)
         {
             GPIO_write(CONFIG_GPIO_0, CONFIG_GPIO_LED_ON);
         }
+        GPIO_toggle(CONFIG_GPIO_7);
     }
-    GPIO_toggle(CONFIG_GPIO_7);
+    else
+    {
+        halt();
+    }
 }
 
 void halt()

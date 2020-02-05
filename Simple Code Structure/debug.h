@@ -36,7 +36,4 @@ void dbgUARTStr(char uartOut[]);
 void dbgOutputLoc(unsigned int outVal);
 void halt();
 
-UART_Handle uart;
-UART_Params uartParams;
-
 #endif /* DEBUG_H_ */

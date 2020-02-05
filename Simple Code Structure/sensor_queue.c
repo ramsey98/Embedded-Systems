@@ -20,8 +20,10 @@ void createSensorQueue()
 int sendTimeMsgToQ1(unsigned int timeVal)
 {
     int ret;
+    BaseType_t success;
     dbgOutputLoc(BEFORE_SEND_QUEUE);
-    if(xQueueSendFromISR(xQueue, &timeVal, 0))
+    success = xQueueSendFromISR(xQueue, &timeVal, pdFALSE);
+    if(success == pdTRUE)
     {
         ret = 0;
     }
@@ -36,8 +38,10 @@ int sendTimeMsgToQ1(unsigned int timeVal)
 int sendSensorMsgToQ1(int mmDist)
 {
     int ret;
+    BaseType_t success;
     dbgOutputLoc(BEFORE_SEND_QUEUE);
-    if(xQueueSendFromISR(xQueue, &mmDist, 0))
+    success = xQueueSendFromISR(xQueue, &mmDist, pdFALSE);
+    if(success == pdTRUE)
     {
         ret = 0;
     }
@@ -52,8 +56,10 @@ int sendSensorMsgToQ1(int mmDist)
 int receiveFromQ1( void * itemToReceive )
 {
     int ret;
+    BaseType_t success;
     dbgOutputLoc(BEFORE_RECEIVE_QUEUE);
-    if(xQueueReceive(xQueue, &itemToReceive, portMAX_DELAY))
+    success = xQueueReceive(xQueue, &itemToReceive, portMAX_DELAY);
+    if(success == pdTRUE)
     {
         ret = 0;
     }
