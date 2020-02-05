@@ -2,7 +2,7 @@
  * sensor_state.h
  *
  *  Created on: Jan 25, 2020
- *      Author: Jon Glaser
+ *      Author: Team 20
  */
 
 #ifndef SENSOR_STATE_H_
@@ -19,11 +19,15 @@ typedef enum
     WaitingForTime1,
     WaitingForTime2,
     WaitingForTime3,
-} STATES;
+} SENSOR_STATES;
 
-int curTime, sensorTotal, sensorCount, sensorAvg;
-STATES curState;
+typedef struct
+{
+    SENSOR_STATES state;
+    int curTime, sensorTotal, sensorCount, sensorAvg;
 
-int fsm(STATES curState, int timeInc, int sensorVal);
+} SENSOR_DATA;
+
+int fsm(SENSOR_DATA *curState, int timeInc, int sensorVal);
 
 #endif /* SENSOR_STATE_H_ */

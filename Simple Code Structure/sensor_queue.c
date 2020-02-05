@@ -2,7 +2,7 @@
  * sensor_queue.c
  *
  *  Created on: Jan 25, 2020
- *      Author: Jon Glaser
+ *      Author: Team 20
  */
 
 #include "sensor_queue.h"
@@ -19,38 +19,48 @@ void createSensorQueue()
 
 int sendTimeMsgToQ1(unsigned int timeVal)
 {
+    int ret;
     dbgOutputLoc(BEFORE_SEND_QUEUE);
     if(xQueueSendFromISR(xQueue, &timeVal, 0))
     {
-        return 0;
+        ret = 0;
     }
     else
     {
-        return -1;
+        ret = -1;
     }
+    dbgOutputLoc(AFTER_SEND_QUEUE);
+    return ret;
 }
 
 int sendSensorMsgToQ1(int mmDist)
 {
+    int ret;
     dbgOutputLoc(BEFORE_SEND_QUEUE);
     if(xQueueSendFromISR(xQueue, &mmDist, 0))
     {
-        return 0;
+        ret = 0;
     }
     else
     {
-        return -1;
+        ret = -1;
     }
+    dbgOutputLoc(AFTER_SEND_QUEUE);
+    return ret;
 }
 
-int receiveFromQ1()
+int receiveFromQ1( void * itemToReceive )
 {
+    int ret;
+    dbgOutputLoc(BEFORE_RECEIVE_QUEUE);
     if(xQueueReceive(xQueue, &itemToReceive, portMAX_DELAY))
     {
-        return 0;
+        ret = 0;
     }
     else
     {
-        return -1;
+        ret = -1;
     }
+    dbgOutputLoc(AFTER_RECEIVE_QUEUE);
+    return ret;
 }

@@ -2,90 +2,93 @@
  * sensor_state.c
  *
  *  Created on: Jan 25, 2020
- *      Author: Jon Glaser
+ *      Author: Team 20
  */
 
 #include "sensor_state.h"
-#include "debug.h"
 #include <stdio.h>
 
 
-int fsm(STATES curState, int timeInc, int sensorVal)
+int fsm(SENSOR_DATA *curState, int timeInc, int sensorVal)
 {
     int success = 1;
-    switch (curState)
+    switch (curState->state)
     {
         case Init:
         {
-
-            curTime = 0;
-            sensorTotal = 0;
-            sensorCount = 0;
-            sensorAvg = 0;
-            curState = WaitingForTime1;
+            curState->curTime = 0;
+            curState->sensorTotal = 0;
+            curState->sensorCount = 0;
+            curState->sensorAvg = 0;
+            curState->state = WaitingForTime1;
+            break;
         }
         case WaitingForTime1:
         {
             if (timeInc == 0)
             {
-                sensorTotal += sensorVal;
-                sensorCount++;
+                curState->sensorTotal += sensorVal;
+                curState->sensorCount++;
             }
             else if (timeInc > 0)
             {
-                curTime += timeInc;
-                sensorAvg = sensorTotal/sensorCount;
+                curState->curTime += timeInc;
+                curState->sensorAvg = curState->sensorTotal/curState->sensorCount;
                 dbgUARTStr("Sensor=:\r\n");
-                dbgUARTVal(sensorAvg);
-                dbgUARTVal(sensorCount);
-                sensorTotal = 0;
-                sensorCount = 0;
+                dbgUARTVal(curState->sensorAvg);
+                dbgUARTVal(curState->sensorCount);
+                curState->sensorTotal = 0;
+                curState->sensorCount = 0;
             }
-            curState = WaitingForTime2;
+            curState->state = WaitingForTime2;
+            break;
         }
         case WaitingForTime2:
         {
             if (timeInc == 0)
             {
-                sensorTotal += sensorVal;
-                sensorCount++;
+                curState->sensorTotal += sensorVal;
+                curState->sensorCount++;
             }
             else if (timeInc > 0)
             {
-                curTime += timeInc;
-                sensorAvg = sensorTotal/sensorCount;
+                curState->curTime += timeInc;
+                curState->sensorAvg = curState->sensorTotal/curState->sensorCount;
                 dbgUARTStr("Sensor=:\r\n");
-                dbgUARTVal(sensorAvg);
-                dbgUARTVal(sensorCount);
-                sensorTotal = 0;
-                sensorCount = 0;
+                dbgUARTVal(curState->sensorAvg);
+                dbgUARTVal(curState->sensorCount);
+                curState->sensorTotal = 0;
+                curState->sensorCount = 0;
             }
-            curState = WaitingForTime3;
+            curState->state = WaitingForTime3;
+            break;
         }
         case WaitingForTime3:
         {
             if (timeInc == 0)
             {
-                sensorTotal += sensorVal;
-                sensorCount++;
+                curState->sensorTotal += sensorVal;
+                curState->sensorCount++;
             }
             else if (timeInc > 0)
             {
-                curTime += timeInc;
-                sensorAvg = sensorTotal/sensorCount;
+                curState->curTime += timeInc;
+                curState->sensorAvg = curState->sensorTotal/curState->sensorCount;
                 dbgUARTStr("Sensor=:\r\n");
-                dbgUARTVal(sensorAvg);
-                dbgUARTVal(sensorCount);
+                dbgUARTVal(curState->sensorAvg);
+                dbgUARTVal(curState->sensorCount);
                 dbgUARTStr("CurTime=:\r\n");
-                dbgUARTVal(curTime);
-                sensorTotal = 0;
-                sensorCount = 0;
-                curState = WaitingForTime1;
+                dbgUARTVal(curState->curTime);
+                curState->sensorTotal = 0;
+                curState->sensorCount = 0;
+                curState->state = WaitingForTime1;
             }
+            break;
         }
         default:
         {
             success = 0;
+            break;
         }
     }
     return success;

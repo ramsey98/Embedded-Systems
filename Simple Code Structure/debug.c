@@ -2,7 +2,7 @@
  * debug.c
  *
  *  Created on: Jan 25, 2020
- *      Author: Jon Glaser
+ *      Author: Team 20
  */
 #include "debug.h"
 
@@ -53,31 +53,31 @@ void dbgOutputLoc(unsigned int outLoc)
     GPIO_write(CONFIG_GPIO_0, CONFIG_GPIO_LED_OFF);
     if (outLoc <= 127)
     {
-        if (outLoc & 0b100000)
+        if (outLoc & 0b1000000)
         {
             GPIO_write(CONFIG_GPIO_6, CONFIG_GPIO_LED_ON);
         }
-        if (outLoc & 0b100000)
+        if (outLoc & 0b0100000)
         {
             GPIO_write(CONFIG_GPIO_5, CONFIG_GPIO_LED_ON);
         }
-        if (outLoc & 0b010000)
+        if (outLoc & 0b0010000)
         {
             GPIO_write(CONFIG_GPIO_4, CONFIG_GPIO_LED_ON);
         }
-        if (outLoc & 0b001000)
+        if (outLoc & 0b0001000)
         {
             GPIO_write(CONFIG_GPIO_3, CONFIG_GPIO_LED_ON);
         }
-        if (outLoc & 0b000100)
+        if (outLoc & 0b0000100)
         {
             GPIO_write(CONFIG_GPIO_2, CONFIG_GPIO_LED_ON);
         }
-        if (outLoc & 0b000010)
+        if (outLoc & 0b0000010)
         {
             GPIO_write(CONFIG_GPIO_1, CONFIG_GPIO_LED_ON);
         }
-        if (outLoc & 0b000001)
+        if (outLoc & 0b0000001)
         {
             GPIO_write(CONFIG_GPIO_0, CONFIG_GPIO_LED_ON);
         }

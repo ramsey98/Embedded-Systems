@@ -2,13 +2,16 @@
  * timertwo.c
  *
  *  Created on: Jan 25, 2020
- *      Author: Jon Glaser
+ *      Author: Team 20
  */
 
 #include "timertwo.h"
 
 void timer75Callback(Timer_Handle myHandle)
 {
+    ADC_Handle adc;
+    ADC_Params adc_params;
+    int res;
     ADC_Params_init(&adc_params);
     adc = ADC_open(CONFIG_ADC_0, &adc_params);
     res = conversion(adc);
@@ -19,7 +22,10 @@ void timer75Callback(Timer_Handle myHandle)
 int conversion(ADC_Handle adc)
 {
     // Blocking mode conversion
-    res = ADC_convert(adc, &adcValue);
+    uint16_t adcValue;
+    uint32_t result;
+    int res = ADC_convert(adc, &adcValue);
+
     if (res == ADC_STATUS_SUCCESS)
     {
         result = ADC_convertRawToMicroVolts(adc, adcValue);
@@ -34,6 +40,8 @@ int conversion(ADC_Handle adc)
 void timerTwoInit()
 {
     Timer_init();
+    Timer_Handle timer1;
+    Timer_Params timer_params;
     Timer_Params_init(&timer_params);
     timer_params.period = 75000;
     timer_params.periodUnits = Timer_PERIOD_US;

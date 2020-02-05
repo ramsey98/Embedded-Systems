@@ -2,7 +2,7 @@
  * debug.h
  *
  *  Created on: Jan 25, 2020
- *      Author: Jon Glaser
+ *      Author: Team 20
  */
 
 #ifndef DEBUG_H_

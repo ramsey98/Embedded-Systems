@@ -2,7 +2,7 @@
  * timerone.h
  *
  *  Created on: Jan 25, 2020
- *      Author: Jon Glaser
+ *      Author: Team 20
  */
 
 #ifndef TIMERONE_H_
@@ -12,8 +12,7 @@
 #include "debug.h"
 #include "sensor_queue.h"
 
-Timer_Handle timer0;
-Timer_Params params;
+uint32_t count;
 
 void timerSecondCallback(Timer_Handle myHandle);
 void timerOneInit();
