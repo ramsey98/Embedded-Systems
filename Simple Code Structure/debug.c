@@ -5,6 +5,7 @@
  *      Author: Team 20
  */
 #include "debug.h"
+#include <string.h>
 static UART_Handle uart;
 
 void dbgUARTInit()
@@ -17,7 +18,7 @@ void dbgUARTInit()
     uartParams.baudRate = 115200;
     uartParams.readEcho = UART_ECHO_OFF;
     uart = UART_open(CONFIG_UART_0, &uartParams);
-    //UART_control(uart, UART_CMD_RXDISABLE, NULL);
+    UART_control(uart, UART_CMD_RXDISABLE, NULL);
     if (uart == NULL)
     {
         halt();
@@ -45,7 +46,11 @@ void dbgUARTVal(unsigned char outVal)
 
 void dbgUARTStr(char * uartOut)
 {
-    UART_write(uart, uartOut, sizeof(uartOut));
+    int i;
+    for(i = 0; i < strlen(uartOut); i++)
+    {
+        UART_write(uart, &uartOut[i], sizeof(uartOut));
+    }
 }
 
 void dbgOutputLoc(unsigned int outLoc)
