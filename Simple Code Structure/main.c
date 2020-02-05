@@ -13,9 +13,12 @@
 void *mainThread(void *arg0)
 {
     Board_init();
+    //Power_enablePolicy();
     dbgUARTInit();
     dbgGPIOInit();
+
     adcInit();
+    createSensorQueue();
     Timer_init();
     timerOneInit();
     timerTwoInit();
@@ -24,7 +27,6 @@ void *mainThread(void *arg0)
     curState.state = Init;
     int timeInc = 0;
     int sensorVal = 0;
-    createSensorQueue();
     int success = fsm(&curState, timeInc, sensorVal);
     unsigned long received;
     dbgOutputLoc(WHILE1);
@@ -34,18 +36,24 @@ void *mainThread(void *arg0)
         if (received & 0x0000000100000000 == 0x0000000100000000)
         {
             timeInc = received & 0xffffffff;
+            sensorVal = 0;
         }
         else if (received & 0x0000000200000000 == 0x0000000200000000)
         {
             sensorVal = received & 0xffffffff;
+            timeInc = 0;
         }
         success = fsm(&curState, timeInc, sensorVal);
+
         if(success == -1)
         {
             halt();
         }
+        if (curState.state == Init)//WaitingForTime1)
+        {
+            GPIO_write(CONFIG_LED_0_GPIO, CONFIG_GPIO_LED_ON);
+        }
     }
-
 }
 
 

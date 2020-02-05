@@ -24,7 +24,6 @@ int conversion(ADC_Handle adc)
     uint16_t adcValue;
     uint32_t result;
     int res = ADC_convert(adc, &adcValue);
-
     if (res == ADC_STATUS_SUCCESS)
     {
         result = ADC_convertRawToMicroVolts(adc, adcValue);
@@ -38,6 +37,7 @@ int conversion(ADC_Handle adc)
 
 void adcInit()
 {
+    ADC_init();
     ADC_Params adc_params;
     ADC_Params_init(&adc_params);
     adc = ADC_open(CONFIG_ADC_0, &adc_params);

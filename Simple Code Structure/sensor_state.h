@@ -8,8 +8,6 @@
 #ifndef SENSOR_STATE_H_
 #define SENSOR_STATE_H_
 
-#include <ti/drivers/GPIO.h>
-#include "ti_drivers_config.h"
 #include "debug.h"
 
 
