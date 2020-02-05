@@ -5,19 +5,23 @@
  *      Author: Team 20
  */
 #include "debug.h"
+#include <string.h>
 
 UART_Handle uart;
-UART_Params uartParams;
 
 void dbgUARTInit()
 {
     UART_init();
+    UART_Params uartParams;
     UART_Params_init(&uartParams);
     uartParams.writeDataMode = UART_DATA_BINARY;
-    uartParams.readDataMode = UART_DATA_BINARY;
-    uartParams.readReturnMode = UART_RETURN_FULL;
-    uartParams.readEcho = UART_ECHO_OFF;
     uartParams.baudRate = 115200;
+    uartParams.readEcho = UART_ECHO_OFF;
+    uart = UART_open(CONFIG_UART_0, &uartParams);
+    if (uart == NULL)
+    {
+        halt();
+    }
 }
 
 void dbgGPIOInit()
@@ -31,18 +35,23 @@ void dbgGPIOInit()
     GPIO_setConfig(CONFIG_GPIO_5, GPIO_CFG_OUT_STD | GPIO_CFG_OUT_LOW);
     GPIO_setConfig(CONFIG_GPIO_6, GPIO_CFG_OUT_STD | GPIO_CFG_OUT_LOW);
     GPIO_setConfig(CONFIG_GPIO_7, GPIO_CFG_OUT_STD | GPIO_CFG_OUT_LOW);
+    GPIO_setConfig(CONFIG_LED_0_GPIO, GPIO_CFG_OUT_STD | GPIO_CFG_OUT_LOW);
+    GPIO_write(CONFIG_GPIO_7, CONFIG_GPIO_LED_OFF);
+    GPIO_write(CONFIG_LED_0_GPIO, CONFIG_GPIO_LED_OFF);
 }
 
 void dbgUARTVal(unsigned char outVal)
 {
-    uart = UART_open(CONFIG_UART_0, &uartParams);
     UART_write(uart, &outVal, sizeof(outVal));
 }
 
-void dbgUARTStr(char uartOut[])
+void dbgUARTStr(char * uartOut)
 {
-    uart = UART_open(CONFIG_UART_0, &uartParams);
-    UART_write(uart, uartOut, sizeof(uartOut));
+    int i;
+    for (i = 0; i < strlen(uartOut); i++)
+    {
+        UART_write(uart, uartOut[i], sizeof(uartOut[i]));
+    }
 }
 
 void dbgOutputLoc(unsigned int outLoc)
@@ -94,14 +103,14 @@ void dbgOutputLoc(unsigned int outLoc)
 
 void halt()
 {
-    GPIO_write(CONFIG_GPIO_0, CONFIG_GPIO_LED_ON);
-    GPIO_write(CONFIG_GPIO_1, CONFIG_GPIO_LED_ON);
-    GPIO_write(CONFIG_GPIO_2, CONFIG_GPIO_LED_ON);
-    GPIO_write(CONFIG_GPIO_3, CONFIG_GPIO_LED_ON);
-    GPIO_write(CONFIG_GPIO_4, CONFIG_GPIO_LED_ON);
-    GPIO_write(CONFIG_GPIO_5, CONFIG_GPIO_LED_ON);
-    GPIO_write(CONFIG_GPIO_6, CONFIG_GPIO_LED_ON);
-    GPIO_write(CONFIG_GPIO_7, CONFIG_GPIO_LED_ON);
+    GPIO_write(CONFIG_GPIO_0, CONFIG_GPIO_LED_OFF);
+    GPIO_write(CONFIG_GPIO_1, CONFIG_GPIO_LED_OFF);
+    GPIO_write(CONFIG_GPIO_2, CONFIG_GPIO_LED_OFF);
+    GPIO_write(CONFIG_GPIO_3, CONFIG_GPIO_LED_OFF);
+    GPIO_write(CONFIG_GPIO_4, CONFIG_GPIO_LED_OFF);
+    GPIO_write(CONFIG_GPIO_5, CONFIG_GPIO_LED_OFF);
+    GPIO_write(CONFIG_GPIO_6, CONFIG_GPIO_LED_OFF);
+    GPIO_write(CONFIG_GPIO_7, CONFIG_GPIO_LED_OFF);
     vTaskSuspendAll();
     while(1) {}
 }

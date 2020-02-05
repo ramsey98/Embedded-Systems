@@ -71,6 +71,8 @@ GPIO8.mode = "Output";
 UART1.$name = "CONFIG_UART_0";
 // Use Hardware - Select the hardware to use, or 'None' to use available header pins
 UART1.$hardware = system.deviceData.board.components.XDS110UART;
+// Data Direction
+UART1.dataDirection = "Send Only";
 // Name
 UART1.uart.$name = "MyUART1";
 // Name - The C/C++ identifier used in applications as the index parameter passed to LED runtime APIs
@@ -107,8 +109,6 @@ GPIO8.gpioPin.$suggestSolution = "45";
 UART1.uart.$suggestSolution = "UART0";
 // Suggest solution
 UART1.uart.txPin.$suggestSolution = "55";
-// Suggest solution
-UART1.uart.rxPin.$suggestSolution = "57";
 // Suggest solution
 LED1.gpioPin.gpioPin.$suggestSolution = "64";
 // Suggest solution

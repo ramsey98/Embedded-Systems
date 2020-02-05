@@ -12,8 +12,6 @@
 #include "debug.h"
 #include "sensor_queue.h"
 
-uint32_t count;
-
 void timerSecondCallback(Timer_Handle myHandle);
 void timerOneInit();
 

@@ -11,7 +11,7 @@
 
 int fsm(SENSOR_DATA *curState, int timeInc, int sensorVal)
 {
-    int success = 1;
+    int success = 0;
     switch (curState->state)
     {
         case Init:
@@ -87,7 +87,7 @@ int fsm(SENSOR_DATA *curState, int timeInc, int sensorVal)
         }
         default:
         {
-            success = 0;
+            success = -1;
             break;
         }
     }

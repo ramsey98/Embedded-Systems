@@ -6,9 +6,13 @@
  */
 
 #include "timertwo.h"
+uint32_t count;
+Timer_Handle timer1;
+Timer_Params timer_params;
 
 void timer75Callback(Timer_Handle myHandle)
 {
+    dbgOutputLoc(ENTER_ISR);
     ADC_Handle adc;
     ADC_Params adc_params;
     int res;
@@ -17,6 +21,7 @@ void timer75Callback(Timer_Handle myHandle)
     res = conversion(adc);
     ADC_close(adc);
     sendSensorMsgToQ1(res);
+    dbgOutputLoc(LEAVE_ISR);
 }
 
 int conversion(ADC_Handle adc)
@@ -39,9 +44,6 @@ int conversion(ADC_Handle adc)
 
 void timerTwoInit()
 {
-    Timer_init();
-    Timer_Handle timer1;
-    Timer_Params timer_params;
     Timer_Params_init(&timer_params);
     timer_params.period = 75000;
     timer_params.periodUnits = Timer_PERIOD_US;
