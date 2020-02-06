@@ -34,7 +34,7 @@ int fsm(SENSOR_DATA *curState, int timeInc, int sensorVal)
             {
                 curState->curTime += timeInc;
                 curState->sensorAvg = curState->sensorTotal/curState->sensorCount;
-                dbgUARTStr("Sensor=:\r\n");
+                dbgUARTStr("Sensor=:");
                 dbgUARTVal(curState->sensorAvg);
                 dbgUARTVal(curState->sensorCount);
                 curState->sensorTotal = 0;
@@ -54,7 +54,7 @@ int fsm(SENSOR_DATA *curState, int timeInc, int sensorVal)
             {
                 curState->curTime += timeInc;
                 curState->sensorAvg = curState->sensorTotal/curState->sensorCount;
-                dbgUARTStr("Sensor=:\r\n");
+                dbgUARTStr("Sensor=:");
                 dbgUARTVal(curState->sensorAvg);
                 dbgUARTVal(curState->sensorCount);
                 curState->sensorTotal = 0;
@@ -74,10 +74,10 @@ int fsm(SENSOR_DATA *curState, int timeInc, int sensorVal)
             {
                 curState->curTime += timeInc;
                 curState->sensorAvg = curState->sensorTotal/curState->sensorCount;
-                dbgUARTStr("Sensor=:\r\n");
+                dbgUARTStr("Sensor=:");
                 dbgUARTVal(curState->sensorAvg);
                 dbgUARTVal(curState->sensorCount);
-                dbgUARTStr("CurTime=:\r\n");
+                dbgUARTStr("CurTime=:");
                 dbgUARTVal(curState->curTime);
                 curState->sensorTotal = 0;
                 curState->sensorCount = 0;

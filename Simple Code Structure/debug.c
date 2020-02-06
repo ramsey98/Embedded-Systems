@@ -37,6 +37,7 @@ void dbgGPIOInit()
     GPIO_setConfig(CONFIG_GPIO_6, GPIO_CFG_OUT_STD | GPIO_CFG_OUT_LOW);
     GPIO_setConfig(CONFIG_GPIO_7, GPIO_CFG_OUT_STD | GPIO_CFG_OUT_LOW);
     GPIO_setConfig(CONFIG_LED_0_GPIO, GPIO_CFG_OUT_STD | GPIO_CFG_OUT_LOW);
+    GPIO_write(CONFIG_GPIO_7, CONFIG_GPIO_LED_OFF);
 }
 
 void dbgUARTVal(unsigned char outVal)
