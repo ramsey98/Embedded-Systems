@@ -56,7 +56,6 @@ void dbgUARTStr(char * uartOut)
 
 void dbgOutputLoc(unsigned int outLoc)
 {
-    GPIO_toggle(CONFIG_GPIO_7);
     GPIO_write(CONFIG_GPIO_6, CONFIG_GPIO_LED_OFF);
     GPIO_write(CONFIG_GPIO_5, CONFIG_GPIO_LED_OFF);
     GPIO_write(CONFIG_GPIO_4, CONFIG_GPIO_LED_OFF);
@@ -66,6 +65,8 @@ void dbgOutputLoc(unsigned int outLoc)
     GPIO_write(CONFIG_GPIO_0, CONFIG_GPIO_LED_OFF);
     if (outLoc <= 127)
     {
+        GPIO_toggle(CONFIG_GPIO_7);
+
         if (outLoc & 0b01000000)
         {
             GPIO_write(CONFIG_GPIO_6, CONFIG_GPIO_LED_ON);
@@ -114,5 +115,17 @@ void halt()
     GPIO_write(CONFIG_LED_0_GPIO, CONFIG_GPIO_LED_ON);
     vTaskSuspendAll();
     taskDISABLE_INTERRUPTS();
-    while(1) {}
+
+    //while loop changing GPIO config
+    int timerCount = 0;
+    while(1) {
+
+        timerCount++;
+
+        if (timerCount > DBG_ERROR_LED_TIME) {
+            timerCount = 0;
+            GPIO_toggle(CONFIG_LED_0_GPIO);
+        }
+
+    }
 }
