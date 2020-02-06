@@ -33,6 +33,8 @@
 #define BEFORE_SEND_QUEUE_ISR_TIMER2 (0b00011000)
 #define AFTER_SEND_QUEUE_ISR_TIMER2 (0b00011100)
 
+#define DBG_ERROR_LED_TIME (250000)
+
 
 void dbgGPIOInit();
 void dbgUARTInit();

@@ -113,5 +113,17 @@ void halt()
     GPIO_write(CONFIG_LED_0_GPIO, CONFIG_GPIO_LED_ON);
     vTaskSuspendAll();
     taskDISABLE_INTERRUPTS();
-    while(1) {}
+
+    //while loop changing GPIO config
+    int timerCount = 0;
+    while(1) {
+
+        timerCount++;
+
+        if (timerCount > DBG_ERROR_LED_TIME) {
+            timerCount = 0;
+            GPIO_toggle(CONFIG_LED_0_GPIO);
+        }
+
+    }
 }
