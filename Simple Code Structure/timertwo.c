@@ -22,7 +22,7 @@ int conversion(ADC_Handle adc)
 {
     // Blocking mode conversion
     uint16_t adcValue;
-    uint32_t result;
+    int result;
     int res = ADC_convert(adc, &adcValue);
     if (res == ADC_STATUS_SUCCESS)
     {
