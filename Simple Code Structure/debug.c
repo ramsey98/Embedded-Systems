@@ -18,7 +18,7 @@ void dbgUARTInit()
     uartParams.baudRate = 115200;
     uartParams.readEcho = UART_ECHO_OFF;
     uart = UART_open(CONFIG_UART_0, &uartParams);
-    UART_control(uart, UART_CMD_RXDISABLE, NULL);
+    //UART_control(uart, UART_CMD_RXDISABLE, NULL);
     if (uart == NULL)
     {
         halt();
@@ -49,7 +49,7 @@ void dbgUARTStr(char * uartOut)
     int i;
     for(i = 0; i < strlen(uartOut); i++)
     {
-        UART_write(uart, &uartOut[i], sizeof(uartOut));
+        UART_write(uart, &uartOut[i], sizeof(uartOut[i]));
     }
 }
 
@@ -112,5 +112,6 @@ void halt()
     GPIO_write(CONFIG_GPIO_7, CONFIG_GPIO_LED_OFF);
     GPIO_write(CONFIG_LED_0_GPIO, CONFIG_GPIO_LED_ON);
     vTaskSuspendAll();
+    taskDISABLE_INTERRUPTS();
     while(1) {}
 }
