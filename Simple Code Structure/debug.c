@@ -56,6 +56,8 @@ void dbgUARTStr(char * uartOut)
 
 void dbgOutputLoc(unsigned int outLoc)
 {
+    GPIO_write(CONFIG_GPIO_7, CONFIG_GPIO_LED_OFF);
+    GPIO_toggle(CONFIG_GPIO_7); //when GPIO_7 is high, bits are being switched
     GPIO_write(CONFIG_GPIO_6, CONFIG_GPIO_LED_OFF);
     GPIO_write(CONFIG_GPIO_5, CONFIG_GPIO_LED_OFF);
     GPIO_write(CONFIG_GPIO_4, CONFIG_GPIO_LED_OFF);
@@ -63,10 +65,9 @@ void dbgOutputLoc(unsigned int outLoc)
     GPIO_write(CONFIG_GPIO_2, CONFIG_GPIO_LED_OFF);
     GPIO_write(CONFIG_GPIO_1, CONFIG_GPIO_LED_OFF);
     GPIO_write(CONFIG_GPIO_0, CONFIG_GPIO_LED_OFF);
+
     if (outLoc <= 127)
     {
-        GPIO_toggle(CONFIG_GPIO_7);
-
         if (outLoc & 0b01000000)
         {
             GPIO_write(CONFIG_GPIO_6, CONFIG_GPIO_LED_ON);
@@ -95,6 +96,8 @@ void dbgOutputLoc(unsigned int outLoc)
         {
             GPIO_write(CONFIG_GPIO_0, CONFIG_GPIO_LED_ON);
         }
+
+        GPIO_toggle(CONFIG_GPIO_7);
     }
     else
     {
@@ -102,19 +105,11 @@ void dbgOutputLoc(unsigned int outLoc)
     }
 }
 
-void halt()
+void halt() //call dgbOutputLoc
 {
-    GPIO_write(CONFIG_GPIO_0, CONFIG_GPIO_LED_OFF);
-    GPIO_write(CONFIG_GPIO_1, CONFIG_GPIO_LED_OFF);
-    GPIO_write(CONFIG_GPIO_2, CONFIG_GPIO_LED_OFF);
-    GPIO_write(CONFIG_GPIO_3, CONFIG_GPIO_LED_OFF);
-    GPIO_write(CONFIG_GPIO_4, CONFIG_GPIO_LED_OFF);
-    GPIO_write(CONFIG_GPIO_5, CONFIG_GPIO_LED_OFF);
-    GPIO_write(CONFIG_GPIO_6, CONFIG_GPIO_LED_OFF);
-    GPIO_write(CONFIG_GPIO_7, CONFIG_GPIO_LED_OFF);
     GPIO_write(CONFIG_LED_0_GPIO, CONFIG_GPIO_LED_ON);
     vTaskSuspendAll();
-    taskDISABLE_INTERRUPTS();
+    taskENTER_CRITICAL();
 
     //while loop changing GPIO config
     int timerCount = 0;
