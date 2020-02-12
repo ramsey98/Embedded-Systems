@@ -14,12 +14,14 @@
 #include "debug.h"
 #include "sensor_queue.h"
 
+#define TIMER1_PERIOD (75000)
+
 //Timer functions
 void timer75Callback(Timer_Handle myHandle);
 void timerTwoInit();
 
 //ADC function
-int conversion(ADC_Handle adc);
+int conversion();
 void adcInit();
 
 #endif /* TIMERTWO_H_ */

@@ -12,25 +12,25 @@ static ADC_Handle adc;
 void timer75Callback(Timer_Handle myHandle)
 {
     dbgOutputLoc(ENTER_ISR_TIMER2);
-    int res;
-    res = conversion(adc);
+    int res = conversion();
     sendSensorMsgToQ1(res);
     dbgOutputLoc(LEAVE_ISR_TIMER2);
 }
 
-int conversion(ADC_Handle adc)
+int conversion()
 {
-    // Blocking mode conversion
     uint16_t adcValue;
+    uint32_t adcValueMicroVolt;
     int result;
-    int res = ADC_convert(adc, &adcValue);
+    int_fast16_t res = ADC_convert(adc, &adcValue);
     if (res == ADC_STATUS_SUCCESS)
     {
-        result = ADC_convertRawToMicroVolts(adc, adcValue);
+        adcValueMicroVolt = ADC_convertRawToMicroVolts(adc, adcValue);
+        result = adcValueMicroVolt;
     }
     else
     {
-        result = -1; //conversion failed
+        result = -1;
     }
     return result;
 }
@@ -41,6 +41,10 @@ void adcInit()
     ADC_Params adc_params;
     ADC_Params_init(&adc_params);
     adc = ADC_open(CONFIG_ADC_0, &adc_params);
+    if (adc == NULL)
+    {
+        halt();
+    }
 }
 
 void timerTwoInit()
@@ -48,7 +52,7 @@ void timerTwoInit()
     Timer_Handle timer1;
     Timer_Params timer_params;
     Timer_Params_init(&timer_params);
-    timer_params.period = 75000;
+    timer_params.period = TIMER1_PERIOD;
     timer_params.periodUnits = Timer_PERIOD_US;
     timer_params.timerMode = Timer_CONTINUOUS_CALLBACK;
     timer_params.timerCallback = timer75Callback;

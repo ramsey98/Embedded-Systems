@@ -83,6 +83,8 @@ LED1.gpioPin.$hardware = system.deviceData.board.components.LED_RED;
 ADC1.$name = "CONFIG_ADC_0";
 // Name
 ADC1.adc.$name = "MyADC1";
+// Assign pin
+ADC1.adc.adcPin.$assign = "boosterpack.24"; // P60
 // Name - The C/C++ identifier used in applications as the index parameter passed to Timer runtime APIs
 Timer2.$name = "CONFIG_TIMER_1";
 // Name
@@ -113,7 +115,5 @@ UART1.uart.txPin.$suggestSolution = "55";
 LED1.gpioPin.gpioPin.$suggestSolution = "64";
 // Suggest solution
 ADC1.adc.$suggestSolution = "ADC0";
-// Suggest solution
-ADC1.adc.adcPin.$suggestSolution = "58";
 // Suggest solution
 Timer2.timer.$suggestSolution = "Timer0";

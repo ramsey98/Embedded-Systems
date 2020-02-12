@@ -12,6 +12,8 @@
 #include "debug.h"
 #include "sensor_queue.h"
 
+#define TIMER0_PERIOD (1000000)
+
 void timerSecondCallback(Timer_Handle myHandle);
 void timerOneInit();
 

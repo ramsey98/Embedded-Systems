@@ -6,8 +6,6 @@
  */
 
 #include "sensor_state.h"
-#include <stdio.h>
-
 
 int fsm(SENSOR_DATA *curState, int timeInc, int sensorVal)
 {
@@ -39,8 +37,8 @@ int fsm(SENSOR_DATA *curState, int timeInc, int sensorVal)
                 dbgUARTVal(curState->sensorCount);
                 curState->sensorTotal = 0;
                 curState->sensorCount = 0;
+                curState->state = WaitingForTime2;
             }
-            curState->state = WaitingForTime2;
             break;
         }
         case WaitingForTime2:
@@ -59,8 +57,8 @@ int fsm(SENSOR_DATA *curState, int timeInc, int sensorVal)
                 dbgUARTVal(curState->sensorCount);
                 curState->sensorTotal = 0;
                 curState->sensorCount = 0;
+                curState->state = WaitingForTime3;
             }
-            curState->state = WaitingForTime3;
             break;
         }
         case WaitingForTime3:
@@ -78,11 +76,11 @@ int fsm(SENSOR_DATA *curState, int timeInc, int sensorVal)
                 dbgUARTVal(curState->sensorAvg);
                 dbgUARTVal(curState->sensorCount);
                 dbgUARTStr("CurTime=:");
-                dbgUARTVal(curState->curTime);
+                dbgUARTVal(curState->curTime/1000);
                 curState->sensorTotal = 0;
                 curState->sensorCount = 0;
+                curState->state = WaitingForTime1;
             }
-            curState->state = WaitingForTime1;
             break;
         }
         default:

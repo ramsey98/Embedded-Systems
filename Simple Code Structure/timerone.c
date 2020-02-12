@@ -10,10 +10,9 @@
 
 void timerSecondCallback(Timer_Handle myHandle)
 {
-    static uint32_t count;
     dbgOutputLoc(ENTER_ISR_TIMER1);
-    count = Timer_getCount(myHandle) - count;
-    unsigned int time = count/1000;
+    //uint32_t count = Timer_getCount(myHandle);
+    uint32_t time = TIMER0_PERIOD/1000;
     sendTimeMsgToQ1(time);
     dbgOutputLoc(LEAVE_ISR_TIMER1);
 }
@@ -23,7 +22,7 @@ void timerOneInit()
     Timer_Handle timer0;
     Timer_Params timer_params;
     Timer_Params_init(&timer_params);
-    timer_params.period = 1000000;
+    timer_params.period = TIMER0_PERIOD;
     timer_params.periodUnits = Timer_PERIOD_US;
     timer_params.timerMode = Timer_CONTINUOUS_CALLBACK;
     timer_params.timerCallback = timerSecondCallback;

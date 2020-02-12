@@ -22,7 +22,7 @@ int sendTimeMsgToQ1(unsigned int timeVal)
     int ret = 0;
     BaseType_t success;
     dbgOutputLoc(BEFORE_SEND_QUEUE_ISR_TIMER1);
-    uint64_t msg = 0x0000000100000000 | timeVal;
+    uint64_t msg = TIMEFLAG | timeVal;
     success = xQueueSendFromISR(xQueue, (void *) &msg, pdFALSE);
     if(success == pdFALSE)
     {
@@ -38,7 +38,7 @@ int sendSensorMsgToQ1(int mmDist)
     BaseType_t success;
     dbgOutputLoc(BEFORE_SEND_QUEUE_ISR_TIMER2);
 
-    uint64_t msg = 0x1000000000000000 | mmDist;
+    uint64_t msg = SENSORFLAG | mmDist;
     success = xQueueSendFromISR(xQueue, (void *) &msg, pdFALSE);
     if(success == pdFALSE)
     {
@@ -56,15 +56,13 @@ int receiveFromQ1(int * timeInc, int * sensorVal)
     uint64_t received;
     success = xQueueReceive(xQueue, &received, portMAX_DELAY);
 
-    if (received >> 32 == 0x00000001)
+    if (received >> SHIFT == TIMEMASK)
     {
-
-        *timeInc = received & 0xffffffff;
-        *sensorVal = 0;
+        *timeInc = received & FMASK;
     }
-    else if (received >> 32 == 0x10000000)
+    else if (received >> SHIFT == SENSORMASK)
     {
-        *sensorVal = received & 0xffffffff;
+        *sensorVal = received & FMASK;
         *timeInc = 0;
     }
     if(success == pdFALSE)
