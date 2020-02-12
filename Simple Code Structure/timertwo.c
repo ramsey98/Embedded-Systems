@@ -12,27 +12,27 @@ static ADC_Handle adc;
 void timer75Callback(Timer_Handle myHandle)
 {
     dbgOutputLoc(ENTER_ISR_TIMER2);
-    int res = conversion();
-    sendSensorMsgToQ1(res);
-    dbgOutputLoc(LEAVE_ISR_TIMER2);
-}
-
-int conversion()
-{
     uint16_t adcValue;
     uint32_t adcValueMicroVolt;
-    int result;
     int_fast16_t res = ADC_convert(adc, &adcValue);
+    int result;
     if (res == ADC_STATUS_SUCCESS)
     {
         adcValueMicroVolt = ADC_convertRawToMicroVolts(adc, adcValue);
-        result = adcValueMicroVolt;
+        result = conversion(adcValueMicroVolt);
     }
-    else
+    if (result != -1)
     {
-        result = -1;
+        sendSensorMsgToQ1(result);
     }
-    return result;
+    dbgOutputLoc(LEAVE_ISR_TIMER2);
+}
+
+int conversion(uint32_t sensorVal)
+{
+    //convert to mm here
+    int sensorConv = sensorVal/1000;
+    return sensorConv;
 }
 
 void adcInit()

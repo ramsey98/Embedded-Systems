@@ -6,6 +6,7 @@
  */
 #include "debug.h"
 #include <string.h>
+#include <stdio.h>
 static UART_Handle uart;
 
 void dbgUARTInit()
@@ -51,6 +52,20 @@ void dbgUARTStr(char * uartOut)
     for(i = 0; i < strlen(uartOut); i++)
     {
         UART_write(uart, &uartOut[i], sizeof(uartOut[i]));
+    }
+}
+
+void dbgUARTNum(int outVal)
+{
+    char str[3];
+    if (outVal > 255)
+    {
+        sprintf(str, "%d", outVal);
+        dbgUARTStr(str);
+    }
+    else
+    {
+        dbgUARTVal(outVal);
     }
 }
 

@@ -33,8 +33,8 @@ int fsm(SENSOR_DATA *curState, int timeInc, int sensorVal)
                 curState->curTime += timeInc;
                 curState->sensorAvg = curState->sensorTotal/curState->sensorCount;
                 dbgUARTStr("Sensor=:");
-                dbgUARTVal(curState->sensorAvg);
-                dbgUARTVal(curState->sensorCount);
+                dbgUARTNum(curState->sensorAvg);
+                dbgUARTNum(curState->sensorCount);
                 curState->sensorTotal = 0;
                 curState->sensorCount = 0;
                 curState->state = WaitingForTime2;
@@ -53,8 +53,8 @@ int fsm(SENSOR_DATA *curState, int timeInc, int sensorVal)
                 curState->curTime += timeInc;
                 curState->sensorAvg = curState->sensorTotal/curState->sensorCount;
                 dbgUARTStr("Sensor=:");
-                dbgUARTVal(curState->sensorAvg);
-                dbgUARTVal(curState->sensorCount);
+                dbgUARTNum(curState->sensorAvg);
+                dbgUARTNum(curState->sensorCount);
                 curState->sensorTotal = 0;
                 curState->sensorCount = 0;
                 curState->state = WaitingForTime3;
@@ -73,10 +73,10 @@ int fsm(SENSOR_DATA *curState, int timeInc, int sensorVal)
                 curState->curTime += timeInc;
                 curState->sensorAvg = curState->sensorTotal/curState->sensorCount;
                 dbgUARTStr("Sensor=:");
-                dbgUARTVal(curState->sensorAvg);
-                dbgUARTVal(curState->sensorCount);
+                dbgUARTNum(curState->sensorAvg);
+                dbgUARTNum(curState->sensorCount);
                 dbgUARTStr("CurTime=:");
-                dbgUARTVal(curState->curTime/1000);
+                dbgUARTNum(curState->curTime/1000);
                 curState->sensorTotal = 0;
                 curState->sensorCount = 0;
                 curState->state = WaitingForTime1;

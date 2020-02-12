@@ -12,7 +12,6 @@
 
 void *mainThread(void *arg0)
 {
-    //Board_init();
     dbgUARTInit();
     dbgGPIOInit();
     adcInit();
