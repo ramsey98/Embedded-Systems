@@ -119,11 +119,12 @@ void dbgOutputLoc(unsigned int outLoc)
     }
 }
 
-void halt() //call dgbOutputLoc
+void halt() //call dgbOutputLoc, param: location of error
 {
     GPIO_write(CONFIG_LED_0_GPIO, CONFIG_GPIO_LED_ON);
     vTaskSuspendAll();
     taskENTER_CRITICAL();
+    taskDISABLE_INTERRUPTS();
 
     //while loop changing GPIO config
     int timerCount = 0;
