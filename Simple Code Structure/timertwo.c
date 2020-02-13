@@ -32,6 +32,13 @@ int conversion(uint32_t sensorVal)
 {
     //convert to mm here
     int sensorConv = sensorVal/1000;
+    /*
+    int result;
+    if (sensorConv>1300)
+        result = 10;
+    else if (sensorConv < 200)
+        result = 80;
+    */
     return sensorConv;
 }
 
