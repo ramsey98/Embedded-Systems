@@ -25,6 +25,10 @@ void timer75Callback(Timer_Handle myHandle)
     {
         sendSensorMsgToQ1(result);
     }
+    else
+    {
+        halt();
+    }
     dbgOutputLoc(LEAVE_ISR_TIMER2);
 }
 
