@@ -22,6 +22,10 @@ var LED1 = LED.addInstance();
 var ADC = scripting.addModule("/ti/drivers/ADC", {}, false);
 var ADC1 = ADC.addInstance();
 var Timer2 = Timer.addInstance();
+var Capture = scripting.addModule("/ti/drivers/Capture", {}, false);
+var Capture1 = Capture.addInstance();
+var Capture2 = Capture.addInstance();
+var UART2 = UART.addInstance();
 // name - Select the RTOS being used
 RTOS.name = "FreeRTOS";
 // Name - The C/C++ identifier used in applications as the index parameter passed to Timer runtime APIs
@@ -91,24 +95,36 @@ ADC1.adc.adcPin.$assign = "boosterpack.24"; // P60
 Timer2.$name = "CONFIG_TIMER_1";
 // Name
 Timer2.timer.$name = "MyTimer1";
+// Name - The C/C++ identifier used in applications as the index parameter passed to Capture runtime APIs
+Capture1.$name = "CONFIG_CAPTURE_0";
+// Name
+Capture1.timer.$name = "MyTimer1";
+// Name - The C/C++ identifier used in applications as the index parameter passed to Capture runtime APIs
+Capture2.$name = "CONFIG_CAPTURE_1";
+// Name
+Capture2.timer.$name = "MyTimer1";
+// Name - The C/C++ identifier used in applications as the index parameter passed to UART runtime APIs
+UART2.$name = "CONFIG_UART_1";
+// Name
+UART2.uart.$name = "MyUART1";
 // Suggest solution
-Timer1.timer.$suggestSolution = "Timer1";
+Timer1.timer.$suggestSolution = "Timer3";
 // Suggest solution
-GPIO1.gpioPin.$suggestSolution = "3";
+GPIO1.gpioPin.$suggestSolution = "6";
 // Suggest solution
-GPIO2.gpioPin.$suggestSolution = "5";
+GPIO2.gpioPin.$suggestSolution = "7";
 // Suggest solution
-GPIO3.gpioPin.$suggestSolution = "6";
+GPIO3.gpioPin.$suggestSolution = "8";
 // Suggest solution
-GPIO4.gpioPin.$suggestSolution = "7";
+GPIO4.gpioPin.$suggestSolution = "18";
 // Suggest solution
-GPIO5.gpioPin.$suggestSolution = "8";
+GPIO5.gpioPin.$suggestSolution = "21";
 // Suggest solution
-GPIO6.gpioPin.$suggestSolution = "18";
+GPIO6.gpioPin.$suggestSolution = "53";
 // Suggest solution
-GPIO7.gpioPin.$suggestSolution = "21";
+GPIO7.gpioPin.$suggestSolution = "58";
 // Suggest solution
-UART1.uart.$suggestSolution = "UART0";
+UART1.uart.$suggestSolution = "UART1";
 // Suggest solution
 UART1.uart.txPin.$suggestSolution = "55";
 // Suggest solution
@@ -117,3 +133,17 @@ LED1.gpioPin.gpioPin.$suggestSolution = "64";
 ADC1.adc.$suggestSolution = "ADC0";
 // Suggest solution
 Timer2.timer.$suggestSolution = "Timer0";
+// Suggest solution
+Capture1.timer.$suggestSolution = "Timer2";
+// Suggest solution
+Capture1.timer.capturePin.$suggestSolution = "5";
+// Suggest solution
+Capture2.timer.$suggestSolution = "Timer1";
+// Suggest solution
+Capture2.timer.capturePin.$suggestSolution = "3";
+// Suggest solution
+UART2.uart.$suggestSolution = "UART0";
+// Suggest solution
+UART2.uart.txPin.$suggestSolution = "62";
+// Suggest solution
+UART2.uart.rxPin.$suggestSolution = "45";
