@@ -26,6 +26,8 @@ var Capture = scripting.addModule("/ti/drivers/Capture", {}, false);
 var Capture1 = Capture.addInstance();
 var Capture2 = Capture.addInstance();
 var UART2 = UART.addInstance();
+var SPI = scripting.addModule("/ti/drivers/SPI");
+var SPI1 = SPI.addInstance();
 // name - Select the RTOS being used
 RTOS.name = "FreeRTOS";
 // Name - The C/C++ identifier used in applications as the index parameter passed to Timer runtime APIs
@@ -75,12 +77,12 @@ GPIO8.mode = "Output";
 GPIO8.gpioPin.$assign = "boosterpack.30"; // P50
 // Name - The C/C++ identifier used in applications as the index parameter passed to UART runtime APIs
 UART1.$name = "CONFIG_UART_0";
-// Use Hardware - Select the hardware to use, or 'None' to use available header pins
-UART1.$hardware = system.deviceData.board.components.XDS110UART;
 // Data Direction
 UART1.dataDirection = "Send Only";
 // Name
 UART1.uart.$name = "MyUART1";
+// Assign pin
+UART1.uart.txPin.$assign = "boosterpack.4"; // P03
 // Name - The C/C++ identifier used in applications as the index parameter passed to LED runtime APIs
 LED1.$name = "CONFIG_LED_0";
 // Use Hardware - Select the hardware to use, or 'None' to use available header pins
@@ -105,28 +107,35 @@ Capture2.$name = "CONFIG_CAPTURE_1";
 Capture2.timer.$name = "MyTimer1";
 // Name - The C/C++ identifier used in applications as the index parameter passed to UART runtime APIs
 UART2.$name = "CONFIG_UART_1";
+// Use Hardware - Select the hardware to use, or 'None' to use available header pins
+UART2.$hardware = system.deviceData.board.components.XDS110UART;
 // Name
 UART2.uart.$name = "MyUART1";
+var DMA = scripting.addModule("/ti/drivers/DMA", {}, false);
+// Name - The C/C++ identifier used in applications as the index parameter passed to SPI runtime APIs
+SPI1.$name = "CONFIG_SPI_0";
+// Mode - In three pin mode the SS signal is not used.
+SPI1.mode = "Four Pin SS Active Low";
+// Name
+SPI1.spi.$name = "MySPI1";
 // Suggest solution
-Timer1.timer.$suggestSolution = "Timer3";
+Timer1.timer.$suggestSolution = "Timer1";
 // Suggest solution
-GPIO1.gpioPin.$suggestSolution = "6";
+GPIO1.gpioPin.$suggestSolution = "18";
 // Suggest solution
-GPIO2.gpioPin.$suggestSolution = "7";
+GPIO2.gpioPin.$suggestSolution = "21";
 // Suggest solution
-GPIO3.gpioPin.$suggestSolution = "8";
+GPIO3.gpioPin.$suggestSolution = "45";
 // Suggest solution
-GPIO4.gpioPin.$suggestSolution = "18";
+GPIO4.gpioPin.$suggestSolution = "58";
 // Suggest solution
-GPIO5.gpioPin.$suggestSolution = "21";
+GPIO5.gpioPin.$suggestSolution = "59";
 // Suggest solution
-GPIO6.gpioPin.$suggestSolution = "53";
+GPIO6.gpioPin.$suggestSolution = "62";
 // Suggest solution
-GPIO7.gpioPin.$suggestSolution = "58";
+GPIO7.gpioPin.$suggestSolution = "63";
 // Suggest solution
-UART1.uart.$suggestSolution = "UART1";
-// Suggest solution
-UART1.uart.txPin.$suggestSolution = "55";
+UART1.uart.$suggestSolution = "UART0";
 // Suggest solution
 LED1.gpioPin.gpioPin.$suggestSolution = "64";
 // Suggest solution
@@ -134,16 +143,30 @@ ADC1.adc.$suggestSolution = "ADC0";
 // Suggest solution
 Timer2.timer.$suggestSolution = "Timer0";
 // Suggest solution
-Capture1.timer.$suggestSolution = "Timer2";
+Capture1.timer.$suggestSolution = "Timer3";
 // Suggest solution
-Capture1.timer.capturePin.$suggestSolution = "5";
+Capture1.timer.capturePin.$suggestSolution = "61";
 // Suggest solution
-Capture2.timer.$suggestSolution = "Timer1";
+Capture2.timer.$suggestSolution = "Timer2";
 // Suggest solution
-Capture2.timer.capturePin.$suggestSolution = "3";
+Capture2.timer.capturePin.$suggestSolution = "53";
 // Suggest solution
-UART2.uart.$suggestSolution = "UART0";
+UART2.uart.$suggestSolution = "UART1";
 // Suggest solution
-UART2.uart.txPin.$suggestSolution = "62";
+UART2.uart.txPin.$suggestSolution = "55";
 // Suggest solution
-UART2.uart.rxPin.$suggestSolution = "45";
+UART2.uart.rxPin.$suggestSolution = "57";
+// Suggest solution
+SPI1.spi.$suggestSolution = "SPI0";
+// Suggest solution
+SPI1.spi.sclkPin.$suggestSolution = "5";
+// Suggest solution
+SPI1.spi.misoPin.$suggestSolution = "6";
+// Suggest solution
+SPI1.spi.mosiPin.$suggestSolution = "7";
+// Suggest solution
+SPI1.spi.ssPin.$suggestSolution = "8";
+// Suggest solution
+SPI1.spi.dmaRxChannel.$suggestSolution = "UDMA_CH30";
+// Suggest solution
+SPI1.spi.dmaTxChannel.$suggestSolution = "UDMA_CH31";

@@ -11,7 +11,6 @@ static UART_Handle motors_uart;
 
 void motorsUARTInit()
 {
-    UART_init();
     UART_Params uartParams;
     UART_Params_init(&uartParams);
     uartParams.writeMode = UART_MODE_BLOCKING;
