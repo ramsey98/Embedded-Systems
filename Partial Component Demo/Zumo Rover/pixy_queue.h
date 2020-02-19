@@ -11,4 +11,8 @@
 #include "debug.h"
 #include "queue.h"
 
+int sendMsgToPixyQ(uint8_t value);
+int receiveFromPixyQ(uint8_t * value);
+void createPixyQueue();
+
 #endif /* PIXY_QUEUE_H_ */

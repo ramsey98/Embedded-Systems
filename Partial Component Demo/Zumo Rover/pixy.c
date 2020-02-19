@@ -5,86 +5,70 @@
  *      Author: Holden Ramsey
  */
 
-/*
- * #include "pixy_queue.h"
- *
-sem_t masterSem;
-static SPI_Handle masterSpi;
+#include "pixy.h"
 
-void slaveReadyFxn(uint_least8_t index)
-{
-    sem_post(&masterSem);
-}
+static SPI_Handle masterSpi;
 
 void pixy_init()
 {
     SPI_Params spiParams;
-    int32_t status;
-
-    GPIO_setConfig(CONFIG_SPI_MASTER_READY, GPIO_CFG_OUTPUT | GPIO_CFG_OUT_LOW);
-    GPIO_setConfig(CONFIG_SPI_SLAVE_READY, GPIO_CFG_INPUT);
-
-    GPIO_write(CONFIG_SPI_MASTER_READY, 1);
-    while (GPIO_read(CONFIG_SPI_SLAVE_READY) == 0) {}
-
-    GPIO_setConfig(CONFIG_SPI_SLAVE_READY, GPIO_CFG_IN_PU | GPIO_CFG_IN_INT_FALLING);
-    GPIO_setCallback(CONFIG_SPI_SLAVE_READY, slaveReadyFxn);
-    GPIO_enableInt(CONFIG_SPI_SLAVE_READY);
-
-    status = sem_init(&masterSem, 0, 0);
-    if (status != 0)
-    {
-        halt();
-    }
-
     SPI_Params_init(&spiParams);
     spiParams.frameFormat = SPI_POL0_PHA1;
     spiParams.bitRate = 10000000;
-    masterSpi = SPI_open(CONFIG_SPI_MASTER, &spiParams);
+    masterSpi = SPI_open(CONFIG_SPI_0, &spiParams);
     if (masterSpi == NULL)
     {
         halt();
     }
-
-    GPIO_write(CONFIG_SPI_MASTER_READY, 0);
-    strncpy((char *) masterTxBuffer, MASTER_MSG, SPI_MSG_LENGTH);
 }
 
-void read_pixy()
+int pixy_transfer(uint8_t *tx_buffer, uint8_t *rx_buffer, uint8_t len)
 {
     bool transferOK;
     SPI_Transaction transaction;
-    sem_wait(&masterSem);
-
-    masterTxBuffer[sizeof(MASTER_MSG) - 1] = (i % 10) + '0';
-    memset((void *) masterRxBuffer, 0, SPI_MSG_LENGTH);
-    transaction.count = SPI_MSG_LENGTH;
-    transaction.txBuf = (void *) masterTxBuffer;
-    transaction.rxBuf = (void *) masterRxBuffer;
-
+    transaction.count = len;
+    transaction.txBuf = (void *) tx_buffer;
+    transaction.rxBuf = (void *) rx_buffer;
     transferOK = SPI_transfer(masterSpi, &transaction);
-    if (!transferOK)
-    {
-        halt();
-    }
+    return transferOK;
 }
-*/
 
-/*
 void *pixyThread(void *arg0)
 {
-    pixy_Init();
+    pixy_init();
     dbgOutputLoc(ENTER_TASK);
-    int received = 0;
+    //int received = 0;
     uint32_t value;
+    uint8_t txBuffer[TXBUFFER];
+    uint8_t rxBuffer[RXBUFFER];
+    uint8_t type = 0x20;
+    uint8_t len = 2;
+    txBuffer[0] = 0xae;
+    txBuffer[1] = 0xc1;
+    txBuffer[2] = type;
+    txBuffer[3] = len;
+    //txBuffer[4] = CCC_SIG_ALL;
+    txBuffer[5] = 0xff;
     dbgOutputLoc(WHILE1);
     while(1)
     {
-        received = receiveFromSpeedQ(&value);
+        pixy_transfer(txBuffer, rxBuffer, sizeof(txBuffer));
+        value = rxBuffer[4] << 24;
+        value = value | (rxBuffer[3] << 16);
+        value = value | (rxBuffer[2] << 8);
+        value = value | rxBuffer[1];
+        /*
+        received = receiveFromPixyQ(&value);
         if(received == -1)
         {
             halt();
         }
+        else
+        {
+            memcpy(value, rxBuffer, sizeof(rxBuffer));
+            sendMsgToPixyQ(value);
+        }
+        */
     }
 }
-*/
+

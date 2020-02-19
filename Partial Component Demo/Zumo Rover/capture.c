@@ -17,6 +17,8 @@ void *captureThread(void *arg0)
     capture0Init();
     capture1Init();
     dbgOutputLoc(ENTER_TASK);
+    uint32_t prevleftFreq = 0;
+    uint32_t prevrightFreq = 0;
     uint32_t leftFreq = 0;
     uint32_t rightFreq = 0;
     int received = 0;
@@ -27,6 +29,16 @@ void *captureThread(void *arg0)
         if(received == -1)
         {
             halt();
+        }
+        if(leftFreq != prevleftFreq)
+        {
+            sendLeftMotorMsgToMQTTQ(leftFreq);
+            prevleftFreq = leftFreq;
+        }
+        if(rightFreq != prevrightFreq)
+        {
+            sendRightMotorMsgToMQTTQ(rightFreq);
+            prevrightFreq = rightFreq;
         }
     }
 }
@@ -74,9 +86,9 @@ void capture1Init()
     semParams.mode = SemaphoreP_Mode_BINARY;
     captureSem1 = SemaphoreP_create(0, &semParams);
 
-    if (captureSem0 == NULL || captureSem1 == NULL)
+    if (captureSem1 == NULL)
     {
-        halt(); //could not allocate semaphore
+        halt();
     }
 
     Capture_Params_init(&captureParams);
@@ -87,7 +99,7 @@ void capture1Init()
     capture1 = Capture_open(CONFIG_CAPTURE_1, &captureParams);
     if (capture1 == NULL)
     {
-        halt(); //failed to initialize capture
+        halt();
     }
 
     Capture_start(capture1);

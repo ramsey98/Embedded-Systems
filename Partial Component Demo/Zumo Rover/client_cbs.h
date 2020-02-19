@@ -48,6 +48,8 @@ extern "C"
 #include <ti/net/mqtt/mqttserver.h>
 #include <ti/net/mqtt/mqttclient.h>
 
+#include <mqtt_client.h>
+
 //*****************************************************************************
 // Macros
 //*****************************************************************************

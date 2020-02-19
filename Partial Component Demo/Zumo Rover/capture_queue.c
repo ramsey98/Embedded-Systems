@@ -57,11 +57,11 @@ int receiveFromCapQ(uint32_t * leftFreq, uint32_t * rightFreq)
 
     if (received >> ENCODERSHIFT == LEFTMASK)
     {
-        *leftFreq = received & CAPFMASK;
+        *leftFreq = 1000000 / (received & CAPFMASK);
     }
     else if (received >> ENCODERSHIFT == RIGHTMASK)
     {
-        *rightFreq = received & CAPFMASK;
+        *rightFreq = 1000000 / (received & CAPFMASK);
     }
     if(success == pdFALSE)
     {
