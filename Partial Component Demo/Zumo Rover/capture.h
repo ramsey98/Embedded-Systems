@@ -13,6 +13,7 @@
 #include <ti/drivers/Capture.h>
 #include <ti/drivers/dpl/SemaphoreP.h>
 
+void *captureThread(void *arg0);
 void capture0Callback(Capture_Handle handle, uint32_t interval);
 void capture0Init();
 void capture1Callback(Capture_Handle handle, uint32_t interval);

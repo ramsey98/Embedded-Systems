@@ -10,22 +10,20 @@
 
 #include "debug.h"
 
-
 typedef enum
 {
     Init,
-    WaitingForTime1,
-    WaitingForTime2,
-    WaitingForTime3,
+    Polling,
+    Averaging,
 } SENSOR_STATES;
 
 typedef struct
 {
     SENSOR_STATES state;
-    int curTime, sensorTotal, sensorCount, sensorAvg;
+    int sensorTotal, sensorCount, sensorAvg;
 
 } SENSOR_DATA;
 
-int fsm(SENSOR_DATA *curState, int timeInc, int sensorVal);
+int fsm(SENSOR_DATA *curState, int sensorVal);
 
 #endif /* SENSOR_STATE_H_ */

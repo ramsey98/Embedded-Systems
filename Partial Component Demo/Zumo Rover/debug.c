@@ -18,7 +18,7 @@ void dbgUARTInit()
     uartParams.writeDataMode = UART_DATA_BINARY;
     uartParams.baudRate = 115200;
     uartParams.readEcho = UART_ECHO_OFF;
-    uart = UART_open(CONFIG_UART_0, &uartParams);
+    uart = UART_open(CONFIG_UART_1, &uartParams);
     if (uart == NULL)
     {
         halt();

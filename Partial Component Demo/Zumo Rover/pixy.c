@@ -6,6 +6,8 @@
  */
 
 /*
+ * #include "pixy_queue.h"
+ *
 sem_t masterSem;
 static SPI_Handle masterSpi;
 
@@ -64,6 +66,25 @@ void read_pixy()
     if (!transferOK)
     {
         halt();
+    }
+}
+*/
+
+/*
+void *pixyThread(void *arg0)
+{
+    pixy_Init();
+    dbgOutputLoc(ENTER_TASK);
+    int received = 0;
+    uint32_t value;
+    dbgOutputLoc(WHILE1);
+    while(1)
+    {
+        received = receiveFromSpeedQ(&value);
+        if(received == -1)
+        {
+            halt();
+        }
     }
 }
 */

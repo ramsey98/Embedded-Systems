@@ -12,6 +12,25 @@ volatile uint32_t curInterval1;
 static SemaphoreP_Handle captureSem0;
 static SemaphoreP_Handle captureSem1;
 
+void *captureThread(void *arg0)
+{
+    capture0Init();
+    capture1Init();
+    dbgOutputLoc(ENTER_TASK);
+    uint32_t leftFreq = 0;
+    uint32_t rightFreq = 0;
+    int received = 0;
+    dbgOutputLoc(WHILE1);
+    while(1)
+    {
+        received = receiveFromCapQ(&leftFreq, &rightFreq);
+        if(received == -1)
+        {
+            halt();
+        }
+    }
+}
+
 void capture0Init()
 {
     SemaphoreP_Params semParams;

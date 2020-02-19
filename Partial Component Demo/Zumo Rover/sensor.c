@@ -1,15 +1,37 @@
 /*
- * timertwo.c
+ * sensor.c
  *
- *  Created on: Jan 25, 2020
- *      Author: Team 20
+ *  Created on: Feb 18, 2020
+ *      Author: Holden Ramsey
  */
 
-#include "timertwo.h"
+#include <sensor.h>
 
 static ADC_Handle adc;
 
-void timer75Callback(Timer_Handle myHandle)
+void *sensorThread(void *arg0)
+{
+    adcInit();
+    timerInit();
+    dbgOutputLoc(ENTER_TASK);
+    SENSOR_DATA curState;
+    curState.state = Init;
+    int sensorVal = 0;
+    int success = fsm(&curState, sensorVal);
+    int received = 0;
+    dbgOutputLoc(WHILE1);
+    while(1)
+    {
+        received = receiveFromSensorQ(&sensorVal);
+        success = fsm(&curState, sensorVal);
+        if(success == -1 || received == -1)
+        {
+            halt();
+        }
+    }
+}
+
+void timerCallback(Timer_Handle myHandle)
 {
     dbgOutputLoc(ENTER_ISR_TIMER2);
     uint16_t adcValue;
@@ -23,7 +45,7 @@ void timer75Callback(Timer_Handle myHandle)
     }
     if (result != -1)
     {
-        sendSensorMsgToQ1(result);
+        sendSensorMsgToQ(result);
     }
     else
     {
@@ -58,23 +80,23 @@ void adcInit()
     }
 }
 
-void timerTwoInit()
+void timerInit()
 {
-    Timer_Handle timer1;
+    Timer_Handle timer;
     Timer_Params timer_params;
     Timer_Params_init(&timer_params);
-    timer_params.period = TIMER1_PERIOD;
+    timer_params.period = TIMER_PERIOD;
     timer_params.periodUnits = Timer_PERIOD_US;
     timer_params.timerMode = Timer_CONTINUOUS_CALLBACK;
-    timer_params.timerCallback = timer75Callback;
+    timer_params.timerCallback = timerCallback;
 
-    timer1 = Timer_open(CONFIG_TIMER_1, &timer_params);
-    if (timer1 == NULL)
+    timer = Timer_open(CONFIG_TIMER_0, &timer_params);
+    if (timer == NULL)
     {
         halt();
     }
 
-    if (Timer_start(timer1) == Timer_STATUS_ERROR)
+    if (Timer_start(timer) == Timer_STATUS_ERROR)
     {
         halt();
     }

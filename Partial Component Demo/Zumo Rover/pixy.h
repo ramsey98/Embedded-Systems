@@ -18,6 +18,7 @@ unsigned char masterRxBuffer[SPI_MSG_LENGTH];
 unsigned char masterTxBuffer[SPI_MSG_LENGTH];
 
 void pixy_init();
+void *pixyThread(void *arg0);
 */
 
 

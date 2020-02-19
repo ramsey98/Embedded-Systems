@@ -1,44 +1,43 @@
 /*
- * sensor_queue.c
+ * UARTRx_queue.c
  *
- *  Created on: Jan 25, 2020
- *      Author: Team 20
+ *  Created on: Feb 18, 2020
+ *      Author: Holden Ramsey
  */
 
-#include "sensor_queue.h"
+#include "UARTRx_queue.h"
 static QueueHandle_t xQueue = NULL;
 
-void createSensorQueue()
+void createUARTRxQueue()
 {
-    xQueue = xQueueCreate(16, sizeof(uint32_t));
+    xQueue = xQueueCreate(16, sizeof(uint8_t));
     if(xQueue == NULL)
     {
         halt();
     }
 }
 
-int sendSensorMsgToQ(int mmDist)
+int sendMsgToUARTRxQ(uint8_t value)
 {
     int ret = 0;
     BaseType_t success;
-    dbgOutputLoc(BEFORE_SEND_QUEUE_ISR_TIMER2);
-
-    uint32_t msg = mmDist;
+    dbgOutputLoc(BEFORE_SEND_QUEUE_ISR_TIMER1);
+    uint8_t msg = value;
     success = xQueueSendFromISR(xQueue, (void *) &msg, pdFALSE);
     if(success == pdFALSE)
     {
         ret = -1;
     }
-    dbgOutputLoc(AFTER_SEND_QUEUE_ISR_TIMER2);
+    dbgOutputLoc(AFTER_SEND_QUEUE_ISR_TIMER1);
     return ret;
 }
 
-int receiveFromSensorQ(int * sensorVal)
+int receiveFromUARTRxQ(uint8_t * value)
 {
     int ret = 0;
     BaseType_t success;
     dbgOutputLoc(BEFORE_RECEIVE_QUEUE);
-    uint32_t received;
+    uint8_t received;
     success = xQueueReceive(xQueue, &received, portMAX_DELAY);
     if(success == pdFALSE)
     {
@@ -46,7 +45,7 @@ int receiveFromSensorQ(int * sensorVal)
     }
     else
     {
-        *sensorVal = received;
+        *value = received;
     }
     dbgOutputLoc(AFTER_RECEIVE_QUEUE);
     return ret;

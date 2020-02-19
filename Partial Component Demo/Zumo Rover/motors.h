@@ -9,6 +9,9 @@
 #define MOTORS_H_
 
 #include "debug.h"
+#include "UARTTx_queue.h"
+#include "UARTRX_queue.h"
+#include "speed_queue.h"
 
 //https://www.pololu.com/docs/0J25/5
 #define INIT_CONTROLLER (0xAA)
@@ -43,6 +46,9 @@
 
 void motorsUARTInit();
 void writeMotors(unsigned char outVal);
-char readMotors();
+void *motorsThread(void *arg0);
+void *UARTOutThread(void *arg0);
+void *UARTRxThread(void *arg0);
+void *UARTTxThread(void *arg0);
 
 #endif /* MOTORS_H_ */
