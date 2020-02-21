@@ -10,20 +10,20 @@ static QueueHandle_t xQueue = NULL;
 
 void createSensorQueue()
 {
-    xQueue = xQueueCreate(16, sizeof(uint32_t));
+    xQueue = xQueueCreate(16, sizeof(uint16_t));
     if(xQueue == NULL)
     {
-        halt();
+        ERROR;
     }
 }
 
-int sendSensorMsgToQ(int mmDist)
+int sendSensorMsgToQ(uint16_t mmDist)
 {
     int ret = 0;
     BaseType_t success;
     dbgOutputLoc(BEFORE_SEND_QUEUE_ISR_TIMER2);
 
-    uint32_t msg = mmDist;
+    uint16_t msg = mmDist;
     success = xQueueSendFromISR(xQueue, (void *) &msg, pdFALSE);
     if(success == pdFALSE)
     {
@@ -33,7 +33,7 @@ int sendSensorMsgToQ(int mmDist)
     return ret;
 }
 
-int receiveFromSensorQ(int * sensorVal)
+int receiveFromSensorQ(uint16_t * sensorVal)
 {
     int ret = 0;
     BaseType_t success;

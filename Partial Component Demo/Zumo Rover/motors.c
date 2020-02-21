@@ -20,7 +20,7 @@ void motorsUARTInit()
     motors_uart = UART_open(CONFIG_UART_0, &uartParams);
     if (motors_uart == NULL)
     {
-        halt();
+        ERROR;
     }
     sendMsgToUARTTxQ(INIT_CONTROLLER);
 }
@@ -29,15 +29,16 @@ void *motorsThread(void *arg0)
 {
     motorsUARTInit();
     dbgOutputLoc(ENTER_TASK);
-    uint16_t speed;
+    uint8_t type;
+    uint8_t value;
     int received = 0;
     dbgOutputLoc(WHILE1);
     while(1)
     {
-        received = receiveFromSpeedQ(&speed);
+        received = receiveFromMotorsQ(&type, &value);
         if(received == -1)
         {
-            halt();
+            ERROR;
         }
     }
 }
@@ -53,7 +54,7 @@ void *UARTTxThread(void *arg0)
         received = receiveFromUARTTxQ(&value);
         if(received == -1)
         {
-            halt();
+            ERROR;
         }
         else
         {
@@ -71,7 +72,7 @@ void *UARTRxThread(void *arg0)
         ret = UART_read(motors_uart, &value, sizeof(value));
         if(ret == UART_STATUS_ERROR)
         {
-            halt();
+            ERROR;
         }
         else
         {
@@ -91,7 +92,7 @@ void *UARTOutThread(void *arg0)
         received = receiveFromUARTRxQ(&value);
         if(received == -1)
         {
-            halt();
+            ERROR;
         }
         else
         {

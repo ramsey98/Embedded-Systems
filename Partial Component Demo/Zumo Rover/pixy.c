@@ -18,7 +18,7 @@ void pixy_init()
     masterSpi = SPI_open(CONFIG_SPI_0, &spiParams);
     if (masterSpi == NULL)
     {
-        halt();
+        ERROR;
     }
 }
 

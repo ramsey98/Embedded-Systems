@@ -13,7 +13,7 @@ void createMQTTQueue()
     xQueue = xQueueCreate(16, sizeof(MQTTMsg));
     if(xQueue == NULL)
     {
-        halt();
+        ERROR;
     }
 }
 
@@ -32,7 +32,7 @@ int sendStateMsgToMQTTQ(uint8_t state)
     return ret;
 }
 
-int sendLeftMotorMsgToMQTTQ(uint16_t leftmotor)
+int sendLeftMotorMsgToMQTTQ(uint8_t leftmotor)
 {
     int ret = 0;
     BaseType_t success;
@@ -47,7 +47,7 @@ int sendLeftMotorMsgToMQTTQ(uint16_t leftmotor)
     return ret;
 }
 
-int sendRightMotorMsgToMQTTQ(uint16_t rightmotor)
+int sendRightMotorMsgToMQTTQ(uint8_t rightmotor)
 {
     int ret = 0;
     BaseType_t success;
@@ -62,7 +62,7 @@ int sendRightMotorMsgToMQTTQ(uint16_t rightmotor)
     return ret;
 }
 
-int receiveFromMQTTQ(uint8_t *index, uint8_t *state, uint16_t *leftmotor, uint16_t *rightmotor)
+int receiveFromMQTTQ(uint8_t *index, uint8_t *state, uint8_t *leftmotor, uint8_t *rightmotor)
 {
     int ret = 0;
     BaseType_t success;
@@ -78,21 +78,19 @@ int receiveFromMQTTQ(uint8_t *index, uint8_t *state, uint16_t *leftmotor, uint16
         switch(received.ID)
         {
         case MQTT_STATE:
-            *state = received.item1;
-            *index = received.ID;
+            *state = received.state;
             break;
         case MQTT_LEFTMOTOR:
-            *leftmotor = received.item2;
-            *index = received.ID;
+            *leftmotor = received.left;
             break;
         case MQTT_RIGHTMOTOR:
-            *rightmotor = received.item3;
-            *index = received.ID;
+            *rightmotor = received.right;
             break;
         default:
-            halt();
+            ERROR;
             break;
         }
+        *index = received.ID;
     }
     dbgOutputLoc(AFTER_RECEIVE_QUEUE);
     return ret;

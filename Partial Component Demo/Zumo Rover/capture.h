@@ -10,8 +10,11 @@
 
 #include "debug.h"
 #include "capture_queue.h"
+#include "mqtt_queue.h"
 #include <ti/drivers/Capture.h>
 #include <ti/drivers/dpl/SemaphoreP.h>
+
+#define SECOND (1000000)
 
 void *captureThread(void *arg0);
 void capture0Callback(Capture_Handle handle, uint32_t interval);

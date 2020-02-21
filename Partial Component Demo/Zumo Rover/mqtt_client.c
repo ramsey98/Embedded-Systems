@@ -91,10 +91,6 @@ char *topic[SUBSCRIPTION_TOPIC_COUNT] =
 unsigned char qos[SUBSCRIPTION_TOPIC_COUNT] =
 { MQTT_QOS_2 };
 
-/* Publishing topics and messages                                            */
-const char *publish_topic0 = { PUBLISH_TOPIC0 };
-const char *publish_topic1 = { PUBLISH_TOPIC1 };
-const char *publish_topic2 = { PUBLISH_TOPIC2 };
 
 /* Message Queue                                                             */
 pthread_t mqttThread = (pthread_t) NULL;
@@ -288,7 +284,7 @@ void * MqttClient(void *pvParameters)
         if(lRetVal == -1)
         {
             UART_PRINT("MQTT Client lib initialization failed\n\r");
-            halt();
+            ERROR;
             //pthread_exit(0);
             //return(NULL);
         }
@@ -302,9 +298,8 @@ void * MqttClient(void *pvParameters)
     /*be sent to the server to see if any local client has subscribed on the */
     /*same topic).                                                           */
     char payload[PUBLISH_JSON_BUFFER_SIZE] = {0};
-    char topic[PUBLISH_TOPIC_BUFFER_SIZE] = {0};
-    uint8_t msgType, state;
-    uint16_t leftmotor, rightmotor;
+    char publish_topic[PUBLISH_TOPIC_BUFFER_SIZE] = {0};
+    uint8_t msgType, state, leftmotor, rightmotor;
     while(1)
     {
         receiveFromMQTTQ(&msgType, &state, &leftmotor, &rightmotor);
@@ -313,22 +308,22 @@ void * MqttClient(void *pvParameters)
         switch(msgType)
         {
         case MQTT_STATE:
-            strncpy(topic, PUBLISH_TOPIC0, sizeof(PUBLISH_TOPIC0));
+            strncpy(publish_topic, PUBLISH_TOPIC0, sizeof(PUBLISH_TOPIC0));
             break;
         case MQTT_LEFTMOTOR:
-            strncpy(topic, PUBLISH_TOPIC1, sizeof(PUBLISH_TOPIC1));
+            strncpy(publish_topic, PUBLISH_TOPIC1, sizeof(PUBLISH_TOPIC1));
             break;
         case MQTT_RIGHTMOTOR:
-            strncpy(topic, PUBLISH_TOPIC2, sizeof(PUBLISH_TOPIC2));
+            strncpy(publish_topic, PUBLISH_TOPIC2, sizeof(PUBLISH_TOPIC2));
             break;
         default:
-            halt();
+            ERROR;
             break;
         }
         lRetVal = MQTTClient_publish
         (
-            gMqttClient, (char*) topic,
-            strlen((char*) topic), payload,
+            gMqttClient, (char*) publish_topic,
+            strlen((char*) publish_topic), payload,
             strlen((char*) payload),
             MQTT_QOS_2 | ((RETAIN_ENABLE) ? MQTT_PUBLISH_RETAIN : 0)
         );
@@ -506,7 +501,7 @@ int32_t MqttClient_start()
     {
         /*lib initialization failed                                          */
         gInitState &= ~CLIENT_INIT_STATE;
-        halt();
+        ERROR;
         return(-1);
     }
 
@@ -880,9 +875,6 @@ void *commThread(void * args)
     {
         gResetApplication = false;
         topic[0] = SUBSCRIPTION_TOPIC0;
-//        topic[1] = SUBSCRIPTION_TOPIC1;
-//        topic[2] = SUBSCRIPTION_TOPIC2;
-//        topic[3] = SUBSCRIPTION_TOPIC3;
         gInitState = 0;
 
         /*Connect to AP                                                      */

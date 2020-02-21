@@ -7,6 +7,7 @@
 #include "debug.h"
 #include <string.h>
 #include <stdio.h>
+#include <ti/drivers/dpl/HwiP.h>
 static UART_Handle uart;
 
 void dbgUARTInit()
@@ -21,7 +22,7 @@ void dbgUARTInit()
     uart = UART_open(CONFIG_UART_1, &uartParams);
     if (uart == NULL)
     {
-        halt();
+        ERROR;
     }
 }
 
@@ -45,7 +46,7 @@ void dbgUARTVal(unsigned char outVal)
     UART_write(uart, &outVal, sizeof(outVal));
 }
 
-void dbgUARTStr(char * uartOut)
+void dbgUARTStr(const char * uartOut)
 {
     int i;
     for(i = 0; i < strlen(uartOut); i++)
@@ -115,13 +116,17 @@ void dbgOutputLoc(unsigned int outLoc)
     }
     else
     {
-        halt();
+        ERROR;
     }
 }
 
-void halt()
+void halt(int line, const char* func)
 {
     GPIO_write(CONFIG_LED_0_GPIO, CONFIG_GPIO_LED_ON);
+    dbgUARTStr("Error in func: ");
+    dbgUARTStr(func);
+    dbgUARTStr(" at line #: ");
+    dbgUARTNum(line);
     HwiP_disable();
     vTaskSuspendAll();
     int timerCount = 0;

@@ -9,9 +9,9 @@
 #define MOTORS_H_
 
 #include "debug.h"
+#include "motors_queue.h"
 #include "UARTTx_queue.h"
 #include "UARTRX_queue.h"
-#include "speed_queue.h"
 
 //https://www.pololu.com/docs/0J25/5
 #define INIT_CONTROLLER (0xAA)

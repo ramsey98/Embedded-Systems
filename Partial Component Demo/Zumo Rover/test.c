@@ -36,6 +36,8 @@ void tests(test_num* num)
         break;
     case test1:
         //left motor forward max speed
+        //sendLeftMsgToMotorsQ(255);
+        //sendRightMsgToMotorsQ(0);
         sendMsgToUARTTxQ(M0_FORWARD);
         sendMsgToUARTTxQ(0xFF);
         sendMsgToUARTTxQ(M1_FORWARD);

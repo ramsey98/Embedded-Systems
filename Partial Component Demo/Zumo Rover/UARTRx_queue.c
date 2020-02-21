@@ -13,7 +13,7 @@ void createUARTRxQueue()
     xQueue = xQueueCreate(16, sizeof(uint8_t));
     if(xQueue == NULL)
     {
-        halt();
+        ERROR;
     }
 }
 
@@ -23,7 +23,7 @@ int sendMsgToUARTRxQ(uint8_t value)
     BaseType_t success;
     dbgOutputLoc(BEFORE_SEND_QUEUE_ISR_TIMER1);
     uint8_t msg = value;
-    success = xQueueSendFromISR(xQueue, (void *) &msg, pdFALSE);
+    success = xQueueSend(xQueue, (void *) &msg, pdFALSE);
     if(success == pdFALSE)
     {
         ret = -1;
