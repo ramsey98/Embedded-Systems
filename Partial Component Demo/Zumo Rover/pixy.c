@@ -35,6 +35,7 @@ int pixy_transfer(uint8_t *tx_buffer, uint8_t *rx_buffer, uint8_t len)
 
 void *pixyThread(void *arg0)
 {
+    createPixyQueue();
     pixy_init();
     dbgOutputLoc(ENTER_TASK);
     //int received = 0;

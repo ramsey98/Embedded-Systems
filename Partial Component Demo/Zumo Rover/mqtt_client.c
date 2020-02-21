@@ -790,6 +790,7 @@ int32_t DisplayAppBanner(char* appName,
 
 void *commThread(void * args)
 {
+    createMQTTQueue();
     uint32_t count = 0;
     pthread_t spawn_thread = (pthread_t) NULL;
     pthread_attr_t pAttrs_spawn;
@@ -826,22 +827,13 @@ void *commThread(void * args)
 
     if(retc != 0)
     {
-        UART_PRINT("could not create simplelink task\n\r");
-        while(1)
-        {
-            ;
-        }
+        ERROR; //could not create simplelink task
     }
 
     retc = sl_Start(0, 0, 0);
     if(retc < 0)
     {
-        /*Handle Error */
-        UART_PRINT("\n sl_Start failed\n");
-        while(1)
-        {
-            ;
-        }
+        ERROR; //sl_Start failed
     }
 
     /*Output device information to the UART terminal */
@@ -853,22 +845,12 @@ void *commThread(void * args)
     retc = sl_Stop(SL_STOP_TIMEOUT);
     if(retc < 0)
     {
-        /*Handle Error */
-        UART_PRINT("\n sl_Stop failed\n");
-        while(1)
-        {
-            ;
-        }
+        ERROR; //sl_Stop failed
     }
 
     if(retc < 0)
     {
-        /*Handle Error */
-        UART_PRINT("mqtt_client - Unable to retrieve device information \n");
-        while(1)
-        {
-            ;
-        }
+        ERROR; //mqtt_client - Unable to retrieve device information
     }
 
     while(1)

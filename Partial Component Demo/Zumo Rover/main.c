@@ -33,13 +33,13 @@ void *mainThread(void *arg0)
     dbgUARTInit();
     dbgGPIOInit();
 
-    //createSensorQueue();
-    //createPixyQueue();
-    createCaptureQueue();
-    //createMotorsQueue();
-    createUARTTxQueue();
-    createUARTRxQueue();
-    //createMQTTQueue();
+    //
+    //
+
+    //
+
+
+    //
 
     pthread_attr_init(&attrs);
     detachState = PTHREAD_CREATE_DETACHED;

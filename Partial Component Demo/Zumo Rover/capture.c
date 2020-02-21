@@ -14,6 +14,7 @@ static SemaphoreP_Handle captureSem1;
 
 void *captureThread(void *arg0)
 {
+    createCaptureQueue();
     capture0Init();
     capture1Init();
     dbgOutputLoc(ENTER_TASK);

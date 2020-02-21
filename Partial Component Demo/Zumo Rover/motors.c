@@ -27,24 +27,53 @@ void motorsUARTInit()
 
 void *motorsThread(void *arg0)
 {
+    createMotorsQueue();
     motorsUARTInit();
     dbgOutputLoc(ENTER_TASK);
-    uint8_t type;
-    uint8_t value;
+    MOTORS_DATA motorsState;
+    motorsState.state = Motors_Init;
+    uint8_t type = 0;
+    uint8_t value = 0;
     int received = 0;
+    int success = motors_fsm(&motorsState, type, value);
     dbgOutputLoc(WHILE1);
     while(1)
     {
         received = receiveFromMotorsQ(&type, &value);
-        if(received == -1)
+        success = motors_fsm(&motorsState, type, value);
+        if(received == -1 || success == -1)
         {
             ERROR;
+        }
+        else
+        {
+            if(motorsState.leftDir == 0)
+            {
+                sendMsgToUARTTxQ(M0_FORWARD);
+                sendMsgToUARTTxQ(motorsState.leftSpeed);
+            }
+            else
+            {
+                sendMsgToUARTTxQ(M0_REVERSE);
+                sendMsgToUARTTxQ(motorsState.leftSpeed);
+            }
+            if(motorsState.rightDir == 0)
+            {
+                sendMsgToUARTTxQ(M1_FORWARD);
+                sendMsgToUARTTxQ(motorsState.rightSpeed);
+            }
+            else
+            {
+                sendMsgToUARTTxQ(M1_REVERSE);
+                sendMsgToUARTTxQ(motorsState.rightSpeed);
+            }
         }
     }
 }
 
 void *UARTTxThread(void *arg0)
 {
+    createUARTTxQueue();
     dbgOutputLoc(ENTER_TASK);
     uint8_t value;
     int received = 0;
@@ -65,6 +94,7 @@ void *UARTTxThread(void *arg0)
 
 void *UARTRxThread(void *arg0)
 {
+    createUARTRxQueue();
     int_fast32_t ret;
     char value;
     while(1)

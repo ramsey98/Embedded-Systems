@@ -5,18 +5,19 @@
  *      Author: Holden Ramsey
  */
 
-#include <sensor.h>
+#include "sensor.h"
 
 static ADC_Handle adc;
 
 void *sensorThread(void *arg0)
 {
+    createSensorQueue();
     adcInit();
     timerInit();
     dbgOutputLoc(ENTER_TASK);
     SENSOR_DATA curState;
     curState.state = Init;
-    uint32_t sensorVal = 0;
+    uint16_t sensorVal = 0;
     int success = fsm(&curState, sensorVal);
     int received = 0;
     dbgOutputLoc(WHILE1);
@@ -37,7 +38,7 @@ void timerCallback(Timer_Handle myHandle)
     uint16_t adcValue;
     uint32_t adcValueMicroVolt;
     int_fast16_t res = ADC_convert(adc, &adcValue);
-    uint16_t result;
+    int result;
     if (res == ADC_STATUS_SUCCESS)
     {
         adcValueMicroVolt = ADC_convertRawToMicroVolts(adc, adcValue);

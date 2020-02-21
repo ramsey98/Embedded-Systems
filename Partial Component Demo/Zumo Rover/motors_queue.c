@@ -18,12 +18,12 @@ void createMotorsQueue()
     }
 }
 
-int sendLeftMsgToMotorsQ(uint8_t value)
+int sendLeftForwardMsgToMotorsQ(uint8_t value)
 {
     int ret = 0;
     BaseType_t success;
     dbgOutputLoc(BEFORE_SEND_QUEUE_ISR_TIMER1);
-    uint16_t msg = LEFTMOTORSFLAG | value;
+    uint16_t msg = LEFTFORWARDMOTORSFLAG | value;
     success = xQueueSend(xQueue, (void *) &msg, pdFALSE);
     if(success == pdFALSE)
     {
@@ -33,12 +33,42 @@ int sendLeftMsgToMotorsQ(uint8_t value)
     return ret;
 }
 
-int sendRightMsgToMotorsQ(uint8_t value)
+int sendLeftReverseMsgToMotorsQ(uint8_t value)
 {
     int ret = 0;
     BaseType_t success;
     dbgOutputLoc(BEFORE_SEND_QUEUE_ISR_TIMER1);
-    uint16_t msg = RIGHTMOTORSFLAG | value;
+    uint16_t msg = LEFTREVERSEMOTORSFLAG | value;
+    success = xQueueSend(xQueue, (void *) &msg, pdFALSE);
+    if(success == pdFALSE)
+    {
+        ret = -1;
+    }
+    dbgOutputLoc(AFTER_SEND_QUEUE_ISR_TIMER1);
+    return ret;
+}
+
+int sendRightForwardMsgToMotorsQ(uint8_t value)
+{
+    int ret = 0;
+    BaseType_t success;
+    dbgOutputLoc(BEFORE_SEND_QUEUE_ISR_TIMER1);
+    uint16_t msg = RIGHTFORWARDMOTORSFLAG | value;
+    success = xQueueSend(xQueue, (void *) &msg, pdFALSE);
+    if(success == pdFALSE)
+    {
+        ret = -1;
+    }
+    dbgOutputLoc(AFTER_SEND_QUEUE_ISR_TIMER1);
+    return ret;
+}
+
+int sendRightReverseMsgToMotorsQ(uint8_t value)
+{
+    int ret = 0;
+    BaseType_t success;
+    dbgOutputLoc(BEFORE_SEND_QUEUE_ISR_TIMER1);
+    uint16_t msg = RIGHTREVERSEMOTORSFLAG | value;
     success = xQueueSend(xQueue, (void *) &msg, pdFALSE);
     if(success == pdFALSE)
     {
@@ -116,7 +146,7 @@ int receiveFromMotorsQ(uint8_t * type, uint8_t * value)
     uint16_t received;
     success = xQueueReceive(xQueue, &received, portMAX_DELAY);
     *type = received >> MOTORSSHIFT;
-    *value = received * MOTORSFMASK;
+    *value = received & MOTORSFMASK;
     if(success == pdFALSE)
     {
         ret = -1;
