@@ -5,7 +5,7 @@
  *      Author: Holden Ramsey
  */
 
-#include <sensor.h>
+#include "sensor.h"
 
 static ADC_Handle adc;
 
@@ -16,7 +16,7 @@ void *sensorThread(void *arg0)
     dbgOutputLoc(ENTER_TASK);
     SENSOR_DATA curState;
     curState.state = Init;
-    int sensorVal = 0;
+    uint16_t sensorVal = 0;
     int success = fsm(&curState, sensorVal);
     int received = 0;
     dbgOutputLoc(WHILE1);
@@ -26,7 +26,7 @@ void *sensorThread(void *arg0)
         success = fsm(&curState, sensorVal);
         if(success == -1 || received == -1)
         {
-            halt();
+            ERROR;
         }
     }
 }
@@ -49,7 +49,7 @@ void timerCallback(Timer_Handle myHandle)
     }
     else
     {
-        halt();
+        ERROR;
     }
     dbgOutputLoc(LEAVE_ISR_TIMER2);
 }
@@ -76,7 +76,7 @@ void adcInit()
     adc = ADC_open(CONFIG_ADC_0, &adc_params);
     if (adc == NULL)
     {
-        halt();
+        ERROR;
     }
 }
 
@@ -93,12 +93,12 @@ void timerInit()
     timer = Timer_open(CONFIG_TIMER_0, &timer_params);
     if (timer == NULL)
     {
-        halt();
+        ERROR;
     }
 
     if (Timer_start(timer) == Timer_STATUS_ERROR)
     {
-        halt();
+        ERROR;
     }
 
 }

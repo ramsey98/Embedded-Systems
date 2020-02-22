@@ -16,12 +16,12 @@
 #define JSON_TEMPLATE      \
 "{"                        \
     "\"ID\": char,"        \
-    "\"state\": int32,"    \
-    "\"leftmotor\": int32,"\
-    "\"rightmotor\": int32"\
+    "\"state\": char,"    \
+    "\"leftmotor\": char,"\
+    "\"rightmotor\": char"\
 "}"
 
-int json_read(char *payload, uint8_t *msgType, uint8_t *state, uint16_t *leftmotor, uint16_t *rightmotor);
-int json_write(char *payload, uint8_t msgType, uint8_t state, uint16_t leftmotor, uint16_t rightmotor);
+int json_read(char *payload, uint8_t *msgType, uint8_t *state, uint8_t *leftmotor, uint8_t *rightmotor);
+int json_write(char *payload, uint8_t msgType, uint8_t state, uint8_t leftmotor, uint8_t rightmotor);
 
 #endif /* JSON_PARSE_H_ */

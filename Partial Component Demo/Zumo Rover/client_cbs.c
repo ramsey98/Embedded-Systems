@@ -98,8 +98,7 @@ void MqttClientCallback(int32_t event,
                         uint32_t dataLen)
 {
     int32_t i = 0;
-    uint8_t msgType = 0, state = 0;
-    uint16_t leftmotor = 0, rightmotor = 0;
+    uint8_t msgType = 0, state = 0, leftmotor = 0, rightmotor = 0;
     int ret = 0;
     switch((MQTTClient_EventCB)event)
     {
@@ -217,7 +216,7 @@ void MqttClientCallback(int32_t event,
             ret = json_read(pubBuff + payloadOffset, &msgType, &state, &leftmotor, &rightmotor);
             if(ret == -1)
             {
-                halt();
+                ERROR;
             }
             if(recvMetaData->retain)
             {

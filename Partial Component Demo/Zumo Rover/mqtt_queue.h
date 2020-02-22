@@ -11,11 +11,12 @@
 #include "debug.h"
 #include "queue.h"
 
-typedef struct {
+typedef struct
+{
     char ID;
-    uint8_t item1;
-    uint16_t item2;
-    uint16_t item3;
+    uint8_t state;
+    uint8_t left;
+    uint8_t right;
 } MQTTMsg;
 
 #define MQTT_STATE (0)
@@ -23,9 +24,9 @@ typedef struct {
 #define MQTT_RIGHTMOTOR (2)
 
 int sendMsgToMQTTQ(uint8_t state);
-int sendLeftMotorMsgToMQTTQ(uint16_t leftmotor);
-int sendRightMotorMsgToMQTTQ(uint16_t rightmotor);
-int receiveFromMQTTQ(uint8_t *index, uint8_t *state, uint16_t *leftmotor, uint16_t *rightmotor);
+int sendLeftMotorMsgToMQTTQ(uint8_t leftmotor);
+int sendRightMotorMsgToMQTTQ(uint8_t rightmotor);
+int receiveFromMQTTQ(uint8_t *index, uint8_t *state, uint8_t *leftmotor, uint8_t *rightmotor);
 void createMQTTQueue();
 
 

@@ -22,93 +22,82 @@ void tests(test_num* num)
     {
     case test0:
         //Interface with controller
-        sendMsgToUARTTxQ(INIT_CONTROLLER);
         sendMsgToUARTTxQ(GET_FIRMWARE);
-        sendMsgToUARTTxQ(GET_CONFIG);
-        sendMsgToUARTTxQ(DEVICE_ID);
-        sendMsgToUARTTxQ(GET_CONFIG);
-        sendMsgToUARTTxQ(PWM_PARAM);
-        sendMsgToUARTTxQ(GET_CONFIG);
-        sendMsgToUARTTxQ(SHUTDOWN_ON_ERROR);
-        sendMsgToUARTTxQ(GET_CONFIG);
-        sendMsgToUARTTxQ(SERIAL_TIMEOUT);
+        sendMsgToUARTTxQ(GET_DEVICE_ID);
+        sendMsgToUARTTxQ(GET_PWM_PARAM);
+        sendMsgToUARTTxQ(GET_SHUTDOWN_ON_ERROR);
+        sendMsgToUARTTxQ(GET_SERIAL_TIMEOUT);
         *num = test1;
         break;
     case test1:
-        //left motor forward max speed
-        sendMsgToUARTTxQ(M0_FORWARD);
-        sendMsgToUARTTxQ(0xFF);
-        sendMsgToUARTTxQ(M1_FORWARD);
-        sendMsgToUARTTxQ(0x00);
-        *num = test2;
+        //left motor forward half speed
+        sendMsgToUARTTxQ(0x7F88);
+        sendMsgToUARTTxQ(0x008C);
+        //*num = test2;
         break;
     case test2:
-        //right motor forward max speed
-        sendMsgToUARTTxQ(M0_FORWARD);
-        sendMsgToUARTTxQ(0x00);
-        sendMsgToUARTTxQ(M1_FORWARD);
-        sendMsgToUARTTxQ(0xFF);
+        //right motor forward half speed
+        sendMsgToUARTTxQ(0x0088);
+        sendMsgToUARTTxQ(0x7F8C);
         *num = test3;
         break;
     case test3:
-        //stop moving
-        sendMsgToUARTTxQ(M0_FORWARD);
-        sendMsgToUARTTxQ(0x00);
-        sendMsgToUARTTxQ(M1_REVERSE);
-        sendMsgToUARTTxQ(0x00);
+        //both motors forward half speed
+        sendMsgToUARTTxQ(0x7F88);
+        sendMsgToUARTTxQ(0x7F8C);
         *num = test4;
         break;
     case test4:
         //both motors forward max speed
-        sendMsgToUARTTxQ(M0_FORWARD);
-        sendMsgToUARTTxQ(0xFF);
-        sendMsgToUARTTxQ(M1_FORWARD);
-        sendMsgToUARTTxQ(0xFF);
+        sendMsgToUARTTxQ(0x7F89);
+        sendMsgToUARTTxQ(0x7F8D);
         *num = test5;
         break;
     case test5:
-        //both motors reverse max speed
-        sendMsgToUARTTxQ(M0_REVERSE);
-        sendMsgToUARTTxQ(0xFF);
-        sendMsgToUARTTxQ(M1_REVERSE);
-        sendMsgToUARTTxQ(0xFF);
+        //both motors reverse half speed
+        sendMsgToUARTTxQ(0x7F8A);
+        sendMsgToUARTTxQ(0x7F8E);
         *num = test6;
         break;
     case test6:
-        //both motors forward max speed
-        sendMsgToUARTTxQ(M0_FORWARD);
-        sendMsgToUARTTxQ(0x00);
-        sendMsgToUARTTxQ(M1_REVERSE);
-        sendMsgToUARTTxQ(0x00);
+        //both motors reverse max speed
+        sendMsgToUARTTxQ(0x7F8B);
+        sendMsgToUARTTxQ(0x7F8F);
         *num = test7;
         break;
     case test7:
         //turn right
-        sendMsgToUARTTxQ(M0_FORWARD);
-        sendMsgToUARTTxQ(0xFF);
-        sendMsgToUARTTxQ(M1_REVERSE);
-        sendMsgToUARTTxQ(0x7F);
+        sendMsgToUARTTxQ(0x7F89);
+        sendMsgToUARTTxQ(0x7F8E);
         *num = test8;
         break;
     case test8:
         //turn left
-        sendMsgToUARTTxQ(M0_FORWARD);
-        sendMsgToUARTTxQ(0x7F);
-        sendMsgToUARTTxQ(M1_REVERSE);
-        sendMsgToUARTTxQ(0xFF);
+        sendMsgToUARTTxQ(0x7F8A);
+        sendMsgToUARTTxQ(0x7F8D);
         *num = test9;
         break;
     case test9:
+        sendMsgToUARTTxQ(0x008A);
+        sendMsgToUARTTxQ(0x008D);
         *num = test10;
         break;
     case test10:
         *num = end;
         break;
     case end:
+        /*
+        if(error_gpio == high)
+        {
+            sendMsgToUARTTxQ(0x0082);
+        }
+        */
+        GPIO_write(CONFIG_LED_0_GPIO, CONFIG_GPIO_LED_ON);
         break;
     default:
         break;
     }
-    sleep(5);
+    sleep(3);
+    GPIO_toggle(CONFIG_LED_0_GPIO);
 }
 

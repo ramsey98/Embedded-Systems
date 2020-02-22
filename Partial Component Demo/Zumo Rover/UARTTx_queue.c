@@ -10,20 +10,20 @@ static QueueHandle_t xQueue = NULL;
 
 void createUARTTxQueue()
 {
-    xQueue = xQueueCreate(16, sizeof(uint8_t));
+    xQueue = xQueueCreate(16, sizeof(uint16_t));
     if(xQueue == NULL)
     {
-        halt();
+        ERROR;
     }
 }
 
-int sendMsgToUARTTxQ(uint8_t value)
+int sendMsgToUARTTxQ(uint16_t value)
 {
     int ret = 0;
     BaseType_t success;
     dbgOutputLoc(BEFORE_SEND_QUEUE_ISR_TIMER1);
-    uint8_t msg = value;
-    success = xQueueSendFromISR(xQueue, (void *) &msg, pdFALSE);
+    uint16_t msg = value;
+    success = xQueueSend(xQueue, (void *) &msg, pdFALSE);
     if(success == pdFALSE)
     {
         ret = -1;
@@ -32,12 +32,12 @@ int sendMsgToUARTTxQ(uint8_t value)
     return ret;
 }
 
-int receiveFromUARTTxQ(uint8_t * value)
+int receiveFromUARTTxQ(uint16_t * value)
 {
     int ret = 0;
     BaseType_t success;
     dbgOutputLoc(BEFORE_RECEIVE_QUEUE);
-    uint8_t received;
+    uint16_t received;
     success = xQueueReceive(xQueue, &received, portMAX_DELAY);
     if(success == pdFALSE)
     {

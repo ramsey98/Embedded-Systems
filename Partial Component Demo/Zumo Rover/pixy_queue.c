@@ -13,11 +13,11 @@ void createPixyQueue()
     xQueue = xQueueCreate(16, sizeof(uint8_t));
     if(xQueue == NULL)
     {
-        halt();
+        ERROR;
     }
 }
 
-int sendMsgToPixyQ(uint8_t value)
+int sendMsgToPixyQ(uint32_t value)
 {
     int ret = 0;
     BaseType_t success;
@@ -32,7 +32,7 @@ int sendMsgToPixyQ(uint8_t value)
     return ret;
 }
 
-int receiveFromPixyQ(uint8_t * value)
+int receiveFromPixyQ(uint32_t * value)
 {
     int ret = 0;
     BaseType_t success;

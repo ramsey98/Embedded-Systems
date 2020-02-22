@@ -17,10 +17,10 @@ void *captureThread(void *arg0)
     capture0Init();
     capture1Init();
     dbgOutputLoc(ENTER_TASK);
-    uint32_t prevleftFreq = 0;
-    uint32_t prevrightFreq = 0;
-    uint32_t leftFreq = 0;
-    uint32_t rightFreq = 0;
+    uint8_t prevleftFreq = 0;
+    uint8_t prevrightFreq = 0;
+    uint8_t leftFreq = 0;
+    uint8_t rightFreq = 0;
     int received = 0;
     dbgOutputLoc(WHILE1);
     while(1)
@@ -28,7 +28,7 @@ void *captureThread(void *arg0)
         received = receiveFromCapQ(&leftFreq, &rightFreq);
         if(received == -1)
         {
-            halt();
+            ERROR;
         }
         if(leftFreq != prevleftFreq)
         {
@@ -54,7 +54,7 @@ void capture0Init()
 
     if (captureSem0 == NULL)
     {
-        halt(); //could not allocate semaphore
+        ERROR; //could not allocate semaphore
     }
 
     Capture_Params_init(&captureParams);
@@ -65,7 +65,7 @@ void capture0Init()
     capture0 = Capture_open(CONFIG_CAPTURE_0, &captureParams);
     if (capture0 == NULL)
     {
-        halt(); //failed to initialize capture
+        ERROR;
     }
 
     Capture_start(capture0);
@@ -88,7 +88,7 @@ void capture1Init()
 
     if (captureSem1 == NULL)
     {
-        halt();
+        ERROR;
     }
 
     Capture_Params_init(&captureParams);
@@ -99,7 +99,7 @@ void capture1Init()
     capture1 = Capture_open(CONFIG_CAPTURE_1, &captureParams);
     if (capture1 == NULL)
     {
-        halt();
+        ERROR;
     }
 
     Capture_start(capture1);
@@ -115,12 +115,14 @@ void capture0Callback(Capture_Handle handle, uint32_t interval)
 {
     curInterval0 = interval;
     SemaphoreP_post(captureSem0);
-    sendLeftMsgToCapQ(curInterval0);
+    uint8_t freq = SECOND/curInterval0;
+    sendLeftMsgToCapQ(freq);
 }
 
 void capture1Callback(Capture_Handle handle, uint32_t interval)
 {
     curInterval1 = interval;
     SemaphoreP_post(captureSem1);
-    sendRightMsgToCapQ(curInterval1);
+    uint8_t freq = SECOND/curInterval1;
+    sendRightMsgToCapQ(freq);
 }

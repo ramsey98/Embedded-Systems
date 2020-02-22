@@ -15,33 +15,34 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
-#define DBG_HALT (0b00000000)
-#define ENTER_TASK (0b00000001)
-#define WHILE1 (0b00000010)
-//#define BEFORE_SEND_QUEUE (0b00000100)
-//#define AFTER_SEND_QUEUE (0b00000101)
-#define BEFORE_RECEIVE_QUEUE (0b0000100)
-#define AFTER_RECEIVE_QUEUE (0b00000101)
-#define ENTER_ISR_TIMER1 (0b00001000)
-#define LEAVE_ISR_TIMER1 (0b00001001)
-#define BEFORE_SEND_QUEUE_ISR_TIMER1 (0b00001010)
-#define AFTER_SEND_QUEUE_ISR_TIMER1 (0b00001011)
-//#define BEFORE_RECEIVE_QUEUE_ISR (0b00001010)
-//#define AFTER_RECEIVE_QUEUE_ISR (0b00001100)
-#define ENTER_ISR_TIMER2 (0b00010000)
-#define LEAVE_ISR_TIMER2 (0b00010001)
-#define BEFORE_SEND_QUEUE_ISR_TIMER2 (0b00010010)
-#define AFTER_SEND_QUEUE_ISR_TIMER2 (0b00010011)
+#define DBG_HALT (0x00)
+#define ENTER_TASK (0x01)
+#define WHILE1 (0x02)
+//#define BEFORE_SEND_QUEUE (0x03)
+//#define AFTER_SEND_QUEUE (0x04)
+#define BEFORE_RECEIVE_QUEUE (0x05)
+#define AFTER_RECEIVE_QUEUE (0x06)
+#define ENTER_ISR_TIMER1 (0x07)
+#define LEAVE_ISR_TIMER1 (0x08)
+#define BEFORE_SEND_QUEUE_ISR_TIMER1 (0x09)
+#define AFTER_SEND_QUEUE_ISR_TIMER1 (0x10)
+//#define BEFORE_RECEIVE_QUEUE_ISR (0x11)
+//#define AFTER_RECEIVE_QUEUE_ISR (0x12)
+#define ENTER_ISR_TIMER2 (0x13)
+#define LEAVE_ISR_TIMER2 (0x14)
+#define BEFORE_SEND_QUEUE_ISR_TIMER2 (0x15)
+#define AFTER_SEND_QUEUE_ISR_TIMER2 (0x16)
 
 #define DBG_ERROR_LED_TIME (250000)
+#define ERROR halt(__LINE__, __func__);
 
 
 void dbgGPIOInit();
 void dbgUARTInit();
 void dbgUARTVal(unsigned char outVal);
-void dbgUARTStr(char * uartOut);
+void dbgUARTStr(const char* uartOut);
 void dbgUARTNum(int outVal);
 void dbgOutputLoc(unsigned int outVal);
-void halt();
+void halt(int line, const char* func);
 
 #endif /* DEBUG_H_ */
