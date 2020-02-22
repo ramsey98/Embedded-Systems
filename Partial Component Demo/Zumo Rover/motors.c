@@ -15,7 +15,9 @@ void motorsUARTInit()
     UART_Params_init(&uartParams);
     uartParams.writeMode = UART_MODE_BLOCKING;
     uartParams.writeDataMode = UART_DATA_BINARY;
-    uartParams.baudRate = 115200;
+    uartParams.readDataMode = UART_DATA_BINARY;
+    uartParams.readReturnMode = UART_RETURN_FULL;
+    uartParams.baudRate = 38400;
     uartParams.readEcho = UART_ECHO_OFF;
     motors_uart = UART_open(CONFIG_UART_0, &uartParams);
     if (motors_uart == NULL)
@@ -27,15 +29,15 @@ void motorsUARTInit()
 
 void *motorsThread(void *arg0)
 {
-    createMotorsQueue();
     motorsUARTInit();
+    /*
     dbgOutputLoc(ENTER_TASK);
     MOTORS_DATA motorsState;
     motorsState.state = Motors_Init;
     uint8_t type = 0;
     uint8_t value = 0;
     int received = 0;
-    int success = motors_fsm(&motorsState, type, value);
+    //int success = motors_fsm(&motorsState, type, value);
     dbgOutputLoc(WHILE1);
     while(1)
     {
@@ -69,13 +71,15 @@ void *motorsThread(void *arg0)
             }
         }
     }
+    */
+    return NULL;
 }
 
 void *UARTTxThread(void *arg0)
 {
-    createUARTTxQueue();
     dbgOutputLoc(ENTER_TASK);
-    uint8_t value;
+    uint8_t byte1;
+    uint16_t value;
     int received = 0;
     dbgOutputLoc(WHILE1);
     while(1)
@@ -87,14 +91,21 @@ void *UARTTxThread(void *arg0)
         }
         else
         {
-            UART_write(motors_uart, &value, sizeof(value));
+            if(value > 255)
+            {
+                UART_write(motors_uart, &value, sizeof(value));
+            }
+            else
+            {
+                byte1 = value & 0xFF;
+                UART_write(motors_uart, &byte1, sizeof(byte1));
+            }
         }
     }
 }
 
 void *UARTRxThread(void *arg0)
 {
-    createUARTRxQueue();
     int_fast32_t ret;
     char value;
     while(1)
@@ -107,6 +118,8 @@ void *UARTRxThread(void *arg0)
         else
         {
             ret = sendMsgToUARTRxQ(value);
+            if (value != 0)
+                GPIO_write(CONFIG_LED_0_GPIO, CONFIG_GPIO_LED_ON);
         }
     }
 }

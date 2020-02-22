@@ -43,7 +43,7 @@ void dbgGPIOInit()
 
 void dbgUARTVal(unsigned char outVal)
 {
-    UART_write(uart, &outVal, sizeof(outVal));
+    //UART_write(uart, &outVal, sizeof(outVal));
 }
 
 void dbgUARTStr(const char * uartOut)
@@ -51,7 +51,7 @@ void dbgUARTStr(const char * uartOut)
     int i;
     for(i = 0; i < strlen(uartOut); i++)
     {
-        UART_write(uart, &uartOut[i], sizeof(uartOut[i]));
+        //UART_write(uart, &uartOut[i], sizeof(uartOut[i]));
     }
 }
 

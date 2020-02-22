@@ -790,7 +790,6 @@ int32_t DisplayAppBanner(char* appName,
 
 void *commThread(void * args)
 {
-    createMQTTQueue();
     uint32_t count = 0;
     pthread_t spawn_thread = (pthread_t) NULL;
     pthread_attr_t pAttrs_spawn;

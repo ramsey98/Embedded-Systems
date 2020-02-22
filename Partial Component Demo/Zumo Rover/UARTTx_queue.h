@@ -21,13 +21,10 @@
 //bit 5: CRC Error
 //bit 6: Format Error
 //bit 7: Timeout
-#define GET_CONFIG (0x83) //followed by parameter number
-#define DEVICE_ID (0x00)
-#define PWM_PARAM (0x01)
-#define SHUTDOWN_ON_ERROR (0x02)
-#define SERIAL_TIMEOUT (0x03)
-#define SET_CONFIG (0x84) //followed by parameter number, parameter value, 0x55, 0x2A
-//return byte 0: OK, 1: Bad Parameter, 2: Bad value, failure is format error
+#define GET_DEVICE_ID (0x0083)
+#define GET_PWM_PARAM (0x0183)
+#define GET_SHUTDOWN_ON_ERROR (0x0283)
+#define GET_SERIAL_TIMEOUT (0x0383)
 #define M0_COAST (0x86)
 #define M1_COAST (0x87)
 //M0 Commands
@@ -41,8 +38,8 @@
 #define M1_REVERSE (0x8E) //motor speed
 #define M1_REVERSE_8BIT (0x8F) //speed+128
 
-int sendMsgToUARTTxQ(uint8_t value);
-int receiveFromUARTTxQ(uint8_t * value);
+int sendMsgToUARTTxQ(uint16_t value);
+int receiveFromUARTTxQ(uint16_t * value);
 void createUARTTxQueue();
 
 #endif /* UARTTX_QUEUE_H_ */

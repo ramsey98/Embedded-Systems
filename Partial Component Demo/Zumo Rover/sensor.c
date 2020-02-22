@@ -11,7 +11,6 @@ static ADC_Handle adc;
 
 void *sensorThread(void *arg0)
 {
-    createSensorQueue();
     adcInit();
     timerInit();
     dbgOutputLoc(ENTER_TASK);

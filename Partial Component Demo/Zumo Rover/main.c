@@ -30,16 +30,15 @@ void *mainThread(void *arg0)
     GPIO_init();
     UART_init();
 
+    createUARTRxQueue();
+    createUARTTxQueue();
+    createMotorsQueue();
+    createMQTTQueue();
+    createSensorQueue();
+    createCaptureQueue();
+
     dbgUARTInit();
     dbgGPIOInit();
-
-    //
-    //
-
-    //
-
-
-    //
 
     pthread_attr_init(&attrs);
     detachState = PTHREAD_CREATE_DETACHED;
@@ -94,6 +93,10 @@ void *mainThread(void *arg0)
     {
         ERROR;
     }
+
+
+
+
     /*
     retc = pthread_create(&UARTOut, &attrs, UARTOutThread, NULL);
     if (retc != 0)
