@@ -9,6 +9,7 @@
 #define CAPTURE_H_
 
 #include "debug.h"
+#include "capture_state.h"
 #include "capture_queue.h"
 #include "mqtt_queue.h"
 #include <ti/drivers/Capture.h>

@@ -12,9 +12,9 @@
 
 typedef enum
 {
-    Init,
-    Polling,
-    Averaging,
+    Sensor_Init,
+    Sensor_Polling,
+    Sensor_Averaging,
 } SENSOR_STATES;
 
 typedef struct
@@ -24,6 +24,6 @@ typedef struct
 
 } SENSOR_DATA;
 
-int fsm(SENSOR_DATA *curState, int sensorVal);
+int sensor_fsm(SENSOR_DATA *curState, int sensorVal);
 
 #endif /* SENSOR_STATE_H_ */

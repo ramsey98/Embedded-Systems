@@ -24,20 +24,19 @@ void motorsUARTInit()
     {
         ERROR;
     }
-    sendMsgToUARTTxQ(INIT_CONTROLLER);
+    sendMsgToUARTTxQ(INIT_CONTROLLER, EMPTY);
 }
 
 void *motorsThread(void *arg0)
 {
     motorsUARTInit();
-    /*
     dbgOutputLoc(ENTER_TASK);
     MOTORS_DATA motorsState;
     motorsState.state = Motors_Init;
     uint8_t type = 0;
     uint8_t value = 0;
     int received = 0;
-    //int success = motors_fsm(&motorsState, type, value);
+    int success = motors_fsm(&motorsState, type, value);
     dbgOutputLoc(WHILE1);
     while(1)
     {
@@ -47,32 +46,26 @@ void *motorsThread(void *arg0)
         {
             ERROR;
         }
-        else
+        else if(motorsState.state == Motors_Ready)
         {
             if(motorsState.leftDir == 0)
             {
-                sendMsgToUARTTxQ(M0_FORWARD);
-                sendMsgToUARTTxQ(motorsState.leftSpeed);
+                sendMsgToUARTTxQ(motorsState.leftSpeed, M0_FORWARD_8BIT);
             }
             else
             {
-                sendMsgToUARTTxQ(M0_REVERSE);
-                sendMsgToUARTTxQ(motorsState.leftSpeed);
+                sendMsgToUARTTxQ(motorsState.leftSpeed, M0_REVERSE_8BIT);
             }
             if(motorsState.rightDir == 0)
             {
-                sendMsgToUARTTxQ(M1_FORWARD);
-                sendMsgToUARTTxQ(motorsState.rightSpeed);
+                sendMsgToUARTTxQ(motorsState.rightSpeed, M1_FORWARD_8BIT);
             }
             else
             {
-                sendMsgToUARTTxQ(M1_REVERSE);
-                sendMsgToUARTTxQ(motorsState.rightSpeed);
+                sendMsgToUARTTxQ(motorsState.rightSpeed, M1_REVERSE_8BIT);
             }
         }
     }
-    */
-    return NULL;
 }
 
 void *UARTTxThread(void *arg0)
@@ -91,9 +84,10 @@ void *UARTTxThread(void *arg0)
         }
         else
         {
-            if(value == INIT_CONTROLLER | value == GET_ERROR | value == GET_FIRMWARE)
+            byte1 = value & 0xFF;
+            if(byte1 == 0)
             {
-                byte1 = value & 0xFF;
+                byte1 = value >> 8;
                 UART_write(motors_uart, &byte1, sizeof(byte1));
             }
             else

@@ -15,15 +15,15 @@ void *sensorThread(void *arg0)
     timerInit();
     dbgOutputLoc(ENTER_TASK);
     SENSOR_DATA curState;
-    curState.state = Init;
+    curState.state = Sensor_Init;
     uint16_t sensorVal = 0;
-    int success = fsm(&curState, sensorVal);
+    int success = sensor_fsm(&curState, sensorVal);
     int received = 0;
     dbgOutputLoc(WHILE1);
     while(1)
     {
         received = receiveFromSensorQ(&sensorVal);
-        success = fsm(&curState, sensorVal);
+        success = sensor_fsm(&curState, sensorVal);
         if(success == -1 || received == -1)
         {
             ERROR;

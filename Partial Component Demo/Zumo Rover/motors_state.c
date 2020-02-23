@@ -23,31 +23,31 @@ int motors_fsm(MOTORS_DATA *motorsState, uint8_t type, uint8_t value)
         }
         case Motors_Ready:
         {
-            if(type == PAUSEMOTORSMASK)
+            if(type == PAUSE)
             {
                 motorsState->state = Motors_Paused;
             }
-            else if(type == LEFTFORWARDMOTORSMASK)
+            else if(type == LEFTFORWARD)
             {
                 motorsState->leftDir = 0;
                 motorsState->leftSpeed = value;
             }
-            else if(type == RIGHTFORWARDMOTORSMASK)
+            else if(type == RIGHTFORWARD)
             {
                 motorsState->rightDir = 0;
                 motorsState->rightSpeed = value;
             }
-            else if(type == LEFTREVERSEMOTORSMASK)
+            else if(type == LEFTREVERSE)
             {
                 motorsState->leftDir = 1;
                 motorsState->leftSpeed = value;
             }
-            else if(type == RIGHTREVERSEMOTORSMASK)
+            else if(type == RIGHTREVERSE)
             {
                 motorsState->rightDir = 1;
                 motorsState->rightSpeed = value;
             }
-            else if(type == ACCELMOTORSMASK)
+            else if(type == ACCEL)
             {
                 if((motorsState->leftSpeed + value) < 255)
                 {
@@ -66,7 +66,7 @@ int motors_fsm(MOTORS_DATA *motorsState, uint8_t type, uint8_t value)
                     motorsState->rightSpeed = 255;
                 }
             }
-            else if(type == DECELMOTORSMASK)
+            else if(type == DECEL)
             {
                 if(motorsState->leftSpeed > value)
                 {
@@ -89,7 +89,10 @@ int motors_fsm(MOTORS_DATA *motorsState, uint8_t type, uint8_t value)
         }
         case Motors_Paused:
         {
-            motorsState->state = Motors_Ready;
+            if(type == RESUME)
+            {
+                motorsState->state = Motors_Ready;
+            }
             break;
         }
         default:

@@ -17,28 +17,20 @@ void *captureThread(void *arg0)
     capture0Init();
     capture1Init();
     dbgOutputLoc(ENTER_TASK);
-    uint8_t prevleftFreq = 0;
-    uint8_t prevrightFreq = 0;
+    CAPTURE_DATA capState;
+    capState.state = Capture_Init;
     uint8_t leftFreq = 0;
     uint8_t rightFreq = 0;
     int received = 0;
+    int success = 0;
     dbgOutputLoc(WHILE1);
     while(1)
     {
         received = receiveFromCapQ(&leftFreq, &rightFreq);
-        if(received == -1)
+        success = capture_fsm(&capState, leftFreq, rightFreq);
+        if(received == -1 | success == -1)
         {
             ERROR;
-        }
-        if(leftFreq != prevleftFreq)
-        {
-            //sendLeftMotorMsgToMQTTQ(leftFreq);
-            prevleftFreq = leftFreq;
-        }
-        if(rightFreq != prevrightFreq)
-        {
-            //sendRightMotorMsgToMQTTQ(rightFreq);
-            prevrightFreq = rightFreq;
         }
     }
 }

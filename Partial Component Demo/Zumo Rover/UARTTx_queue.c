@@ -17,12 +17,12 @@ void createUARTTxQueue()
     }
 }
 
-int sendMsgToUARTTxQ(uint16_t value)
+int sendMsgToUARTTxQ(uint8_t byte1, uint8_t byte2)
 {
     int ret = 0;
     BaseType_t success;
     dbgOutputLoc(BEFORE_SEND_QUEUE_ISR_TIMER1);
-    uint16_t msg = value;
+    uint16_t msg = (byte1 << 8) | byte2;
     success = xQueueSend(xQueue, (void *) &msg, pdFALSE);
     if(success == pdFALSE)
     {
