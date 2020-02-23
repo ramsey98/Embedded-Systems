@@ -36,7 +36,6 @@
 #define DBG_ERROR_LED_TIME (250000)
 #define ERROR halt(__LINE__, __func__);
 
-
 void dbgGPIOInit();
 void dbgUARTInit();
 void dbgUARTVal(unsigned char outVal);

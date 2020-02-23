@@ -17,7 +17,7 @@
 
 void *mainThread(void *arg0)
 {
-    pthread_t capture, UARTRx, UARTTx, motors, test; //UARTOut, mqtt, pixy, sensor;
+    pthread_t capture, UARTRx, UARTTx, motors, test, UARTOut;//, mqtt; //pixy, sensor;
     pthread_attr_t attrs;
     struct sched_param  priParam;
     int retc;
@@ -30,12 +30,13 @@ void *mainThread(void *arg0)
     GPIO_init();
     UART_init();
 
-    createUARTRxQueue();
-    createUARTTxQueue();
-    createMotorsQueue();
-    createMQTTQueue();
-    createSensorQueue();
+    //createSensorQueue();
+    //createPixyQueue();
     createCaptureQueue();
+    createMotorsQueue();
+    createUARTTxQueue();
+    createUARTRxQueue();
+    //createMQTTQueue();
 
     dbgUARTInit();
     dbgGPIOInit();
@@ -62,14 +63,14 @@ void *mainThread(void *arg0)
     {
         halt();
     }
-    */
-    /*
+
     retc = pthread_create(&pixy, &attrs, pixyThread, NULL);
     if (retc != 0)
     {
         halt();
     }
     */
+
     retc = pthread_create(&capture, &attrs, captureThread, NULL);
     if (retc != 0)
     {
@@ -94,16 +95,13 @@ void *mainThread(void *arg0)
         ERROR;
     }
 
-
-
-
-    /*
     retc = pthread_create(&UARTOut, &attrs, UARTOutThread, NULL);
     if (retc != 0)
     {
         ERROR;
     }
 
+    /*
     retc = pthread_create(&mqtt, &attrs, commThread, NULL);
     if (retc != 0)
     {

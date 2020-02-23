@@ -51,16 +51,13 @@
 //*****************************************************************************
 #include <mqtt_client.h>
 
-
 //*****************************************************************************
 //                 GLOBAL VARIABLES
 //*****************************************************************************
 
 /* Connection state: (0) - connected, (negative) - disconnected              */
 int32_t gApConnectionState = -1;
-uint32_t gInitState = 0;
 uint32_t memPtrCounterfree = 0;
-bool gResetApplication = false;
 static MQTTClient_Handle gMqttClient;
 MQTTClient_Params MqttClientExmple_params;
 unsigned short g_usTimerInts;
@@ -379,6 +376,7 @@ int32_t Mqtt_IF_Connect()
     if(lRetVal < 0)
     {
         UART_PRINT("Failed to start SimpleLink Device\n\r", lRetVal);
+        ERROR;
         return(-1);
     }
 
@@ -392,15 +390,14 @@ int32_t Mqtt_IF_Connect()
     SecurityParams.Key = (signed char *) SECURITY_KEY;
     SecurityParams.KeyLen = strlen(SECURITY_KEY);
     SecurityParams.Type = SECURITY_TYPE;
-
     /*Connect to the Access Point                                            */
     lRetVal = Network_IF_ConnectAP(SSID_Remote_Name, SecurityParams);
     if(lRetVal < 0)
     {
         UART_PRINT("Connection to an AP failed\n\r");
+        ERROR;
         return(-1);
     }
-
     /*Disable the LED blinking Timer as Device is connected to AP.           */
     LedTimerDeinitStop();
 
@@ -440,42 +437,18 @@ void Mqtt_start()
 
     if(retc != 0)
     {
-        gInitState &= ~MQTT_INIT_STATE;
         UART_PRINT("MQTT thread create fail\n\r");
+        ERROR;
         return;
     }
 
     retc = pthread_create(&mqttThread, &pAttrs, MqttClient, (void *) &threadArg);
     if(retc != 0)
     {
-        gInitState &= ~MQTT_INIT_STATE;
         UART_PRINT("MQTT thread create fail\n\r");
+        ERROR;
         return;
     }
-
-    gInitState &= ~MQTT_INIT_STATE;
-}
-
-//*****************************************************************************
-//!
-//! MQTT Stop - Close the client instance and free all the items required to
-//! run the MQTT protocol
-//!
-//! \param  none
-//!
-//! \return None
-//!
-//*****************************************************************************
-
-void Mqtt_Stop()
-{
-    if(gApConnectionState >= 0)
-    {
-        Mqtt_ClientStop(1);
-    }
-
-    sl_Stop(SL_STOP_TIMEOUT);
-    UART_PRINT("\n\r Client Stop completed\r\n");
 }
 
 int32_t MqttClient_start()
@@ -492,15 +465,12 @@ int32_t MqttClient_start()
     MqttClientExmple_params.mqttMode31 = MQTT_3_1;
     MqttClientExmple_params.blockingSend = true;
 
-    gInitState |= CLIENT_INIT_STATE;
-
     /*Initialize MQTT client lib                                             */
     gMqttClient = MQTTClient_create(MqttClientCallback,
                                     &MqttClientExmple_params);
     if(gMqttClient == NULL)
     {
         /*lib initialization failed                                          */
-        gInitState &= ~CLIENT_INIT_STATE;
         ERROR;
         return(-1);
     }
@@ -518,7 +488,7 @@ int32_t MqttClient_start()
     if(lRetVal != 0)
     {
         UART_PRINT("Client Thread Create Failed failed\n\r");
-        gInitState &= ~CLIENT_INIT_STATE;
+        ERROR;
         return(-1);
     }
 #ifdef SECURE_CLIENT
@@ -559,9 +529,7 @@ int32_t MqttClient_start()
         if(0 > lRetVal)
         {
             /*lib initialization failed                                      */
-            UART_PRINT("Connection to broker failed, Error code: %d\n\r",
-                       lRetVal);
-
+            UART_PRINT("Connection to broker failed, Error code: %d\n\r",lRetVal);
             gUiConnFlag = 0;
         }
         else
@@ -598,43 +566,7 @@ int32_t MqttClient_start()
         }
     }
 
-    gInitState &= ~CLIENT_INIT_STATE;
-
     return(0);
-}
-
-//*****************************************************************************
-//!
-//! MQTT Client stop - Unsubscribe from the subscription topics and exit the
-//! MQTT client lib.
-//!
-//! \param  none
-//!
-//! \return None
-//!
-//*****************************************************************************
-
-void Mqtt_ClientStop(uint8_t disconnect)
-{
-    uint32_t iCount;
-
-    MQTTClient_UnsubscribeParams subscriptionInfo[SUBSCRIPTION_TOPIC_COUNT];
-
-    for(iCount = 0; iCount < SUBSCRIPTION_TOPIC_COUNT; iCount++)
-    {
-        subscriptionInfo[iCount].topic = topic[iCount];
-    }
-
-    MQTTClient_unsubscribe(gMqttClient, subscriptionInfo,
-                           SUBSCRIPTION_TOPIC_COUNT);
-    for(iCount = 0; iCount < SUBSCRIPTION_TOPIC_COUNT; iCount++)
-    {
-        UART_PRINT("Unsubscribed from the topic %s\r\n", topic[iCount]);
-    }
-    gUiConnFlag = 0;
-
-    /*exiting the Client library                                             */
-    MQTTClient_delete(gMqttClient);
 }
 
 //*****************************************************************************
@@ -790,40 +722,30 @@ int32_t DisplayAppBanner(char* appName,
 
 void *commThread(void * args)
 {
-    uint32_t count = 0;
     pthread_t spawn_thread = (pthread_t) NULL;
     pthread_attr_t pAttrs_spawn;
     struct sched_param priParam;
     int32_t retc = 0;
     UART_Handle tUartHndl;
-
     /*Initialize SlNetSock layer with CC31xx/CC32xx interface */
     SlNetIf_init(0);
     SlNetIf_add(SLNETIF_ID_1, "CC32xx",
                 (const SlNetIf_Config_t *)&SlNetIfConfigWifi,
                 SLNET_IF_WIFI_PRIO);
-
     SlNetSock_init(0);
     SlNetUtil_init(0);
-
-    GPIO_init();
-    SPI_init();
 
     /*Configure the UART                                                     */
     tUartHndl = InitTerm();
     /*remove uart receive from LPDS dependency                               */
     UART_control(tUartHndl, UART_CMD_RXDISABLE, NULL);
-
     /*Create the sl_Task                                                     */
     pthread_attr_init(&pAttrs_spawn);
     priParam.sched_priority = SPAWN_TASK_PRIORITY;
     retc = pthread_attr_setschedparam(&pAttrs_spawn, &priParam);
     retc |= pthread_attr_setstacksize(&pAttrs_spawn, TASKSTACKSIZE);
-    retc |= pthread_attr_setdetachstate
-                                    (&pAttrs_spawn, PTHREAD_CREATE_DETACHED);
-
+    retc |= pthread_attr_setdetachstate(&pAttrs_spawn, PTHREAD_CREATE_DETACHED);
     retc = pthread_create(&spawn_thread, &pAttrs_spawn, sl_Task, NULL);
-
     if(retc != 0)
     {
         ERROR; //could not create simplelink task
@@ -834,57 +756,30 @@ void *commThread(void * args)
     {
         ERROR; //sl_Start failed
     }
-
     /*Output device information to the UART terminal */
     retc = DisplayAppBanner(APPLICATION_NAME, APPLICATION_VERSION);
     /*Set the ClientId with its own mac address */
     retc |= SetClientIdNamefromMacAddress();
-
-
     retc = sl_Stop(SL_STOP_TIMEOUT);
     if(retc < 0)
     {
         ERROR; //sl_Stop failed
     }
-
     if(retc < 0)
     {
         ERROR; //mqtt_client - Unable to retrieve device information
     }
 
-    while(1)
+    /*Connect to AP                                                      */
+    gApConnectionState = Mqtt_IF_Connect();
+    /*Run MQTT Main Thread (it will open the Client and Server)          */
+    Mqtt_start();
+
+    if (gApConnectionState >= 0)
     {
-        gResetApplication = false;
-        topic[0] = SUBSCRIPTION_TOPIC0;
-        gInitState = 0;
-
-        /*Connect to AP                                                      */
-        gApConnectionState = Mqtt_IF_Connect();
-
-        gInitState |= MQTT_INIT_STATE;
-        /*Run MQTT Main Thread (it will open the Client and Server)          */
         Mqtt_start();
-
-        /*Wait for init to be completed!!!                                   */
-        while(gInitState != 0)
-        {
-            UART_PRINT(".");
-            sleep(1);
-        }
-        UART_PRINT(".\r\n");
-
-        while(gResetApplication == false)
-        {
-            ;
-        }
-
-        UART_PRINT("TO Complete - Closing all threads and resources\r\n");
-
-        /*Stop the MQTT Process                                              */
-        Mqtt_Stop();
-
-        UART_PRINT("reopen MQTT # %d  \r\n", ++count);
     }
+    return NULL;
 }
 
 //*****************************************************************************

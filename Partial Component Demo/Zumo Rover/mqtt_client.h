@@ -133,12 +133,8 @@ void LedTimerConfigNStart();
 void LedTimerDeinitStop();
 void DisplayBanner(char * AppName);
 void *MqttClient(void *pvParameters);
-void Mqtt_ClientStop(uint8_t disconnect);
-void Mqtt_ServerStop();
-void Mqtt_Stop();
 void Mqtt_start();
 int32_t Mqtt_IF_Connect();
-int32_t MqttServer_start();
 int32_t MqttClient_start();
 void *commThread(void * args);
 

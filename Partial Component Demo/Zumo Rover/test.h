@@ -10,6 +10,7 @@
 
 #include "debug.h"
 #include "motors.h"
+#include "mqtt_queue.h"
 #include <unistd.h>
 
 typedef enum

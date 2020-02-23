@@ -91,14 +91,14 @@ void *UARTTxThread(void *arg0)
         }
         else
         {
-            if(value > 255)
-            {
-                UART_write(motors_uart, &value, sizeof(value));
-            }
-            else
+            if(value == INIT_CONTROLLER | value == GET_ERROR | value == GET_FIRMWARE)
             {
                 byte1 = value & 0xFF;
                 UART_write(motors_uart, &byte1, sizeof(byte1));
+            }
+            else
+            {
+                UART_write(motors_uart, &value, sizeof(value));
             }
         }
     }
@@ -118,8 +118,6 @@ void *UARTRxThread(void *arg0)
         else
         {
             ret = sendMsgToUARTRxQ(value);
-            if (value != 0)
-                GPIO_write(CONFIG_LED_0_GPIO, CONFIG_GPIO_LED_ON);
         }
     }
 }
@@ -141,7 +139,6 @@ void *UARTOutThread(void *arg0)
         {
             dbgUARTStr("Controller Value Received:");
             dbgUARTVal(value);
-            dbgUARTStr("\n");
         }
     }
 }

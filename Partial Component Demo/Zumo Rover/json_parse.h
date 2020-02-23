@@ -13,7 +13,13 @@
 
 #define PUBLISH_JSON_BUFFER_SIZE (512)
 
-#define JSON_TEMPLATE      \
+#define JSON_RECEIVE      \
+"{"                        \
+    "\"ID\": char,"        \
+    "\"state\": char,"    \
+"}"
+
+#define JSON_SEND      \
 "{"                        \
     "\"ID\": char,"        \
     "\"state\": char,"    \
@@ -21,7 +27,7 @@
     "\"rightmotor\": char"\
 "}"
 
-int json_read(char *payload, uint8_t *msgType, uint8_t *state, uint8_t *leftmotor, uint8_t *rightmotor);
+int json_read(char *payload, uint8_t *msgType, uint8_t *state);
 int json_write(char *payload, uint8_t msgType, uint8_t state, uint8_t leftmotor, uint8_t rightmotor);
 
 #endif /* JSON_PARSE_H_ */

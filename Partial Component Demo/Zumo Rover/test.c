@@ -33,7 +33,7 @@ void tests(test_num* num)
         //left motor forward half speed
         sendMsgToUARTTxQ(0x7F88);
         sendMsgToUARTTxQ(0x008C);
-        //*num = test2;
+        *num = test2;
         break;
     case test2:
         //right motor forward half speed
@@ -83,21 +83,24 @@ void tests(test_num* num)
         *num = test10;
         break;
     case test10:
+        //sendLeftMotorMsgToMQTTQ(50);
+        //sendRightMotorMsgToMQTTQ(70);
+        //sendStateMsgToMQTTQ(40);
         *num = end;
         break;
     case end:
         /*
         if(error_gpio == high)
         {
-            sendMsgToUARTTxQ(0x0082);
+            sendMsgToUARTTxQ(GET_ERROR);
         }
         */
-        GPIO_write(CONFIG_LED_0_GPIO, CONFIG_GPIO_LED_ON);
+        GPIO_write(CONFIG_LED_1_GPIO, CONFIG_GPIO_LED_ON);
         break;
     default:
         break;
     }
     sleep(3);
-    GPIO_toggle(CONFIG_LED_0_GPIO);
+    GPIO_toggle(CONFIG_LED_1_GPIO);
 }
 

@@ -32,12 +32,12 @@ void *captureThread(void *arg0)
         }
         if(leftFreq != prevleftFreq)
         {
-            sendLeftMotorMsgToMQTTQ(leftFreq);
+            //sendLeftMotorMsgToMQTTQ(leftFreq);
             prevleftFreq = leftFreq;
         }
         if(rightFreq != prevrightFreq)
         {
-            sendRightMotorMsgToMQTTQ(rightFreq);
+            //sendRightMotorMsgToMQTTQ(rightFreq);
             prevrightFreq = rightFreq;
         }
     }
