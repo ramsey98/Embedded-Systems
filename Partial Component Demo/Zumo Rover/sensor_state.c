@@ -7,35 +7,35 @@
 
 #include "sensor_state.h"
 
-int fsm(SENSOR_DATA *curState, int sensorVal)
+int sensor_fsm(SENSOR_DATA *curState, int sensorVal)
 {
     int success = 0;
     switch (curState->state)
     {
-        case Init:
+        case Sensor_Init:
         {
             curState->sensorTotal = 0;
             curState->sensorCount = 0;
             curState->sensorAvg = 0;
-            curState->state = Polling;
+            curState->state = Sensor_Polling;
             break;
         }
-        case Polling:
+        case Sensor_Polling:
         {
             curState->sensorTotal += sensorVal;
             curState->sensorCount++;
             if (curState->sensorCount == 4)
             {
-                curState->state = Averaging;
+                curState->state = Sensor_Averaging;
             }
             break;
         }
-        case Averaging:
+        case Sensor_Averaging:
         {
             curState->sensorAvg = curState->sensorTotal/curState->sensorCount;
             curState->sensorTotal = 0;
             curState->sensorCount = 0;
-            curState->state = Polling;
+            curState->state = Sensor_Polling;
             break;
         }
         default:

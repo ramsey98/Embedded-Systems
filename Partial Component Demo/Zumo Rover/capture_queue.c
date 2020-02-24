@@ -22,7 +22,7 @@ int sendLeftMsgToCapQ(uint8_t freq)
     int ret = 0;
     BaseType_t success;
     dbgOutputLoc(BEFORE_SEND_QUEUE_ISR_TIMER1);
-    uint16_t msg = LEFTFLAG | freq;
+    uint16_t msg = (LEFT << ENCODERSHIFT) | freq;
     success = xQueueSendFromISR(xQueue, (void *) &msg, pdFALSE);
     if(success == pdFALSE)
     {
@@ -37,7 +37,7 @@ int sendRightMsgToCapQ(uint8_t freq)
     int ret = 0;
     BaseType_t success;
     dbgOutputLoc(BEFORE_SEND_QUEUE_ISR_TIMER1);
-    uint16_t msg = RIGHTFLAG | freq;
+    uint16_t msg = (RIGHT << ENCODERSHIFT) | freq;
     success = xQueueSendFromISR(xQueue, (void *) &msg, pdFALSE);
     if(success == pdFALSE)
     {
@@ -55,11 +55,11 @@ int receiveFromCapQ(uint8_t * leftFreq, uint8_t * rightFreq)
     uint16_t received;
     success = xQueueReceive(xQueue, &received, portMAX_DELAY);
 
-    if (received >> ENCODERSHIFT == LEFTMASK)
+    if (received >> ENCODERSHIFT == LEFT)
     {
         *leftFreq = (received & CAPFMASK);
     }
-    else if (received >> ENCODERSHIFT == RIGHTMASK)
+    else if (received >> ENCODERSHIFT == RIGHT)
     {
         *rightFreq = (received & CAPFMASK);
     }

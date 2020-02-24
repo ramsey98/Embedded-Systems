@@ -12,10 +12,8 @@
 #include "queue.h"
 
 #define CAPFMASK (0xFF)
-#define LEFTMASK (0x01)
-#define RIGHTMASK (0x02)
-#define LEFTFLAG (0x0100)
-#define RIGHTFLAG (0x0200)
+#define LEFT (0x01)
+#define RIGHT (0x02)
 #define ENCODERSHIFT (8)
 
 int sendLeftMsgToCapQ(uint8_t freq);

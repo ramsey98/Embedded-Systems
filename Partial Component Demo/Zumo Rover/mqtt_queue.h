@@ -23,7 +23,7 @@ typedef struct
 #define MQTT_LEFTMOTOR (1)
 #define MQTT_RIGHTMOTOR (2)
 
-int sendMsgToMQTTQ(uint8_t state);
+int sendStateMsgToMQTTQ(uint8_t state);
 int sendLeftMotorMsgToMQTTQ(uint8_t leftmotor);
 int sendRightMotorMsgToMQTTQ(uint8_t rightmotor);
 int receiveFromMQTTQ(uint8_t *index, uint8_t *state, uint8_t *leftmotor, uint8_t *rightmotor);

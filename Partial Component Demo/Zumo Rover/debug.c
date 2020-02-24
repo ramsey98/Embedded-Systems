@@ -38,12 +38,12 @@ void dbgGPIOInit()
     GPIO_setConfig(CONFIG_GPIO_6, GPIO_CFG_OUT_STD | GPIO_CFG_OUT_LOW);
     GPIO_setConfig(CONFIG_GPIO_7, GPIO_CFG_OUT_STD | GPIO_CFG_OUT_LOW);
     GPIO_setConfig(CONFIG_LED_0_GPIO, GPIO_CFG_OUT_STD | GPIO_CFG_OUT_LOW);
-    GPIO_write(CONFIG_GPIO_7, CONFIG_GPIO_LED_OFF);
+    GPIO_setConfig(CONFIG_LED_1_GPIO, GPIO_CFG_OUT_STD | GPIO_CFG_OUT_LOW);
 }
 
 void dbgUARTVal(unsigned char outVal)
 {
-    //UART_write(uart, &outVal, sizeof(outVal));
+    UART_write(uart, &outVal, sizeof(outVal));
 }
 
 void dbgUARTStr(const char * uartOut)
@@ -51,7 +51,7 @@ void dbgUARTStr(const char * uartOut)
     int i;
     for(i = 0; i < strlen(uartOut); i++)
     {
-        //UART_write(uart, &uartOut[i], sizeof(uartOut[i]));
+        UART_write(uart, &uartOut[i], sizeof(uartOut[i]));
     }
 }
 
