@@ -14,7 +14,8 @@
 #include "FreeRTOS.h"
 #include "debug.h"
 
-#define SPI_MSG_LENGTH 128
+#define SPI_RX_LENGTH 128
+#define SPI_TX_LENGTH 6
 
 void spiInit();
 void spiTransfer();
@@ -23,7 +24,7 @@ SPI_Handle      handle;
 SPI_Params      params;
 SPI_Transaction spiTransaction;
 
-char  rxBuffer[SPI_MSG_LENGTH];
-char  txBuffer[6] = {0b11111111, 0b11111111, 0b00000010, 0b00100000, 0b11000001, 0b10101110};
+unsigned char rxBuffer[SPI_RX_LENGTH];
+unsigned char txBuffer[SPI_TX_LENGTH];
 
 #endif /* SPI_H_ */
