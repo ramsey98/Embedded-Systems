@@ -62,10 +62,10 @@ void capture0Init()
 
     Capture_start(capture0);
 
-    while(1)
-    {
-        SemaphoreP_pend(captureSem0, SemaphoreP_WAIT_FOREVER); //curInterval is period
-    }
+    //while(1)
+    //{
+    //    SemaphoreP_pend(captureSem0, SemaphoreP_WAIT_FOREVER); //curInterval is period
+    //}
 
 }
 
@@ -96,17 +96,17 @@ void capture1Init()
 
     Capture_start(capture1);
 
-    while(1)
-    {
-        SemaphoreP_pend(captureSem1, SemaphoreP_WAIT_FOREVER);
-    }
+    //while(1)
+    //{
+    //    SemaphoreP_pend(captureSem1, SemaphoreP_WAIT_FOREVER);
+    //}
 
 }
 
 void capture0Callback(Capture_Handle handle, uint32_t interval)
 {
     curInterval0 = interval;
-    SemaphoreP_post(captureSem0);
+    //SemaphoreP_post(captureSem0);
     uint8_t freq = SECOND/curInterval0;
     sendLeftMsgToCapQ(freq);
 }
@@ -114,7 +114,7 @@ void capture0Callback(Capture_Handle handle, uint32_t interval)
 void capture1Callback(Capture_Handle handle, uint32_t interval)
 {
     curInterval1 = interval;
-    SemaphoreP_post(captureSem1);
+    //SemaphoreP_post(captureSem1);
     uint8_t freq = SECOND/curInterval1;
     sendRightMsgToCapQ(freq);
 }

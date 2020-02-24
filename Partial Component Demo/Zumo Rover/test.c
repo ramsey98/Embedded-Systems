@@ -114,12 +114,12 @@ void tests(test_num* num)
             sendMsgToUARTTxQ(GET_ERROR);
         }
         */
-        GPIO_write(CONFIG_LED_1_GPIO, CONFIG_GPIO_LED_ON);
+        //GPIO_write(CONFIG_LED_1_GPIO, CONFIG_GPIO_LED_ON);
         break;
     default:
         break;
     }
     sleep(3);
-    GPIO_toggle(CONFIG_LED_1_GPIO);
+    //GPIO_toggle(CONFIG_LED_1_GPIO);
 }
 

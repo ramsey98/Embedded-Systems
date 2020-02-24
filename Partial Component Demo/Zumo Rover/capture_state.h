@@ -9,6 +9,7 @@
 #define CAPTURE_STATE_H_
 
 #include "debug.h"
+#include "UARTDebug_queue.h"
 
 typedef enum
 {

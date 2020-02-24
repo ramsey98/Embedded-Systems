@@ -98,41 +98,30 @@ void *UARTTxThread(void *arg0)
     }
 }
 
-void *UARTRxThread(void *arg0)
-{
-    int_fast32_t ret;
-    char value;
-    while(1)
-    {
-        ret = UART_read(motors_uart, &value, sizeof(value));
-        if(ret == UART_STATUS_ERROR)
-        {
-            ERROR;
-        }
-        else
-        {
-            ret = sendMsgToUARTRxQ(value);
-        }
-    }
-}
-
-void *UARTOutThread(void *arg0)
+void *UARTDebugThread(void *arg0)
 {
     dbgOutputLoc(ENTER_TASK);
-    uint8_t value;
+    uint8_t value, type;
     int received = 0;
     dbgOutputLoc(WHILE1);
     while(1)
     {
-        received = receiveFromUARTRxQ(&value);
+        received = receiveFromUARTDebugQ(&type, &value);
         if(received == -1)
         {
             ERROR;
         }
         else
         {
-            dbgUARTStr("Controller Value Received:");
-            dbgUARTVal(value);
+            if(type == 1)
+            {
+                dbgUARTStr("Left Motor:");
+            }
+            else if(type == 2)
+            {
+                dbgUARTStr("Right Motor:");
+            }
+            dbgUARTNum(value);
         }
     }
 }

@@ -12,12 +12,11 @@ static UART_Handle uart;
 
 void dbgUARTInit()
 {
-    UART_init();
     UART_Params uartParams;
     UART_Params_init(&uartParams);
     uartParams.writeMode = UART_MODE_BLOCKING;
     uartParams.writeDataMode = UART_DATA_BINARY;
-    uartParams.baudRate = 115200;
+    uartParams.baudRate = 38400;
     uartParams.readEcho = UART_ECHO_OFF;
     uart = UART_open(CONFIG_UART_1, &uartParams);
     if (uart == NULL)

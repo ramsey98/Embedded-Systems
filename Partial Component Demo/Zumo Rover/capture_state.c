@@ -24,14 +24,12 @@ int capture_fsm(CAPTURE_DATA *curState, uint8_t leftFreq, uint8_t rightFreq)
         {
             if(curState->leftFreq != leftFreq)
             {
-                dbgUARTStr("Left Freq:");
-                dbgUARTNum(leftFreq);
+                success = sendLeftCapMsgToUARTDebugQ(leftFreq);
                 curState->leftFreq = leftFreq;
             }
             if(curState->rightFreq != rightFreq)
             {
-                dbgUARTStr("Right Freq:");
-                dbgUARTNum(rightFreq);
+                success = sendRightCapMsgToUARTDebugQ(rightFreq);
                 curState->rightFreq = rightFreq;
             }
             curState->state = Capture_Waiting;
