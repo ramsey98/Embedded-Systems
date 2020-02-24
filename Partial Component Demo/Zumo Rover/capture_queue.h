@@ -18,7 +18,7 @@
 
 int sendLeftMsgToCapQ(uint8_t freq);
 int sendRightMsgToCapQ(uint8_t freq);
-int receiveFromCapQ(uint8_t * leftFreq, uint8_t * rightFreq);
+int receiveFromCapQ(uint8_t * type, uint8_t * freq);
 void createCaptureQueue();
 
 #endif /* CAPTURE_QUEUE_H_ */

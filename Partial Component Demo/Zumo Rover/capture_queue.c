@@ -47,25 +47,28 @@ int sendRightMsgToCapQ(uint8_t freq)
     return ret;
 }
 
-int receiveFromCapQ(uint8_t * leftFreq, uint8_t * rightFreq)
+int receiveFromCapQ(uint8_t * type, uint8_t * freq)
 {
     int ret = 0;
     BaseType_t success;
     dbgOutputLoc(BEFORE_RECEIVE_QUEUE);
     uint16_t received;
     success = xQueueReceive(xQueue, &received, portMAX_DELAY);
-
-    if (received >> ENCODERSHIFT == LEFT)
-    {
-        *leftFreq = (received & CAPFMASK);
-    }
-    else if (received >> ENCODERSHIFT == RIGHT)
-    {
-        *rightFreq = (received & CAPFMASK);
-    }
     if(success == pdFALSE)
     {
         ret = -1;
+    }
+    else
+    {
+        if (received >> ENCODERSHIFT == LEFT)
+        {
+            *type = LEFT;
+        }
+        else if (received >> ENCODERSHIFT == RIGHT)
+        {
+            *type = RIGHT;
+        }
+        *freq = (received & CAPFMASK);
     }
     dbgOutputLoc(AFTER_RECEIVE_QUEUE);
     return ret;

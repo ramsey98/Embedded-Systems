@@ -35,10 +35,10 @@
 #define M0_REVERSE (0x8A) //motor speed
 #define M0_REVERSE_8BIT (0x8B) //speed+128
 //M1 Commands
-#define M1_FORWARD (0x8C) //followed by motor speed
-#define M1_FORWARD_8BIT (0x8D) //speed + 128 (max is 0x7f) 127+128
-#define M1_REVERSE (0x8E) //motor speed
-#define M1_REVERSE_8BIT (0x8F) //speed+128
+#define M1_FORWARD (0x8E) //followed by motor speed
+#define M1_FORWARD_8BIT (0x8F) //speed + 128 (max is 0x7f) 127+128
+#define M1_REVERSE (0x8C) //motor speed
+#define M1_REVERSE_8BIT (0x8D) //speed+128
 
 int sendMsgToUARTTxQ(uint8_t byte1, uint8_t byte2);
 int receiveFromUARTTxQ(uint16_t * value);

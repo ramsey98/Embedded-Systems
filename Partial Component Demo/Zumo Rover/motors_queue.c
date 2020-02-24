@@ -113,7 +113,7 @@ int sendPauseMsgToMotorsQ()
     int ret = 0;
     BaseType_t success;
     dbgOutputLoc(BEFORE_SEND_QUEUE_ISR_TIMER1);
-    uint16_t msg = PAUSE;
+    uint16_t msg = (PAUSE << MOTORSSHIFT);
     success = xQueueSend(xQueue, (void *) &msg, pdFALSE);
     if(success == pdFALSE)
     {
@@ -128,7 +128,7 @@ int sendResumeMsgToMotorsQ()
     int ret = 0;
     BaseType_t success;
     dbgOutputLoc(BEFORE_SEND_QUEUE_ISR_TIMER1);
-    uint16_t msg = RESUME;
+    uint16_t msg = (RESUME << MOTORSSHIFT);
     success = xQueueSend(xQueue, (void *) &msg, pdFALSE);
     if(success == pdFALSE)
     {

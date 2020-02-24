@@ -7,45 +7,52 @@
 
 #include "capture_state.h"
 
-int capture_fsm(CAPTURE_DATA *curState, uint8_t leftFreq, uint8_t rightFreq)
+int capture_fsm(CAPTURE_DATA *curState, uint8_t type, uint8_t freq)
 {
     int success = 0;
     switch (curState->state)
     {
         case Capture_Init:
         {
-            curState->leftFreq = 0;
-            curState->rightFreq = 0;
+            curState->leftTotal = 0;
+            curState->rightTotal = 0;
+            curState->leftCount = 0;
+            curState->rightCount = 0;
             curState->count = 0;
             curState->state = Capture_Polling;
             break;
         }
         case Capture_Polling:
         {
-            if(curState->leftFreq != leftFreq)
+            if(type == LEFT)
             {
-                success = sendLeftCapMsgToUARTDebugQ(leftFreq);
-                curState->leftFreq = leftFreq;
+                curState->leftTotal += freq;
+                curState->leftCount++;
             }
-            if(curState->rightFreq != rightFreq)
+            else if(type == RIGHT)
             {
-                success = sendRightCapMsgToUARTDebugQ(rightFreq);
-                curState->rightFreq = rightFreq;
+                curState->rightTotal += freq;
+                curState->rightCount++;
             }
-            curState->state = Capture_Waiting;
+            curState->count++;
+            if(curState->count == 100)
+            {
+                curState->state = Capture_Averaging;
+            }
             break;
         }
-        case Capture_Waiting:
+        case Capture_Averaging:
         {
-            if(curState->count == 10)
-            {
-                curState->count = 0;
-                curState->state = Capture_Polling;
-            }
-            else
-            {
-                curState->count++;
-            }
+            curState->leftAvg = curState->leftTotal / curState->leftCount;
+            curState->rightAvg = curState->rightTotal / curState->rightCount;
+            success = sendLeftCapMsgToUARTDebugQ(curState->leftAvg);
+            success = sendRightCapMsgToUARTDebugQ(curState->rightAvg);
+            curState->leftTotal = 0;
+            curState->rightTotal = 0;
+            curState->leftCount = 0;
+            curState->rightCount = 0;
+            curState->count = 0;
+            curState->state = Capture_Polling;
             break;
         }
         default:

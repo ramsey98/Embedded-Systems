@@ -50,19 +50,32 @@ void *motorsThread(void *arg0)
         {
             if(motorsState.leftDir == 0)
             {
-                sendMsgToUARTTxQ(motorsState.leftSpeed, M0_FORWARD_8BIT);
+                success = sendMsgToUARTTxQ(motorsState.leftSpeed, M0_FORWARD_8BIT);
             }
             else
             {
-                sendMsgToUARTTxQ(motorsState.leftSpeed, M0_REVERSE_8BIT);
+                success = sendMsgToUARTTxQ(motorsState.leftSpeed, M0_REVERSE_8BIT);
             }
             if(motorsState.rightDir == 0)
             {
-                sendMsgToUARTTxQ(motorsState.rightSpeed, M1_FORWARD_8BIT);
+                success = sendMsgToUARTTxQ(motorsState.rightSpeed, M1_FORWARD_8BIT);
             }
             else
             {
-                sendMsgToUARTTxQ(motorsState.rightSpeed, M1_REVERSE_8BIT);
+                success = sendMsgToUARTTxQ(motorsState.rightSpeed, M1_REVERSE_8BIT);
+            }
+            if(success == -1)
+            {
+                ERROR;
+            }
+        }
+        else if(motorsState.state == Motors_Paused)
+        {
+            success = sendMsgToUARTTxQ(0, M0_FORWARD_8BIT);
+            success = sendMsgToUARTTxQ(0, M1_FORWARD_8BIT);
+            if(success == -1)
+            {
+                ERROR;
             }
         }
     }
