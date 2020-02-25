@@ -114,7 +114,7 @@ void *UARTTxThread(void *arg0)
 void *UARTDebugThread(void *arg0)
 {
     dbgOutputLoc(ENTER_TASK);
-    uint8_t value, type;
+    uint16_t value, type;
     int received = 0;
     dbgOutputLoc(WHILE1);
     while(1)

@@ -11,14 +11,14 @@
 #include "debug.h"
 #include "queue.h"
 
-#define CAPFMASK (0xFF)
-#define LEFT (0x01)
-#define RIGHT (0x02)
-#define ENCODERSHIFT (8)
+#define CAPFMASK (0xFFFFFFFF)
+#define LEFT (0x00000001)
+#define RIGHT (0x00000002)
+#define ENCODERSHIFT (32)
 
-int sendLeftMsgToCapQ(uint8_t freq);
-int sendRightMsgToCapQ(uint8_t freq);
-int receiveFromCapQ(uint8_t * type, uint8_t * freq);
+int sendLeftMsgToCapQ(uint32_t period);
+int sendRightMsgToCapQ(uint32_t period);
+int receiveFromCapQ(uint32_t * type, uint32_t * period);
 void createCaptureQueue();
 
 #endif /* CAPTURE_QUEUE_H_ */

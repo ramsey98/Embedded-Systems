@@ -12,6 +12,10 @@
 #include "UARTDebug_queue.h"
 #include "capture_queue.h"
 
+#define LINECOUNT (12)
+#define MINUTE (60)
+#define SECOND (1000000)
+
 typedef enum
 {
     Capture_Init,
@@ -22,11 +26,10 @@ typedef enum
 typedef struct
 {
     CAPTURE_STATES state;
-    uint32_t leftTotal, rightTotal;
+    uint32_t leftTotal, rightTotal, leftAvg, rightAvg;
     int count, leftCount, rightCount;
-    uint8_t leftAvg, rightAvg;
 } CAPTURE_DATA;
 
-int capture_fsm(CAPTURE_DATA *curState, uint8_t type, uint8_t freq);
+int capture_fsm(CAPTURE_DATA *curState, uint32_t type, uint32_t period);
 
 #endif /* CAPTURE_STATE_H_ */

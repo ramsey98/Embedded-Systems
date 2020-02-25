@@ -10,19 +10,19 @@ static QueueHandle_t xQueue = NULL;
 
 void createCaptureQueue()
 {
-    xQueue = xQueueCreate(16, sizeof(uint16_t));
+    xQueue = xQueueCreate(16, sizeof(uint64_t));
     if(xQueue == NULL)
     {
         ERROR;
     }
 }
 
-int sendLeftMsgToCapQ(uint8_t freq)
+int sendLeftMsgToCapQ(uint32_t period)
 {
     int ret = 0;
     BaseType_t success;
     dbgOutputLoc(BEFORE_SEND_QUEUE_ISR_TIMER1);
-    uint16_t msg = (LEFT << ENCODERSHIFT) | freq;
+    uint64_t msg = 0x0000000100000000 | period;//(LEFT << ENCODERSHIFT) | period;
     success = xQueueSendFromISR(xQueue, (void *) &msg, pdFALSE);
     if(success == pdFALSE)
     {
@@ -32,12 +32,12 @@ int sendLeftMsgToCapQ(uint8_t freq)
     return ret;
 }
 
-int sendRightMsgToCapQ(uint8_t freq)
+int sendRightMsgToCapQ(uint32_t period)
 {
     int ret = 0;
     BaseType_t success;
     dbgOutputLoc(BEFORE_SEND_QUEUE_ISR_TIMER1);
-    uint16_t msg = (RIGHT << ENCODERSHIFT) | freq;
+    uint64_t msg = 0x0000000200000000 | period;//(RIGHT << ENCODERSHIFT) | period;
     success = xQueueSendFromISR(xQueue, (void *) &msg, pdFALSE);
     if(success == pdFALSE)
     {
@@ -47,12 +47,12 @@ int sendRightMsgToCapQ(uint8_t freq)
     return ret;
 }
 
-int receiveFromCapQ(uint8_t * type, uint8_t * freq)
+int receiveFromCapQ(uint32_t * type, uint32_t * period)
 {
     int ret = 0;
     BaseType_t success;
     dbgOutputLoc(BEFORE_RECEIVE_QUEUE);
-    uint16_t received;
+    uint64_t received;
     success = xQueueReceive(xQueue, &received, portMAX_DELAY);
     if(success == pdFALSE)
     {
@@ -68,7 +68,7 @@ int receiveFromCapQ(uint8_t * type, uint8_t * freq)
         {
             *type = RIGHT;
         }
-        *freq = (received & CAPFMASK);
+        *period = (received & CAPFMASK);
     }
     dbgOutputLoc(AFTER_RECEIVE_QUEUE);
     return ret;

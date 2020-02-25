@@ -11,9 +11,9 @@
 #include "debug.h"
 #include "queue.h"
 
-int sendLeftCapMsgToUARTDebugQ(uint8_t value);
-int sendRightCapMsgToUARTDebugQ(uint8_t value);
-int receiveFromUARTDebugQ(uint8_t * type, uint8_t * value);
+int sendLeftCapMsgToUARTDebugQ(uint16_t value);
+int sendRightCapMsgToUARTDebugQ(uint16_t value);
+int receiveFromUARTDebugQ(uint16_t * type, uint16_t * value);
 void createUARTDebugQueue();
 
 

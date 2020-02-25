@@ -18,15 +18,15 @@ void *captureThread(void *arg0)
     capture1Init();
     dbgOutputLoc(ENTER_TASK);
     CAPTURE_DATA capState;
-    uint8_t type = 0, freq = 0;
+    uint32_t type = 0, period = 0;
     int received = 0, success = 0;
     capState.state = Capture_Init;
-    received = receiveFromCapQ(&type, &freq);
+    received = receiveFromCapQ(&type, &period);
     dbgOutputLoc(WHILE1);
     while(1)
     {
-        received = receiveFromCapQ(&type, &freq);
-        success = capture_fsm(&capState, type, freq);
+        received = receiveFromCapQ(&type, &period);
+        success = capture_fsm(&capState, type, period);
         if(received == -1 | success == -1)
         {
             ERROR;
@@ -106,8 +106,7 @@ void capture0Callback(Capture_Handle handle, uint32_t interval)
 {
     curInterval0 = interval;
     //SemaphoreP_post(captureSem0);
-    uint8_t freq = ((SECOND/curInterval0)/LINECOUNT)*MINUTE;
-    int success = sendLeftMsgToCapQ(freq);
+    int success = sendLeftMsgToCapQ(curInterval0);
     if(success == -1)
     {
         ERROR;
@@ -118,8 +117,7 @@ void capture1Callback(Capture_Handle handle, uint32_t interval)
 {
     curInterval1 = interval;
     //SemaphoreP_post(captureSem1);
-    uint8_t freq = ((SECOND/curInterval1)/LINECOUNT)*MINUTE;
-    int success = sendRightMsgToCapQ(freq);
+    int success = sendRightMsgToCapQ(curInterval1);
     if(success == -1)
     {
         ERROR;

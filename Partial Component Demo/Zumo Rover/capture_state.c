@@ -7,7 +7,7 @@
 
 #include "capture_state.h"
 
-int capture_fsm(CAPTURE_DATA *curState, uint8_t type, uint8_t freq)
+int capture_fsm(CAPTURE_DATA *curState, uint32_t type, uint32_t period)
 {
     int success = 0;
     switch (curState->state)
@@ -26,12 +26,13 @@ int capture_fsm(CAPTURE_DATA *curState, uint8_t type, uint8_t freq)
         {
             if(type == LEFT)
             {
-                curState->leftTotal += freq;
+                curState->leftTotal += (SECOND/period);
                 curState->leftCount++;
+                GPIO_write(CONFIG_LED_0_GPIO, CONFIG_GPIO_LED_ON);
             }
             else if(type == RIGHT)
             {
-                curState->rightTotal += freq;
+                curState->rightTotal += (SECOND/period);
                 curState->rightCount++;
             }
             curState->count++;
@@ -45,8 +46,10 @@ int capture_fsm(CAPTURE_DATA *curState, uint8_t type, uint8_t freq)
         {
             curState->leftAvg = curState->leftTotal / curState->leftCount;
             curState->rightAvg = curState->rightTotal / curState->rightCount;
-            success = sendLeftCapMsgToUARTDebugQ(curState->leftAvg);
-            success = sendRightCapMsgToUARTDebugQ(curState->rightAvg);
+            uint8_t leftRPM = (curState->leftAvg/LINECOUNT);
+            uint8_t rightRPM = (curState->rightAvg/LINECOUNT);
+            success = sendLeftCapMsgToUARTDebugQ(leftRPM);
+            success = sendRightCapMsgToUARTDebugQ(rightRPM);
             curState->leftTotal = 0;
             curState->rightTotal = 0;
             curState->leftCount = 0;
