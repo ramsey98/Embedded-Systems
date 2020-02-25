@@ -5,7 +5,7 @@
  *      Author: Holden Ramsey
  */
 
-#include "motors.h"
+#include <PID.h>
 
 static UART_Handle motors_uart;
 
@@ -24,58 +24,83 @@ void motorsUARTInit()
     {
         ERROR;
     }
-    sendMsgToUARTTxQ(INIT_CONTROLLER, EMPTY);
+    int sent = sendMsgToUARTTxQ(INIT_CONTROLLER, EMPTY);
+    if(sent == -1)
+    {
+        ERROR;
+    }
 }
 
-void *motorsThread(void *arg0)
+void updateMotors(MOTORS_DATA motorsState)
 {
-    motorsUARTInit();
+    int sent = 0;
+    if(motorsState.state == Motors_Ready)
+    {
+        if(motorsState.leftDir == 0)
+        {
+            sent = sendMsgToUARTTxQ(motorsState.leftSpeed, M0_FORWARD_8BIT);
+        }
+        else
+        {
+            sent = sendMsgToUARTTxQ(motorsState.leftSpeed, M0_REVERSE_8BIT);
+        }
+        if(motorsState.rightDir == 0)
+        {
+            sent = sendMsgToUARTTxQ(motorsState.rightSpeed, M1_FORWARD_8BIT);
+        }
+        else
+        {
+            sent = sendMsgToUARTTxQ(motorsState.rightSpeed, M1_REVERSE_8BIT);
+        }
+    }
+    else if(motorsState.state == Motors_Paused)
+    {
+        sent = sendMsgToUARTTxQ(0, M0_FORWARD_8BIT);
+        sent = sendMsgToUARTTxQ(0, M1_FORWARD_8BIT);
+    }
+    if(sent == -1)
+    {
+        ERROR;
+    }
+}
+
+void *PIDThread(void *arg0)
+{
     dbgOutputLoc(ENTER_TASK);
+    motorsUARTInit();
+    int received = 0, success = 0, leftCount = 0, rightCount = 0;
+    uint32_t type = 0, value = 0;
     MOTORS_DATA motorsState;
-    motorsState.state = Motors_Init;
-    uint8_t type = 0;
-    uint8_t value = 0;
-    int received = 0;
-    int success = motors_fsm(&motorsState, type, value);
-    dbgOutputLoc(WHILE1);
+    success = motors_fsm(&motorsState, type, value);
+    if(success == -1)
+    {
+        ERROR;
+    }
     while(1)
     {
-        received = receiveFromMotorsQ(&type, &value);
-        success = motors_fsm(&motorsState, type, value);
-        if(received == -1 || success == -1)
+        received = receiveFromPIDQ(&type, &value);
+        if(received == -1)
         {
             ERROR;
         }
-        else if(motorsState.state == Motors_Ready)
+        else
         {
-            if(motorsState.leftDir == 0)
-            {
-                success = sendMsgToUARTTxQ(motorsState.leftSpeed, M0_FORWARD_8BIT);
-            }
-            else
-            {
-                success = sendMsgToUARTTxQ(motorsState.leftSpeed, M0_REVERSE_8BIT);
-            }
-            if(motorsState.rightDir == 0)
-            {
-                success = sendMsgToUARTTxQ(motorsState.rightSpeed, M1_FORWARD_8BIT);
-            }
-            else
-            {
-                success = sendMsgToUARTTxQ(motorsState.rightSpeed, M1_REVERSE_8BIT);
-            }
+            success = motors_fsm(&motorsState, type, value);
             if(success == -1)
             {
                 ERROR;
             }
-        }
-        else if(motorsState.state == Motors_Paused)
-        {
-            success = sendMsgToUARTTxQ(0, M0_FORWARD_8BIT);
-            success = sendMsgToUARTTxQ(0, M1_FORWARD_8BIT);
-            if(success == -1)
+            else if(type == TIMER)
             {
-                ERROR;
+                updateMotors(motorsState);
+            }
+            else if(type == LEFTCAP)
+            {
+                sendLeftCapMsgToUARTDebugQ(value);
+            }
+            else if(type == RIGHTCAP)
+            {
+                sendRightCapMsgToUARTDebugQ(value);
             }
         }
     }
@@ -126,11 +151,11 @@ void *UARTDebugThread(void *arg0)
         }
         else
         {
-            if(type == 1)
+            if(type == LEFTCAP)
             {
                 dbgUARTStr("Left Motor:");
             }
-            else if(type == 2)
+            else if(type == RIGHTCAP)
             {
                 dbgUARTStr("Right Motor:");
             }

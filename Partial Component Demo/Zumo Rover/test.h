@@ -8,8 +8,8 @@
 #ifndef TEST_H_
 #define TEST_H_
 
+#include <PID.h>
 #include "debug.h"
-#include "motors.h"
 #include "mqtt_queue.h"
 #include <unistd.h>
 

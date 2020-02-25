@@ -5,9 +5,9 @@
  *      Author: Holden Ramsey
  */
 
-#include "motors_state.h"
+#include <PID_state.h>
 
-int motors_fsm(MOTORS_DATA *motorsState, uint8_t type, uint8_t value)
+int motors_fsm(MOTORS_DATA *motorsState, uint32_t type, uint32_t value)
 {
     int success = 0;
     switch (motorsState->state)
@@ -27,25 +27,17 @@ int motors_fsm(MOTORS_DATA *motorsState, uint8_t type, uint8_t value)
             {
                 motorsState->state = Motors_Paused;
             }
-            else if(type == LEFTFORWARD)
+            else if(type == FORWARD)
             {
                 motorsState->leftDir = 0;
                 motorsState->leftSpeed = value;
-            }
-            else if(type == RIGHTFORWARD)
-            {
                 motorsState->rightDir = 0;
                 motorsState->rightSpeed = value;
             }
-            else if(type == LEFTREVERSE)
+            else if(type == REVERSE)
             {
                 motorsState->leftDir = 1;
                 motorsState->leftSpeed = value;
-            }
-            else if(type == RIGHTREVERSE)
-            {
-                motorsState->rightDir = 1;
-                motorsState->rightSpeed = value;
             }
             else if(type == ACCEL)
             {

@@ -5,12 +5,12 @@
  *      Author: Holden Ramsey
  */
 
-#ifndef MOTORS_STATE_H_
-#define MOTORS_STATE_H_
+#ifndef PID_STATE_H_
+#define PID_STATE_H_
 
+#include <PID_queue.h>
 #include "debug.h"
 #include "UARTTx_queue.h"
-#include "motors_queue.h"
 
 typedef enum
 {
@@ -26,6 +26,6 @@ typedef struct
 
 } MOTORS_DATA;
 
-int motors_fsm(MOTORS_DATA *motorsState, uint8_t type, uint8_t value);
+int motors_fsm(MOTORS_DATA *motorsState, uint32_t type, uint32_t value);
 
-#endif /* MOTORS_STATE_H_ */
+#endif /* PID_STATE_H_ */

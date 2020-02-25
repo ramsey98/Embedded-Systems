@@ -34,22 +34,32 @@ void *sensorThread(void *arg0)
 void timerCallback(Timer_Handle myHandle)
 {
     dbgOutputLoc(ENTER_ISR_TIMER2);
+    int sent = 0, result = 0;
+    //int sent = sendPIDMsgToMotorsQ();
+    if(sent == -1)
+    {
+        ERROR;
+    }
+
     uint16_t adcValue;
     uint32_t adcValueMicroVolt;
     int_fast16_t res = ADC_convert(adc, &adcValue);
-    int result;
     if (res == ADC_STATUS_SUCCESS)
     {
         adcValueMicroVolt = ADC_convertRawToMicroVolts(adc, adcValue);
         result = conversion(adcValueMicroVolt);
-    }
-    if (result != -1)
-    {
-        sendSensorMsgToQ(result);
-    }
-    else
-    {
-        ERROR;
+        if (result != -1)
+        {
+            sent = sendSensorMsgToQ(result);
+            if(sent == -1)
+            {
+                ERROR;
+            }
+        }
+        else
+        {
+            ERROR;
+        }
     }
     dbgOutputLoc(LEAVE_ISR_TIMER2);
 }

@@ -8,16 +8,16 @@
 #include "debug.h"
 #include "pixy.h"
 #include "capture.h"
-#include "motors.h"
 #include "sensor.h"
 #include "test.h"
 #include <pthread.h>
+#include <PID.h>
 
 #define THREADSTACKSIZE (1024)
 
 void *mainThread(void *arg0)
 {
-    pthread_t capture, UARTTx, motors, test, UARTDebug;//, mqtt; //pixy, sensor;
+    pthread_t UARTTx, PID, test, UARTDebug;//, mqtt; //pixy, sensor;
     pthread_attr_t attrs;
     struct sched_param  priParam;
     int retc;
@@ -32,14 +32,14 @@ void *mainThread(void *arg0)
 
     //createSensorQueue();
     //createPixyQueue();
-    createCaptureQueue();
-    createMotorsQueue();
+    createPIDQueue();
     createUARTTxQueue();
     createUARTDebugQueue();
     //createMQTTQueue();
 
     dbgUARTInit();
     dbgGPIOInit();
+    captureInit();
 
     pthread_attr_init(&attrs);
     detachState = PTHREAD_CREATE_DETACHED;
@@ -71,13 +71,7 @@ void *mainThread(void *arg0)
     }
     */
 
-    retc = pthread_create(&capture, &attrs, captureThread, NULL);
-    if (retc != 0)
-    {
-        ERROR;
-    }
-
-    retc = pthread_create(&motors, &attrs, motorsThread, NULL);
+    retc = pthread_create(&PID, &attrs, PIDThread, NULL);
     if (retc != 0)
     {
         ERROR;
