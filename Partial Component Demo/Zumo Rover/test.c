@@ -136,6 +136,7 @@ void tests(test_num* num)
         sendLeftForwardMsgToMotorsQ(0x00);
         sendRightForwardMsgToMotorsQ(0x00);
         *num = test10;
+        break;
     case test10:
         //Pause & Resume
         sendLeftForwardMsgToMotorsQ(0x3F);
