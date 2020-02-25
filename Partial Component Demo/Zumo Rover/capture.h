@@ -15,6 +15,8 @@
 #include <ti/drivers/Capture.h>
 #include <ti/drivers/dpl/SemaphoreP.h>
 
+#define LINECOUNT (12)
+#define MINUTE (60)
 #define SECOND (1000000)
 
 void *captureThread(void *arg0);

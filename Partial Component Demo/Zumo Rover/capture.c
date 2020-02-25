@@ -106,7 +106,7 @@ void capture0Callback(Capture_Handle handle, uint32_t interval)
 {
     curInterval0 = interval;
     //SemaphoreP_post(captureSem0);
-    uint8_t freq = SECOND/curInterval0;
+    uint8_t freq = ((SECOND/curInterval1)/LINECOUNT)*MINUTE;
     int success = sendLeftMsgToCapQ(freq);
     if(success == -1)
     {
@@ -118,7 +118,7 @@ void capture1Callback(Capture_Handle handle, uint32_t interval)
 {
     curInterval1 = interval;
     //SemaphoreP_post(captureSem1);
-    uint8_t freq = SECOND/curInterval1;
+    uint8_t freq = ((SECOND/curInterval1)/LINECOUNT)*MINUTE;
     int success = sendRightMsgToCapQ(freq);
     if(success == -1)
     {

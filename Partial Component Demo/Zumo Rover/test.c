@@ -66,9 +66,12 @@ void tests(test_num* num)
         *num = test6;
         break;
     case test6:
-        //both motors forward half speed
+        //both motors forward then backward half speed
         sendLeftForwardMsgToMotorsQ(0x3F);
         sendRightForwardMsgToMotorsQ(0x3F);
+        sleep(3);
+        sendLeftReverseMsgToMotorsQ(0x3F);
+        sendRightReverseMsgToMotorsQ(0x3F);
         sleep(3);
         sendLeftForwardMsgToMotorsQ(0x00);
         sendRightForwardMsgToMotorsQ(0x00);
