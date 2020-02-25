@@ -6,7 +6,7 @@
  */
 #include "spi.h"
 
-unsigned char txBufferInfo[6] = {
+uint8_t txBufferInfo[4] = {
                                    0xae,  // first byte of no_checksum_sync (little endian -> least-significant byte first)
                                    0xc1,  // second byte of no_checksum_sync
                                    0x0e,  // this is the version request type
@@ -37,16 +37,14 @@ void spiInit()
     SPI_init();
     dbgOutputLoc(SPI_INIT);
     SPI_Params_init(&params);
-    params.transferTimeout = 1000;
     params.bitRate  = 2000000;
     params.transferMode = SPI_MODE_CALLBACK;
     params.frameFormat = SPI_POL0_PHA1;
     params.transferCallbackFxn = spiCallback;
-    params.dataSize = 8;
     handle = SPI_open(CONFIG_SPI_0, &params);
 
     int i;
-    for(i=0; i < SPI_TX_LENGTH; i++) {
+    for(i=0; i < SPI_MSG_LENGTH; i++) {
         if(i < 4) {
             txBuffer[i] = txBufferInfo[i];
         } else {
@@ -54,7 +52,7 @@ void spiInit()
         }
     }
 
-    for(i=0; i < SPI_RX_LENGTH; i++) {
+    for(i=0; i < SPI_MSG_LENGTH; i++) {
         rxBuffer[i] = 0;
     }
 
@@ -66,8 +64,9 @@ void spiInit()
 void spiTransfer()
 {
     dbgOutputLoc(SPI_BEGIN_TRANSFER);
-    spiTransaction.count = SPI_TX_LENGTH;
+    spiTransaction.count = SPI_MSG_LENGTH;
     spiTransaction.txBuf = (void *) txBuffer;
     spiTransaction.rxBuf = (void *) rxBuffer;
     SPI_transfer(handle, &spiTransaction);
+    //dbgOutputLoc(SPI_WAIT_CALLBACK);
 }
