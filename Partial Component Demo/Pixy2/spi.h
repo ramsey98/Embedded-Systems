@@ -15,7 +15,7 @@
 #include "debug.h"
 
 #define SPI_RX_LENGTH 128
-#define SPI_TX_LENGTH 6
+#define SPI_TX_LENGTH 128
 
 void spiInit();
 void spiTransfer();

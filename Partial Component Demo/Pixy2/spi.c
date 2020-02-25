@@ -9,18 +9,25 @@
 unsigned char txBufferInfo[6] = {
                                    0xae,  // first byte of no_checksum_sync (little endian -> least-significant byte first)
                                    0xc1,  // second byte of no_checksum_sync
-                                   0x20,  // this is the version request type
-                                   0x02,   // data_length is 2
-                                   0xff,
-                                   0xff,
+                                   0x0e,  // this is the version request type
+                                   0x00   // data_length is 2
                                 };
 
 void spiCallback(SPI_Handle handle, SPI_Transaction *transaction)
 {
+   dbgOutputLoc(SPI_CALLBACK);
    if(transaction->status == SPI_TRANSFER_COMPLETED)
    {
-       dbgUARTStr((char *)rxBuffer);
-       dbgOutputLoc(SPI_END_TRANSFER);
+       dbgOutputLoc(SPI_SUCCESS_TRANSFER);
+       dbgUARTStr((char *) (*transaction).rxBuf);
+
+       //if rx_buffer[2] == 33
+
+       //if code == etc
+   }
+   else if(transaction->status == SPI_TRANSFER_FAILED) {
+       dbgOutputLoc(SPI_FAIL_TRANSFER);
+       halt();
    }
    return;
 }
@@ -40,11 +47,15 @@ void spiInit()
 
     int i;
     for(i=0; i < SPI_TX_LENGTH; i++) {
-        txBuffer[i] = txBufferInfo[i];
+        if(i < 4) {
+            txBuffer[i] = txBufferInfo[i];
+        } else {
+            txBuffer[i] = 0xff;
+        }
     }
 
     for(i=0; i < SPI_RX_LENGTH; i++) {
-        rxBuffer[i] = 1;
+        rxBuffer[i] = 0;
     }
 
     if (!handle) {
