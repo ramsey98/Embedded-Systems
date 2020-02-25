@@ -13,10 +13,11 @@
 #include "ti_drivers_config.h"
 #include "FreeRTOS.h"
 #include "debug.h"
+#include "string.h"
 
-#define SPI_RX_LENGTH 128
-#define SPI_TX_LENGTH 128
+#define SPI_MSG_LENGTH 128
 
+void spiCallback(SPI_Handle handle, SPI_Transaction *transaction);
 void spiInit();
 void spiTransfer();
 
@@ -24,7 +25,7 @@ SPI_Handle      handle;
 SPI_Params      params;
 SPI_Transaction spiTransaction;
 
-unsigned char rxBuffer[SPI_RX_LENGTH];
-unsigned char txBuffer[SPI_TX_LENGTH];
+uint8_t rxBuffer[SPI_MSG_LENGTH];
+uint8_t txBuffer[SPI_MSG_LENGTH];
 
 #endif /* SPI_H_ */
