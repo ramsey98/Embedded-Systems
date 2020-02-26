@@ -11,31 +11,46 @@ static QueueHandle_t xQueue = NULL;
 void *UARTDebugThread(void *arg0)
 {
     dbgOutputLoc(ENTER_TASK);
-    uint16_t value, type;
-    int received = 0;
+    uint32_t value, type;
     dbgOutputLoc(WHILE1);
     while(1)
     {
-        received = receiveFromUARTDebugQ(&type, &value);
-        if(received == -1)
+        receiveFromUARTDebugQ(&type, &value);
+        switch(type)
         {
-            ERROR;
-        }
-        else
-        {
-            if(type == LEFTCAP)
+            case LEFTCAP:
             {
                 dbgUARTStr("Left Motor:");
                 dbgUARTNum(value);
+                break;
             }
-            else if(type == RIGHTCAP)
+            case RIGHTCAP:
             {
                 dbgUARTStr("Right Motor:");
                 dbgUARTNum(value);
+                break;
             }
-            else if(type == TIMER)
+            case TIMER:
             {
                 dbgUARTStr("Timer");
+                break;
+            }
+            case LEFTCOUNT:
+            {
+                dbgUARTStr("Left Count:");
+                dbgUARTNum(value);
+                break;
+            }
+            case RIGHTCOUNT:
+            {
+                dbgUARTStr("Right Count:");
+                dbgUARTNum(value);
+                break;
+            }
+            default:
+            {
+                dbgUARTStr("Invalid Debug");
+                break;
             }
         }
     }
@@ -43,44 +58,39 @@ void *UARTDebugThread(void *arg0)
 
 void createUARTDebugQueue()
 {
-    xQueue = xQueueCreate(16, sizeof(uint32_t));
+    xQueue = xQueueCreate(16, sizeof(uint64_t));
     if(xQueue == NULL)
     {
         ERROR;
     }
 }
 
-int sendMsgToUARTDebugQ(uint16_t type, uint16_t value)
+void sendMsgToUARTDebugQ(uint32_t type, uint32_t value)
 {
-    int ret = 0;
-    BaseType_t success;
     dbgOutputLoc(BEFORE_SEND_QUEUE_ISR_TIMER1);
-    uint32_t msg = (type << UARTSHIFT) | value;
-    success = xQueueSend(xQueue, (void *) &msg, pdFALSE);
+    uint64_t msg1 = type;
+    uint64_t msg = (msg1 << UARTSHIFT) | value;
+    BaseType_t success = xQueueSend(xQueue, (void *) &msg, pdFALSE);
     if(success == pdFALSE)
     {
-        ret = -1;
+        ERROR;
     }
     dbgOutputLoc(AFTER_SEND_QUEUE_ISR_TIMER1);
-    return ret;
 }
 
-int receiveFromUARTDebugQ(uint16_t * type, uint16_t * value)
+void receiveFromUARTDebugQ(uint32_t * type, uint32_t * value)
 {
-    int ret = 0;
-    BaseType_t success;
     dbgOutputLoc(BEFORE_RECEIVE_QUEUE);
-    uint32_t received;
-    success = xQueueReceive(xQueue, &received, portMAX_DELAY);
+    uint64_t received;
+    BaseType_t success = xQueueReceive(xQueue, &received, portMAX_DELAY);
     if(success == pdFALSE)
     {
-        ret = -1;
+        ERROR;
     }
     else
     {
-        *type = received >> 16;
+        *type = received >> UARTSHIFT;
         *value = received;
     }
     dbgOutputLoc(AFTER_RECEIVE_QUEUE);
-    return ret;
 }

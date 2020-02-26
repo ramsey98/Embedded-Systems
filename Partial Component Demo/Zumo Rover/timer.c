@@ -31,17 +31,10 @@ void timerInit()
 void timerCallback(Timer_Handle myHandle)
 {
     dbgOutputLoc(ENTER_ISR_TIMER2);
-    int sent = sendMsgToPIDQ(TIMER, 0);
-    if(sent == -1)
-    {
-        ERROR;
-    }
-    else
-    {
-        clearCounts();
-        pollSensor();
-        //pollPixy();
-    }
+    sendMsgToPIDQ(TIMER, 0);
+    clearCounts();
+    pollSensor();
+    //pollPixy();
     dbgOutputLoc(LEAVE_ISR_TIMER2);
 }
 

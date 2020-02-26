@@ -52,23 +52,18 @@ void captureInit()
 
 void captureCallback(Capture_Handle handle, uint32_t interval)
 {
-    int sent;
     curInterval = interval;
     if(handle == capture0)
     {
-        sent = sendMsgToPIDQ(LEFTCAP, curInterval);
+        sendMsgToPIDQ(LEFTCAP, curInterval);
         leftCount++;
     }
     else if(handle == capture1)
     {
-        sent = sendMsgToPIDQ(RIGHTCAP, curInterval);
+        sendMsgToPIDQ(RIGHTCAP, curInterval);
         rightCount++;
     }
     else
-    {
-        ERROR;
-    }
-    if(sent == -1)
     {
         ERROR;
     }

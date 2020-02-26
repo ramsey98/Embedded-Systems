@@ -24,11 +24,13 @@
 #define DECEL (0x00000009)
 #define PAUSE (0x0000000A)
 #define RESUME (0x0000000B)
+#define LEFTCOUNT (0x0000000C)
+#define RIGHTCOUNT (0x0000000D)
 
 #define PIDSHIFT (32)
 
-int sendMsgToPIDQ(uint32_t type, uint32_t value);
-int receiveFromPIDQ(uint32_t * type, uint32_t * value);
+void sendMsgToPIDQ(uint32_t type, uint32_t value);
+void receiveFromPIDQ(uint32_t * type, uint32_t * value);
 void createPIDQueue();
 
 #endif /* PID_QUEUE_H_ */

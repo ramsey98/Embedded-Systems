@@ -1,5 +1,5 @@
 /*
- * motors.h
+ * PID.h
  *
  *  Created on: Feb 17, 2020
  *      Author: Holden Ramsey
@@ -7,7 +7,6 @@
 
 #ifndef PID_H_
 #define PID_H_
-
 
 #include "capture.h"
 #include "debug.h"
@@ -17,8 +16,7 @@
 
 typedef struct
 {
-    uint8_t leftSpeed, rightSpeed, leftDir, rightDir;
-    int paused;
+    uint8_t realLeftSpeed, realRightSpeed, setLeftSpeed, setRightSpeed, leftDir, rightDir, paused;
 } MOTORS_DATA;
 
 void motorsUARTInit();

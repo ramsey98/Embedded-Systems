@@ -81,6 +81,7 @@ void tests(test_num* num)
         break;
     case test8:
         //Accel then Decel
+        sendMsgToPIDQ(FORWARD, 0x00);
         sendMsgToPIDQ(ACCEL, 25);
         sleep(1);
         sendMsgToPIDQ(ACCEL, 25);

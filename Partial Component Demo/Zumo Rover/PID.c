@@ -1,5 +1,5 @@
 /*
- * motors.c
+ * PID.c
  *
  *  Created on: Feb 17, 2020
  *      Author: Holden Ramsey
@@ -24,48 +24,58 @@ void motorsUARTInit()
     {
         ERROR;
     }
-    int sent = sendMsgToUARTTxQ(INIT_CONTROLLER, EMPTY);
-    if(sent == -1)
-    {
-        ERROR;
-    }
+    sendMsgToUARTTxQ(INIT_CONTROLLER, EMPTY);
 }
 
 void updateMotors(MOTORS_DATA motorsState)
 {
-    int sent = 0;
     if(motorsState.paused == 0)
     {
         if(motorsState.leftDir == 0)
         {
-            sent = sendMsgToUARTTxQ(motorsState.leftSpeed, M0_FORWARD_8BIT);
+            sendMsgToUARTTxQ(motorsState.setLeftSpeed, M0_FORWARD_8BIT);
         }
         else
         {
-            sent = sendMsgToUARTTxQ(motorsState.leftSpeed, M0_REVERSE_8BIT);
+            sendMsgToUARTTxQ(motorsState.setLeftSpeed, M0_REVERSE_8BIT);
         }
         if(motorsState.rightDir == 0)
         {
-            sent = sendMsgToUARTTxQ(motorsState.rightSpeed, M1_FORWARD_8BIT);
+            sendMsgToUARTTxQ(motorsState.setRightSpeed, M1_FORWARD_8BIT);
         }
         else
         {
-            sent = sendMsgToUARTTxQ(motorsState.rightSpeed, M1_REVERSE_8BIT);
+            sendMsgToUARTTxQ(motorsState.setRightSpeed, M1_REVERSE_8BIT);
         }
     }
     else if(motorsState.paused == 1)
     {
-        sent = sendMsgToUARTTxQ(0, M0_FORWARD_8BIT);
-        sent = sendMsgToUARTTxQ(0, M1_FORWARD_8BIT);
-    }
-    if(sent == -1)
-    {
-        ERROR;
+        sendMsgToUARTTxQ(0, M0_FORWARD_8BIT);
+        sendMsgToUARTTxQ(0, M1_FORWARD_8BIT);
     }
 }
 
 void updateValues(MOTORS_DATA *motorsState, uint32_t type, uint32_t value)
 {
+    //this is the PID adjustment
+    /*
+    if(motorsState->setLeftSpeed < motorsState->realLeftSpeed)
+    {
+        motorsState->setLeftSpeed--;
+    }
+    else if(motorsState->setLeftSpeed > motorsState->realLeftSpeed)
+    {
+        motorsState->setLeftSpeed++;
+    }
+    if(motorsState->setLeftSpeed < motorsState->realRightSpeed)
+    {
+        motorsState->setRightSpeed--;
+    }
+    else if(motorsState->setRightSpeed > motorsState->realRightSpeed)
+    {
+        motorsState->setRightSpeed++;
+    }
+    */
     switch(type)
     {
         case PAUSE:
@@ -79,67 +89,67 @@ void updateValues(MOTORS_DATA *motorsState, uint32_t type, uint32_t value)
         case TURNLEFT:
         {
             motorsState->leftDir = 0;
-            motorsState->leftSpeed = value;
+            motorsState->setLeftSpeed = value;
             motorsState->rightDir = 1;
-            motorsState->rightSpeed = value/2;
+            motorsState->setRightSpeed = value/2;
         }
         case TURNRIGHT:
         {
             motorsState->leftDir = 1;
-            motorsState->leftSpeed = value/2;
+            motorsState->setLeftSpeed = value/2;
             motorsState->rightDir = 0;
-            motorsState->rightSpeed = value;
+            motorsState->setRightSpeed = value;
         }
         case FORWARD:
         {
             motorsState->leftDir = 0;
-            motorsState->leftSpeed = value;
+            motorsState->setLeftSpeed = value;
             motorsState->rightDir = 0;
-            motorsState->rightSpeed = value;
+            motorsState->setRightSpeed = value;
         }
         case REVERSE:
         {
             motorsState->leftDir = 1;
-            motorsState->leftSpeed = value;
+            motorsState->setLeftSpeed = value;
             motorsState->rightDir = 1;
-            motorsState->rightSpeed = value;
+            motorsState->setRightSpeed = value;
         }
         case ACCEL:
         {
-            if((motorsState->leftSpeed + value) < 255)
+            if((motorsState->setLeftSpeed + value) < 255)
             {
-                motorsState->leftSpeed += value;
+                motorsState->setLeftSpeed += value;
             }
             else
             {
-                motorsState->leftSpeed = 255;
+                motorsState->setLeftSpeed = 255;
             }
-            if((motorsState->rightSpeed + value) < 255)
+            if((motorsState->setRightSpeed + value) < 255)
             {
-                motorsState->rightSpeed += value;
+                motorsState->setRightSpeed += value;
             }
             else
             {
-                motorsState->rightSpeed = 255;
+                motorsState->setRightSpeed = 255;
             }
         }
         case DECEL:
         {
-            if(motorsState->leftSpeed > value)
+            if(motorsState->setLeftSpeed > value)
             {
-                motorsState->leftSpeed -= value;
+                motorsState->setLeftSpeed -= value;
             }
             else
             {
-                motorsState->leftSpeed = 0;
+                motorsState->setLeftSpeed = 0;
             }
-            if(motorsState->rightSpeed > value)
+            if(motorsState->setRightSpeed > value)
             {
-                motorsState->rightSpeed -= value;
+                motorsState->setRightSpeed -= value;
             }
             else
             {
-                motorsState->rightSpeed = 0;
+                motorsState->setRightSpeed = 0;
             }
         }
         default:
@@ -153,48 +163,48 @@ void *PIDThread(void *arg0)
 {
     dbgOutputLoc(ENTER_TASK);
     motorsUARTInit();
-    int received = 0, leftCount = 0, rightCount = 0;
+    int leftCount = 0, rightCount = 0;
     uint32_t type = 0, value = 0;
     MOTORS_DATA motorsState;
-    motorsState.leftSpeed = 0;
-    motorsState.rightSpeed = 0;
+    motorsState.setLeftSpeed = 0;
+    motorsState.setRightSpeed = 0;
+    motorsState.realLeftSpeed = 0;
+    motorsState.realRightSpeed = 0;
     motorsState.leftDir = 0;
     motorsState.rightDir = 0;
     motorsState.paused = 0;
     while(1)
     {
-        received = receiveFromPIDQ(&type, &value);
-        if(received == -1)
+        receiveFromPIDQ(&type, &value);
+        if(type == TIMER)
         {
-            ERROR;
+            if(leftCount != getLeftCount() | rightCount != getRightCount())
+            {
+                ERROR;
+            }
+            updateMotors(motorsState);
+            sendMsgToUARTDebugQ(TIMER, value);
+            sendMsgToUARTDebugQ(LEFTCAP, motorsState.realLeftSpeed);
+            sendMsgToUARTDebugQ(RIGHTCAP, motorsState.realRightSpeed);
+            sendMsgToUARTDebugQ(LEFTCOUNT, leftCount);
+            sendMsgToUARTDebugQ(RIGHTCOUNT, rightCount);
+            leftCount = 0;
+            rightCount = 0;
+        }
+        else if(type == LEFTCAP)
+        {
+            //1.6ms is full speed, need to measure min speed
+            motorsState.realLeftSpeed = value;
+            leftCount++;
+        }
+        else if(type == RIGHTCAP)
+        {
+            motorsState.realRightSpeed = value;
+            rightCount++;
         }
         else
         {
-            if(type == TIMER)
-            {
-                if(leftCount != getLeftCount() | rightCount != getRightCount())
-                {
-                    ERROR;
-                }
-                updateMotors(motorsState);
-                leftCount = 0;
-                rightCount = 0;
-                sendMsgToUARTDebugQ(TIMER, value);
-            }
-            else if(type == LEFTCAP)
-            {
-                sendMsgToUARTDebugQ(LEFTCAP, value);
-                leftCount++;
-            }
-            else if(type == RIGHTCAP)
-            {
-                sendMsgToUARTDebugQ(RIGHTCAP, value);
-                rightCount++;
-            }
-            else
-            {
-                updateValues(&motorsState, type, value);
-            }
+            updateValues(&motorsState, type, value);
         }
     }
 }
@@ -204,27 +214,19 @@ void *UARTTxThread(void *arg0)
     dbgOutputLoc(ENTER_TASK);
     uint8_t byte1;
     uint16_t value;
-    int received = 0;
     dbgOutputLoc(WHILE1);
     while(1)
     {
-        received = receiveFromUARTTxQ(&value);
-        if(received == -1)
+        receiveFromUARTTxQ(&value);
+        byte1 = value & 0xFF;
+        if(byte1 == 0)
         {
-            ERROR;
+            byte1 = value >> 8;
+            UART_write(motors_uart, &byte1, sizeof(byte1));
         }
         else
         {
-            byte1 = value & 0xFF;
-            if(byte1 == 0)
-            {
-                byte1 = value >> 8;
-                UART_write(motors_uart, &byte1, sizeof(byte1));
-            }
-            else
-            {
-                UART_write(motors_uart, &value, sizeof(value));
-            }
+            UART_write(motors_uart, &value, sizeof(value));
         }
     }
 }
