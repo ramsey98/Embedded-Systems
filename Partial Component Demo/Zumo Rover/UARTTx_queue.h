@@ -40,8 +40,8 @@
 #define M1_REVERSE (0x8C) //motor speed
 #define M1_REVERSE_8BIT (0x8D) //speed+128
 
-int sendMsgToUARTTxQ(uint8_t byte1, uint8_t byte2);
-int receiveFromUARTTxQ(uint16_t * value);
+void sendMsgToUARTTxQ(uint8_t byte1, uint8_t byte2);
+void receiveFromUARTTxQ(uint16_t * value);
 void createUARTTxQueue();
 
 #endif /* UARTTX_QUEUE_H_ */

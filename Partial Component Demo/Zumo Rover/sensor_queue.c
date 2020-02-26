@@ -17,37 +17,30 @@ void createSensorQueue()
     }
 }
 
-int sendSensorMsgToQ(uint16_t mmDist)
+void sendSensorMsgToQ(uint16_t mmDist)
 {
-    int ret = 0;
-    BaseType_t success;
     dbgOutputLoc(BEFORE_SEND_QUEUE_ISR_TIMER2);
-
     uint16_t msg = mmDist;
-    success = xQueueSendFromISR(xQueue, (void *) &msg, pdFALSE);
+    BaseType_t success = xQueueSendFromISR(xQueue, (void *) &msg, pdFALSE);
     if(success == pdFALSE)
     {
-        ret = -1;
+        ERROR;
     }
     dbgOutputLoc(AFTER_SEND_QUEUE_ISR_TIMER2);
-    return ret;
 }
 
-int receiveFromSensorQ(uint16_t * sensorVal)
+void receiveFromSensorQ(uint16_t * sensorVal)
 {
-    int ret = 0;
-    BaseType_t success;
     dbgOutputLoc(BEFORE_RECEIVE_QUEUE);
     uint32_t received;
-    success = xQueueReceive(xQueue, &received, portMAX_DELAY);
+    BaseType_t success = xQueueReceive(xQueue, &received, portMAX_DELAY);
     if(success == pdFALSE)
     {
-        ret = -1;
+        ERROR;
     }
     else
     {
         *sensorVal = received;
     }
     dbgOutputLoc(AFTER_RECEIVE_QUEUE);
-    return ret;
 }

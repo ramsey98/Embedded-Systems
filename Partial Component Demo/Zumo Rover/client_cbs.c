@@ -219,6 +219,17 @@ void MqttClientCallback(int32_t event,
                 if(recvMetaData->retain)
                 {
                     //process trirover state here
+                    if(msgType == MQTT_STATE)
+                    {
+                        if(state == 0)//moving
+                        {
+                            sendMsgToPIDQ(RESUME, 0);
+                        }
+                        else if(state == 1)//loading
+                        {
+                            sendMsgToPIDQ(PAUSE, 0);
+                        }
+                    }
                 }
             }
             break;

@@ -8,23 +8,18 @@
 #ifndef SENSOR_H_
 #define SENSOR_H_
 
-#include <ti/drivers/Timer.h>
-#include <ti/drivers/ADC.h>
 
+#include <ti/drivers/ADC.h>
 #include "debug.h"
 #include "sensor_queue.h"
 #include "sensor_state.h"
-#include "pixy_queue.h"
 
-#define TIMER_PERIOD (100000)
+#define DICTLEN (100)
 
-//Timer functions
 void *sensorThread(void *arg0);
-void timerCallback(Timer_Handle myHandle);
-void timerInit();
-
-//ADC function
-int conversion(uint32_t sensorVal);
 void adcInit();
+void pollSensor();
+int conversion(uint32_t sensorVal);
+
 
 #endif /* SENSOR_H_ */

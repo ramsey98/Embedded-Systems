@@ -8,64 +8,23 @@
 #include "sensor.h"
 
 static ADC_Handle adc;
+static int sensorValuesLookup[DICTLEN] = {0};
+static int sensorDistLookup[DICTLEN] = {0};
 
 void *sensorThread(void *arg0)
 {
-    adcInit();
-    timerInit();
     dbgOutputLoc(ENTER_TASK);
+    adcInit();
     SENSOR_DATA curState;
     curState.state = Sensor_Init;
     uint16_t sensorVal = 0;
-    int success = sensor_fsm(&curState, sensorVal);
-    int received = 0;
+    sensor_fsm(&curState, sensorVal);
     dbgOutputLoc(WHILE1);
     while(1)
     {
-        received = receiveFromSensorQ(&sensorVal);
-        success = sensor_fsm(&curState, sensorVal);
-        if(success == -1 || received == -1)
-        {
-            ERROR;
-        }
+        receiveFromSensorQ(&sensorVal);
+        sensor_fsm(&curState, sensorVal);
     }
-}
-
-void timerCallback(Timer_Handle myHandle)
-{
-    dbgOutputLoc(ENTER_ISR_TIMER2);
-    uint16_t adcValue;
-    uint32_t adcValueMicroVolt;
-    int_fast16_t res = ADC_convert(adc, &adcValue);
-    int result;
-    if (res == ADC_STATUS_SUCCESS)
-    {
-        adcValueMicroVolt = ADC_convertRawToMicroVolts(adc, adcValue);
-        result = conversion(adcValueMicroVolt);
-    }
-    if (result != -1)
-    {
-        sendSensorMsgToQ(result);
-    }
-    else
-    {
-        ERROR;
-    }
-    dbgOutputLoc(LEAVE_ISR_TIMER2);
-}
-
-int conversion(uint32_t sensorVal)
-{
-    //convert to mm here
-    int sensorConv = sensorVal/1000;
-    /*
-    int result;
-    if (sensorConv>1300)
-        result = 10;
-    else if (sensorConv < 200)
-        result = 80;
-    */
-    return sensorConv;
 }
 
 void adcInit()
@@ -80,26 +39,38 @@ void adcInit()
     }
 }
 
-void timerInit()
+void pollSensor()
 {
-    Timer_Handle timer;
-    Timer_Params timer_params;
-    Timer_Params_init(&timer_params);
-    timer_params.period = TIMER_PERIOD;
-    timer_params.periodUnits = Timer_PERIOD_US;
-    timer_params.timerMode = Timer_CONTINUOUS_CALLBACK;
-    timer_params.timerCallback = timerCallback;
-
-    timer = Timer_open(CONFIG_TIMER_0, &timer_params);
-    if (timer == NULL)
+    int result = 0;
+    uint16_t adcValue;
+    uint32_t adcValueMicroVolt;
+    int_fast16_t res = ADC_convert(adc, &adcValue);
+    if (res == ADC_STATUS_SUCCESS)
     {
-        ERROR;
+        adcValueMicroVolt = ADC_convertRawToMicroVolts(adc, adcValue);
+        result = conversion(adcValueMicroVolt);
+        if (result != -1)
+        {
+            sendSensorMsgToQ(result);
+        }
+        else
+        {
+            ERROR;
+        }
     }
+}
 
-    if (Timer_start(timer) == Timer_STATUS_ERROR)
+int conversion(uint32_t sensorVal)
+{
+    int i, sensorConv = 0;
+    for(i = 0; i < DICTLEN; i++)
     {
-        ERROR;
+        if(sensorVal < sensorValuesLookup[i])
+        {
+            sensorConv = sensorDistLookup[i];
+            break;
+        }
     }
-
+    return sensorConv;
 }
 

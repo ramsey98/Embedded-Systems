@@ -10,12 +10,12 @@
 
 #include "debug.h"
 #include "queue.h"
+#include "PID_queue.h"
 
-int sendLeftCapMsgToUARTDebugQ(uint8_t value);
-int sendRightCapMsgToUARTDebugQ(uint8_t value);
-int receiveFromUARTDebugQ(uint8_t * type, uint8_t * value);
+#define UARTSHIFT (32)
+void sendMsgToUARTDebugQ(uint32_t type, uint32_t value);
+void receiveFromUARTDebugQ(uint32_t * type, uint32_t * value);
 void createUARTDebugQueue();
-
-
+void *UARTDebugThread(void *arg0);
 
 #endif /* UARTDEBUG_QUEUE_H_ */

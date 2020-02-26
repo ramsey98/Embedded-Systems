@@ -11,8 +11,8 @@
 #include "debug.h"
 #include "queue.h"
 
-int sendSensorMsgToQ(uint16_t mmDist);
-int receiveFromSensorQ(uint16_t * sensorVal);
+void sendSensorMsgToQ(uint16_t mmDist);
+void receiveFromSensorQ(uint16_t * sensorVal);
 void createSensorQueue();
 
 #endif /* SENSOR_QUEUE_H_ */

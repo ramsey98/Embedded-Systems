@@ -9,18 +9,15 @@
 #define CAPTURE_H_
 
 #include "debug.h"
-#include "capture_state.h"
-#include "capture_queue.h"
+#include "UARTDebug_queue.h"
+#include "PID_queue.h"
 #include "mqtt_queue.h"
 #include <ti/drivers/Capture.h>
-#include <ti/drivers/dpl/SemaphoreP.h>
 
-#define SECOND (1000000)
-
-void *captureThread(void *arg0);
-void capture0Callback(Capture_Handle handle, uint32_t interval);
-void capture0Init();
-void capture1Callback(Capture_Handle handle, uint32_t interval);
-void capture1Init();
+void captureCallback(Capture_Handle handle, uint32_t interval);
+void captureInit();
+void clearCounts();
+int getLeftCount();
+int getRightCount();
 
 #endif /* CAPTURE_H_ */

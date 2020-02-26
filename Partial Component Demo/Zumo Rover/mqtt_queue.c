@@ -17,61 +17,51 @@ void createMQTTQueue()
     }
 }
 
-int sendStateMsgToMQTTQ(uint8_t state)
+void sendMsgToMQTTQ(uint8_t type, uint8_t value)
 {
-    int ret = 0;
-    BaseType_t success;
-    dbgOutputLoc(BEFORE_SEND_QUEUE_ISR_TIMER1);
-    MQTTMsg msg = {MQTT_STATE, state, NULL, NULL};
-    success = xQueueSend(xQueue, (void *) &msg, pdFALSE);
+    dbgOutputLoc(BEFORE_SEND_QUEUE_ISR_TIMER);
+    MQTTMsg msg;
+    switch(type)
+    {
+        case MQTT_STATE:
+        {
+            msg.ID = MQTT_STATE;
+            msg.state = value;
+            break;
+        }
+        case MQTT_LEFTMOTOR:
+        {
+            msg.ID = MQTT_LEFTMOTOR;
+            msg.left = value;
+            break;
+        }
+        case MQTT_RIGHTMOTOR:
+        {
+            msg.ID = MQTT_RIGHTMOTOR;
+            msg.right = value;
+            break;
+        }
+        default:
+        {
+            ERROR;
+        }
+    }
+    BaseType_t success = xQueueSend(xQueue, (void *) &msg, pdFALSE);
     if(success == pdFALSE)
     {
-        ret = -1;
+        ERROR;
     }
-    dbgOutputLoc(AFTER_SEND_QUEUE_ISR_TIMER1);
-    return ret;
+    dbgOutputLoc(AFTER_SEND_QUEUE_ISR_TIMER);
 }
 
-int sendLeftMotorMsgToMQTTQ(uint8_t leftmotor)
+void receiveFromMQTTQ(uint8_t *index, uint8_t *state, uint8_t *leftmotor, uint8_t *rightmotor)
 {
-    int ret = 0;
-    BaseType_t success;
-    dbgOutputLoc(BEFORE_SEND_QUEUE_ISR_TIMER1);
-    MQTTMsg msg = {MQTT_LEFTMOTOR, NULL, leftmotor, NULL};
-    success = xQueueSend(xQueue, (void *) &msg, pdFALSE);
-    if(success == pdFALSE)
-    {
-        ret = -1;
-    }
-    dbgOutputLoc(AFTER_SEND_QUEUE_ISR_TIMER1);
-    return ret;
-}
-
-int sendRightMotorMsgToMQTTQ(uint8_t rightmotor)
-{
-    int ret = 0;
-    BaseType_t success;
-    dbgOutputLoc(BEFORE_SEND_QUEUE_ISR_TIMER1);
-    MQTTMsg msg = {MQTT_RIGHTMOTOR, NULL, NULL, rightmotor};
-    success = xQueueSend(xQueue, (void *) &msg, pdFALSE);
-    if(success == pdFALSE)
-    {
-        ret = -1;
-    }
-    dbgOutputLoc(AFTER_SEND_QUEUE_ISR_TIMER1);
-    return ret;
-}
-
-int receiveFromMQTTQ(uint8_t *index, uint8_t *state, uint8_t *leftmotor, uint8_t *rightmotor)
-{
-    int ret = 0;
-    BaseType_t success;
     dbgOutputLoc(BEFORE_RECEIVE_QUEUE);
     MQTTMsg received;
-    success = xQueueReceive(xQueue, &received, portMAX_DELAY);
+    BaseType_t success = xQueueReceive(xQueue, &received, portMAX_DELAY);
     if(success == pdFALSE)
     {
-        ret = -1;
+        ERROR;
     }
     else
     {
@@ -93,7 +83,6 @@ int receiveFromMQTTQ(uint8_t *index, uint8_t *state, uint8_t *leftmotor, uint8_t
         *index = received.ID;
     }
     dbgOutputLoc(AFTER_RECEIVE_QUEUE);
-    return ret;
 }
 
 

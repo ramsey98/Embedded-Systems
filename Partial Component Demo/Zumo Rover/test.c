@@ -49,105 +49,94 @@ void tests(test_num* num)
         break;
     case test4:
         //both motors forward max speed
-        sendLeftForwardMsgToMotorsQ(0x7F);
-        sendRightForwardMsgToMotorsQ(0x7F);
+        sendMsgToPIDQ(FORWARD, 0x7F);
         sleep(3);
-        sendLeftForwardMsgToMotorsQ(0x00);
-        sendRightForwardMsgToMotorsQ(0x00);
+        sendMsgToPIDQ(FORWARD, 0x00);
         *num = test5;
         break;
     case test5:
         //both motors reverse max speed
-        sendLeftReverseMsgToMotorsQ(0x7F);
-        sendRightReverseMsgToMotorsQ(0x7F);
+        sendMsgToPIDQ(REVERSE, 0x7F);
         sleep(3);
-        sendLeftReverseMsgToMotorsQ(0x00);
-        sendRightReverseMsgToMotorsQ(0x00);
+        sendMsgToPIDQ(REVERSE, 0x00);
         *num = test6;
         break;
     case test6:
-        //both motors forward half speed
-        sendLeftForwardMsgToMotorsQ(0x3F);
-        sendRightForwardMsgToMotorsQ(0x3F);
+        //both motors forward then backward half speed
+        sendMsgToPIDQ(FORWARD, 0x3F);
         sleep(3);
-        sendLeftForwardMsgToMotorsQ(0x00);
-        sendRightForwardMsgToMotorsQ(0x00);
+        sendMsgToPIDQ(REVERSE, 0x3F);
+        sleep(3);
+        sendMsgToPIDQ(REVERSE, 0x00);
         *num = test7;
         break;
     case test7:
         //turn right then left
-        sendLeftForwardMsgToMotorsQ(0x7F);
-        sendRightReverseMsgToMotorsQ(0x3F);
+        sendMsgToPIDQ(TURNRIGHT, 0x7F);
         sleep(3);
-        sendLeftReverseMsgToMotorsQ(0x3F);
-        sendRightForwardMsgToMotorsQ(0x7F);
+        sendMsgToPIDQ(TURNLEFT, 0x7F);
         sleep(3);
-        sendLeftForwardMsgToMotorsQ(0x00);
-        sendRightForwardMsgToMotorsQ(0x00);
+        sendMsgToPIDQ(FORWARD, 0x00);
         *num = test8;
         break;
     case test8:
         //Accel then Decel
-        sendLeftForwardMsgToMotorsQ(0x0);
-        sendRightForwardMsgToMotorsQ(0x0);
-        sendAccelMsgToMotorsQ(25);
+        sendMsgToPIDQ(FORWARD, 0x00);
+        sendMsgToPIDQ(ACCEL, 25);
         sleep(1);
-        sendAccelMsgToMotorsQ(25);
+        sendMsgToPIDQ(ACCEL, 25);
         sleep(1);
-        sendAccelMsgToMotorsQ(25);
+        sendMsgToPIDQ(ACCEL, 25);
         sleep(1);
-        sendAccelMsgToMotorsQ(25);
+        sendMsgToPIDQ(ACCEL, 25);
         sleep(1);
-        sendAccelMsgToMotorsQ(25);
+        sendMsgToPIDQ(ACCEL, 25);
         sleep(1);
-        sendDecelMsgToMotorsQ(25);
+        sendMsgToPIDQ(DECEL, 25);
         sleep(1);
-        sendDecelMsgToMotorsQ(25);
+        sendMsgToPIDQ(DECEL, 25);
         sleep(1);
-        sendDecelMsgToMotorsQ(25);
+        sendMsgToPIDQ(DECEL, 25);
         sleep(1);
-        sendDecelMsgToMotorsQ(25);
+        sendMsgToPIDQ(DECEL, 25);
         sleep(1);
-        sendDecelMsgToMotorsQ(25);
-        sendLeftForwardMsgToMotorsQ(0x00);
-        sendRightForwardMsgToMotorsQ(0x00);
+        sendMsgToPIDQ(DECEL, 25);
+        sendMsgToPIDQ(FORWARD, 0);
         *num = test9;
         break;
     case test9:
         //accelerate mid right turn
-        sendLeftForwardMsgToMotorsQ(25);
-        sendRightReverseMsgToMotorsQ(25);
+        sendMsgToPIDQ(TURNRIGHT, 25);
         sleep(1);
-        sendAccelMsgToMotorsQ(25);
+        sendMsgToPIDQ(ACCEL, 25);
         sleep(1);
-        sendAccelMsgToMotorsQ(25);
+        sendMsgToPIDQ(ACCEL, 25);
         sleep(1);
-        sendAccelMsgToMotorsQ(25);
+        sendMsgToPIDQ(ACCEL, 25);
         sleep(1);
-        sendAccelMsgToMotorsQ(25);
+        sendMsgToPIDQ(ACCEL, 25);
         sleep(1);
-        sendDecelMsgToMotorsQ(25);
+        sendMsgToPIDQ(DECEL, 25);
         sleep(1);
-        sendDecelMsgToMotorsQ(25);
+        sendMsgToPIDQ(DECEL, 25);
         sleep(1);
-        sendDecelMsgToMotorsQ(25);
+        sendMsgToPIDQ(DECEL, 25);
         sleep(1);
-        sendDecelMsgToMotorsQ(25);
-        sendLeftForwardMsgToMotorsQ(0x00);
-        sendRightForwardMsgToMotorsQ(0x00);
+        sendMsgToPIDQ(DECEL, 25);
+        sleep(1);
+        sendMsgToPIDQ(DECEL, 25);
+        sendMsgToPIDQ(FORWARD, 0);
         *num = test10;
         break;
     case test10:
         //Pause & Resume
-        sendLeftForwardMsgToMotorsQ(0x3F);
-        sendRightForwardMsgToMotorsQ(0x3F);
+        sendMsgToPIDQ(FORWARD, 0x3F);
         sleep(3);
-        sendPauseMsgToMotorsQ();
+        sendMsgToPIDQ(PAUSE, 0);
         sleep(3);
-        sendResumeMsgToMotorsQ();
+        sendMsgToPIDQ(RESUME, 0);
         sleep(3);
-        sendLeftForwardMsgToMotorsQ(0x00);
-        sendRightForwardMsgToMotorsQ(0x00);
+        sendMsgToPIDQ(FORWARD, 0);
         *num = end;
         break;
     case end:
