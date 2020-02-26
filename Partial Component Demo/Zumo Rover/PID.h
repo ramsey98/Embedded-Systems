@@ -10,13 +10,13 @@
 
 #include <PID_queue.h>
 #include <PID_state.h>
+#include "capture.h"
 #include "UARTDebug_queue.h"
 #include "debug.h"
 #include "UARTTx_queue.h"
 
 void motorsUARTInit();
 void *PIDThread(void *arg0);
-void *UARTDebugThread(void *arg0);
 void *UARTTxThread(void *arg0);
 
 #endif /* PID_H_ */

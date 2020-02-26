@@ -93,14 +93,22 @@ void *PIDThread(void *arg0)
             else if(type == TIMER)
             {
                 updateMotors(motorsState);
+                if(leftCount != getLeftCount() | rightCount != getRightCount())
+                {
+                    ERROR;
+                }
+                leftCount = 0;
+                rightCount = 0;
             }
             else if(type == LEFTCAP)
             {
-                sendLeftCapMsgToUARTDebugQ(value);
+                sendMsgToUARTDebugQ(LEFTCAP, value);
+                leftCount++;
             }
             else if(type == RIGHTCAP)
             {
-                sendRightCapMsgToUARTDebugQ(value);
+                sendMsgToUARTDebugQ(RIGHTCAP, value);
+                rightCount++;
             }
         }
     }
@@ -132,34 +140,6 @@ void *UARTTxThread(void *arg0)
             {
                 UART_write(motors_uart, &value, sizeof(value));
             }
-        }
-    }
-}
-
-void *UARTDebugThread(void *arg0)
-{
-    dbgOutputLoc(ENTER_TASK);
-    uint16_t value, type;
-    int received = 0;
-    dbgOutputLoc(WHILE1);
-    while(1)
-    {
-        received = receiveFromUARTDebugQ(&type, &value);
-        if(received == -1)
-        {
-            ERROR;
-        }
-        else
-        {
-            if(type == LEFTCAP)
-            {
-                dbgUARTStr("Left Motor:");
-            }
-            else if(type == RIGHTCAP)
-            {
-                dbgUARTStr("Right Motor:");
-            }
-            dbgUARTNum(value);
         }
     }
 }

@@ -10,8 +10,10 @@
 #include "capture.h"
 #include "sensor.h"
 #include "test.h"
+#include "timer.h"
+#include "PID.h"
+#include "UARTDebug_queue.h"
 #include <pthread.h>
-#include <PID.h>
 
 #define THREADSTACKSIZE (1024)
 
@@ -40,6 +42,7 @@ void *mainThread(void *arg0)
     dbgUARTInit();
     dbgGPIOInit();
     captureInit();
+    timerInit();
 
     pthread_attr_init(&attrs);
     detachState = PTHREAD_CREATE_DETACHED;

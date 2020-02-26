@@ -16,5 +16,8 @@
 
 void captureCallback(Capture_Handle handle, uint32_t interval);
 void captureInit();
+void clearCounts();
+int getLeftCount();
+int getRightCount();
 
 #endif /* CAPTURE_H_ */
