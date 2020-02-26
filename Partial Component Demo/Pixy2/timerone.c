@@ -11,9 +11,9 @@
 void timerSecondCallback(Timer_Handle myHandle)
 {
     dbgOutputLoc(ENTER_ISR_TIMER1);
-    //uint32_t count = Timer_getCount(myHandle);
     uint32_t time = TIMER0_PERIOD/1000;
     sendTimeMsgToQ1(time);
+    sendTimeMsgToPixyQ1(time);
     dbgOutputLoc(LEAVE_ISR_TIMER1);
 }
 

@@ -100,8 +100,6 @@ SPI1.$name = "CONFIG_SPI_0";
 SPI1.mode = "Four Pin SS Active Low";
 // Name
 SPI1.spi.$name = "MySPI1";
-// Assign pin
-SPI1.spi.misoPin.$assign = "boosterpack.14"; // P06
 // Suggest solution
 Timer1.timer.$suggestSolution = "Timer1";
 // Suggest solution
@@ -132,6 +130,8 @@ Timer2.timer.$suggestSolution = "Timer0";
 SPI1.spi.$suggestSolution = "SPI0";
 // Suggest solution
 SPI1.spi.sclkPin.$suggestSolution = "5";
+// Suggest solution
+SPI1.spi.misoPin.$suggestSolution = "6";
 // Suggest solution
 SPI1.spi.mosiPin.$suggestSolution = "7";
 // Suggest solution

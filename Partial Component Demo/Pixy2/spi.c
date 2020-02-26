@@ -12,10 +12,10 @@ void spiCallback(SPI_Handle handle, SPI_Transaction *transaction)
    if(transaction->status == SPI_TRANSFER_COMPLETED)
    {
        dbgOutputLoc(SPI_SUCCESS_TRANSFER);
-       /*
-       //dbgUARTStr((char *) (*transaction).rxBuf);
-       uint8_t *rx_buffptr = *(uint8_t **)(*transaction).rxBuf;
+       uint8_t *rx_buffptr = (*transaction).rxBuf;
+
        dbgUARTVal(rx_buffptr[0]);
+       dbgUARTVal(rx_buffptr[3]);
 
        //color connected components response
        if(rx_buffptr[2] == 33) {
@@ -27,7 +27,9 @@ void spiCallback(SPI_Handle handle, SPI_Transaction *transaction)
        //get version response
        else if(rx_buffptr[2] == 15) {
 
-       } */
+       }
+   } else {
+       //dbgOutputLoc(SPI_FAIL_TRANSFER);
    }
 
    return;
@@ -118,4 +120,5 @@ void spiTransfer(unsigned frame_count, uint8_t *rx_buffer, uint8_t *tx_buffer)
     spi_transaction.txBuf = (void *) tx_buffer;
     spi_transaction.rxBuf = (void *) rx_buffer;
     SPI_transfer(handle, &spi_transaction);
+    dbgOutputLoc(SPI_WAIT_CALLBACK);
 }
