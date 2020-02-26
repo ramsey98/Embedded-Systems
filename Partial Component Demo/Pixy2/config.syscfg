@@ -96,24 +96,28 @@ Timer2.timer.$name = "MyTimer1";
 var DMA = scripting.addModule("/ti/drivers/DMA", {}, false);
 // Name - The C/C++ identifier used in applications as the index parameter passed to SPI runtime APIs
 SPI1.$name = "CONFIG_SPI_0";
+// Mode - In three pin mode the SS signal is not used.
+SPI1.mode = "Four Pin SS Active Low";
 // Name
 SPI1.spi.$name = "MySPI1";
+// Assign pin
+SPI1.spi.misoPin.$assign = "boosterpack.14"; // P06
 // Suggest solution
 Timer1.timer.$suggestSolution = "Timer1";
 // Suggest solution
 GPIO1.gpioPin.$suggestSolution = "3";
 // Suggest solution
-GPIO2.gpioPin.$suggestSolution = "8";
+GPIO2.gpioPin.$suggestSolution = "18";
 // Suggest solution
-GPIO3.gpioPin.$suggestSolution = "18";
+GPIO3.gpioPin.$suggestSolution = "21";
 // Suggest solution
-GPIO4.gpioPin.$suggestSolution = "21";
+GPIO4.gpioPin.$suggestSolution = "45";
 // Suggest solution
-GPIO5.gpioPin.$suggestSolution = "45";
+GPIO5.gpioPin.$suggestSolution = "53";
 // Suggest solution
-GPIO6.gpioPin.$suggestSolution = "53";
+GPIO6.gpioPin.$suggestSolution = "58";
 // Suggest solution
-GPIO7.gpioPin.$suggestSolution = "58";
+GPIO7.gpioPin.$suggestSolution = "59";
 // Suggest solution
 UART1.uart.$suggestSolution = "UART0";
 // Suggest solution
@@ -129,9 +133,9 @@ SPI1.spi.$suggestSolution = "SPI0";
 // Suggest solution
 SPI1.spi.sclkPin.$suggestSolution = "5";
 // Suggest solution
-SPI1.spi.misoPin.$suggestSolution = "6";
-// Suggest solution
 SPI1.spi.mosiPin.$suggestSolution = "7";
+// Suggest solution
+SPI1.spi.ssPin.$suggestSolution = "8";
 // Suggest solution
 SPI1.spi.dmaRxChannel.$suggestSolution = "UDMA_CH30";
 // Suggest solution
