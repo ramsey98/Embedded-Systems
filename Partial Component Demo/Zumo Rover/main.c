@@ -43,7 +43,7 @@ void *mainThread(void *arg0)
     dbgGPIOInit();
     captureInit();
     timerInit();
-    pixy_init();
+    //pixy_init();
 
     pthread_attr_init(&attrs);
     detachState = PTHREAD_CREATE_DETACHED;

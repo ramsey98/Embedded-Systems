@@ -67,7 +67,7 @@ void createUARTDebugQueue()
 
 void sendMsgToUARTDebugQ(uint32_t type, uint32_t value)
 {
-    dbgOutputLoc(BEFORE_SEND_QUEUE_ISR_TIMER1);
+    dbgOutputLoc(BEFORE_SEND_QUEUE_ISR_TIMER);
     uint64_t msg1 = type;
     uint64_t msg = (msg1 << UARTSHIFT) | value;
     BaseType_t success = xQueueSend(xQueue, (void *) &msg, pdFALSE);
@@ -75,7 +75,7 @@ void sendMsgToUARTDebugQ(uint32_t type, uint32_t value)
     {
         ERROR;
     }
-    dbgOutputLoc(AFTER_SEND_QUEUE_ISR_TIMER1);
+    dbgOutputLoc(AFTER_SEND_QUEUE_ISR_TIMER);
 }
 
 void receiveFromUARTDebugQ(uint32_t * type, uint32_t * value)

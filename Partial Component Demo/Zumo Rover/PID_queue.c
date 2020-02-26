@@ -20,7 +20,7 @@ void createPIDQueue()
 
 void sendMsgToPIDQ(uint32_t type, uint32_t value)
 {
-    dbgOutputLoc(BEFORE_SEND_QUEUE_ISR_TIMER1);
+    dbgOutputLoc(BEFORE_SEND_QUEUE_ISR_TIMER);
     uint64_t msg1 = type;
     uint64_t msg = (msg1 << PIDSHIFT) | value;
     BaseType_t success = xQueueSendFromISR(xQueue, (void *) &msg, pdFALSE);
@@ -28,7 +28,7 @@ void sendMsgToPIDQ(uint32_t type, uint32_t value)
     {
         ERROR;
     }
-    dbgOutputLoc(AFTER_SEND_QUEUE_ISR_TIMER1);
+    dbgOutputLoc(AFTER_SEND_QUEUE_ISR_TIMER);
 }
 
 void receiveFromPIDQ(uint32_t * type, uint32_t * value)
@@ -39,6 +39,11 @@ void receiveFromPIDQ(uint32_t * type, uint32_t * value)
     if(success == pdFALSE)
     {
         ERROR;
+    }
+    else
+    {
+        *type = received >> PIDSHIFT;
+        *value = received;
     }
     dbgOutputLoc(AFTER_RECEIVE_QUEUE);
 }

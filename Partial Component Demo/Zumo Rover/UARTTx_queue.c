@@ -19,14 +19,14 @@ void createUARTTxQueue()
 
 void sendMsgToUARTTxQ(uint8_t byte1, uint8_t byte2)
 {
-    dbgOutputLoc(BEFORE_SEND_QUEUE_ISR_TIMER1);
+    dbgOutputLoc(BEFORE_SEND_QUEUE_ISR_TIMER);
     uint16_t msg = (byte1 << 8) | byte2;
     BaseType_t success = xQueueSend(xQueue, (void *) &msg, pdFALSE);
     if(success == pdFALSE)
     {
         ERROR;
     }
-    dbgOutputLoc(AFTER_SEND_QUEUE_ISR_TIMER1);
+    dbgOutputLoc(AFTER_SEND_QUEUE_ISR_TIMER);
 }
 
 void receiveFromUARTTxQ(uint16_t * value)

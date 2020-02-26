@@ -18,7 +18,7 @@
 
 void pixy_init();
 void SPICallback(SPI_Handle handle, SPI_Transaction *trans);
-int pixy_transfer(uint8_t *tx_buffer, uint8_t *rx_buffer, uint8_t len);
+void pixy_transfer();
 void *pixyThread(void *arg0);
 
 

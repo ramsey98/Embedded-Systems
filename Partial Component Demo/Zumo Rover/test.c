@@ -123,6 +123,8 @@ void tests(test_num* num)
         sendMsgToPIDQ(DECEL, 25);
         sleep(1);
         sendMsgToPIDQ(DECEL, 25);
+        sleep(1);
+        sendMsgToPIDQ(DECEL, 25);
         sendMsgToPIDQ(FORWARD, 0);
         *num = test10;
         break;

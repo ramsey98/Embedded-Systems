@@ -19,7 +19,7 @@ void createMQTTQueue()
 
 void sendMsgToMQTTQ(uint8_t type, uint8_t value)
 {
-    dbgOutputLoc(BEFORE_SEND_QUEUE_ISR_TIMER1);
+    dbgOutputLoc(BEFORE_SEND_QUEUE_ISR_TIMER);
     MQTTMsg msg;
     switch(type)
     {
@@ -51,7 +51,7 @@ void sendMsgToMQTTQ(uint8_t type, uint8_t value)
     {
         ERROR;
     }
-    dbgOutputLoc(AFTER_SEND_QUEUE_ISR_TIMER1);
+    dbgOutputLoc(AFTER_SEND_QUEUE_ISR_TIMER);
 }
 
 void receiveFromMQTTQ(uint8_t *index, uint8_t *state, uint8_t *leftmotor, uint8_t *rightmotor)

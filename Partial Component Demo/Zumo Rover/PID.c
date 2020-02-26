@@ -90,18 +90,18 @@ void updateValues(MOTORS_DATA *motorsState, uint32_t type, uint32_t value)
         }
         case TURNLEFT:
         {
-            motorsState->leftDir = 0;
-            motorsState->setLeftSpeed = value;
-            motorsState->rightDir = 1;
-            motorsState->setRightSpeed = value/2;
-            break;
-        }
-        case TURNRIGHT:
-        {
             motorsState->leftDir = 1;
             motorsState->setLeftSpeed = value/2;
             motorsState->rightDir = 0;
             motorsState->setRightSpeed = value;
+            break;
+        }
+        case TURNRIGHT:
+        {
+            motorsState->leftDir = 0;
+            motorsState->setLeftSpeed = value;
+            motorsState->rightDir = 1;
+            motorsState->setRightSpeed = value/2;
             break;
         }
         case FORWARD:
