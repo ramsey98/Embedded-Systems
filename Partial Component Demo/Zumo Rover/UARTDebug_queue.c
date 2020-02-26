@@ -26,12 +26,17 @@ void *UARTDebugThread(void *arg0)
             if(type == LEFTCAP)
             {
                 dbgUARTStr("Left Motor:");
+                dbgUARTNum(value);
             }
             else if(type == RIGHTCAP)
             {
                 dbgUARTStr("Right Motor:");
+                dbgUARTNum(value);
             }
-            dbgUARTNum(value);
+            else if(type == TIMER)
+            {
+                dbgUARTStr("Timer");
+            }
         }
     }
 }

@@ -34,7 +34,7 @@ void motorsUARTInit()
 void updateMotors(MOTORS_DATA motorsState)
 {
     int sent = 0;
-    if(motorsState.state == Motors_Ready)
+    if(motorsState.paused == 0)
     {
         if(motorsState.leftDir == 0)
         {
@@ -53,7 +53,7 @@ void updateMotors(MOTORS_DATA motorsState)
             sent = sendMsgToUARTTxQ(motorsState.rightSpeed, M1_REVERSE_8BIT);
         }
     }
-    else if(motorsState.state == Motors_Paused)
+    else if(motorsState.paused == 1)
     {
         sent = sendMsgToUARTTxQ(0, M0_FORWARD_8BIT);
         sent = sendMsgToUARTTxQ(0, M1_FORWARD_8BIT);
@@ -64,18 +64,103 @@ void updateMotors(MOTORS_DATA motorsState)
     }
 }
 
+void updateValues(MOTORS_DATA *motorsState, uint32_t type, uint32_t value)
+{
+    switch(type)
+    {
+        case PAUSE:
+        {
+            motorsState->paused = 1;
+        }
+        case RESUME:
+        {
+            motorsState->paused = 0;
+        }
+        case TURNLEFT:
+        {
+            motorsState->leftDir = 0;
+            motorsState->leftSpeed = value;
+            motorsState->rightDir = 1;
+            motorsState->rightSpeed = value/2;
+        }
+        case TURNRIGHT:
+        {
+            motorsState->leftDir = 1;
+            motorsState->leftSpeed = value/2;
+            motorsState->rightDir = 0;
+            motorsState->rightSpeed = value;
+        }
+        case FORWARD:
+        {
+            motorsState->leftDir = 0;
+            motorsState->leftSpeed = value;
+            motorsState->rightDir = 0;
+            motorsState->rightSpeed = value;
+        }
+        case REVERSE:
+        {
+            motorsState->leftDir = 1;
+            motorsState->leftSpeed = value;
+            motorsState->rightDir = 1;
+            motorsState->rightSpeed = value;
+        }
+        case ACCEL:
+        {
+            if((motorsState->leftSpeed + value) < 255)
+            {
+                motorsState->leftSpeed += value;
+            }
+            else
+            {
+                motorsState->leftSpeed = 255;
+            }
+            if((motorsState->rightSpeed + value) < 255)
+            {
+                motorsState->rightSpeed += value;
+            }
+            else
+            {
+                motorsState->rightSpeed = 255;
+            }
+        }
+        case DECEL:
+        {
+            if(motorsState->leftSpeed > value)
+            {
+                motorsState->leftSpeed -= value;
+            }
+            else
+            {
+                motorsState->leftSpeed = 0;
+            }
+            if(motorsState->rightSpeed > value)
+            {
+                motorsState->rightSpeed -= value;
+            }
+            else
+            {
+                motorsState->rightSpeed = 0;
+            }
+        }
+        default:
+        {
+            ERROR;
+        }
+    }
+}
+
 void *PIDThread(void *arg0)
 {
     dbgOutputLoc(ENTER_TASK);
     motorsUARTInit();
-    int received = 0, success = 0, leftCount = 0, rightCount = 0;
+    int received = 0, leftCount = 0, rightCount = 0;
     uint32_t type = 0, value = 0;
     MOTORS_DATA motorsState;
-    success = motors_fsm(&motorsState, type, value);
-    if(success == -1)
-    {
-        ERROR;
-    }
+    motorsState.leftSpeed = 0;
+    motorsState.rightSpeed = 0;
+    motorsState.leftDir = 0;
+    motorsState.rightDir = 0;
+    motorsState.paused = 0;
     while(1)
     {
         received = receiveFromPIDQ(&type, &value);
@@ -85,20 +170,16 @@ void *PIDThread(void *arg0)
         }
         else
         {
-            success = motors_fsm(&motorsState, type, value);
-            if(success == -1)
+            if(type == TIMER)
             {
-                ERROR;
-            }
-            else if(type == TIMER)
-            {
-                updateMotors(motorsState);
                 if(leftCount != getLeftCount() | rightCount != getRightCount())
                 {
                     ERROR;
                 }
+                updateMotors(motorsState);
                 leftCount = 0;
                 rightCount = 0;
+                sendMsgToUARTDebugQ(TIMER, value);
             }
             else if(type == LEFTCAP)
             {
@@ -109,6 +190,10 @@ void *PIDThread(void *arg0)
             {
                 sendMsgToUARTDebugQ(RIGHTCAP, value);
                 rightCount++;
+            }
+            else
+            {
+                updateValues(&motorsState, type, value);
             }
         }
     }
