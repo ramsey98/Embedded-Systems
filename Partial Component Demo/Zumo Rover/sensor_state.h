@@ -9,6 +9,7 @@
 #define SENSOR_STATE_H_
 
 #include "debug.h"
+#include "PID_queue.h"
 
 typedef enum
 {
@@ -24,6 +25,6 @@ typedef struct
 
 } SENSOR_DATA;
 
-int sensor_fsm(SENSOR_DATA *curState, int sensorVal);
+void sensor_fsm(SENSOR_DATA *curState, int sensorVal);
 
 #endif /* SENSOR_STATE_H_ */

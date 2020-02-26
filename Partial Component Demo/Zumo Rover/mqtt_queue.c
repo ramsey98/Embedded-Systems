@@ -17,34 +17,35 @@ void createMQTTQueue()
     }
 }
 
-void sendStateMsgToMQTTQ(uint8_t state)
+void sendMsgToMQTTQ(uint8_t type, uint8_t value)
 {
     dbgOutputLoc(BEFORE_SEND_QUEUE_ISR_TIMER1);
-    MQTTMsg msg = {MQTT_STATE, state, NULL, NULL};
-    BaseType_t success = xQueueSend(xQueue, (void *) &msg, pdFALSE);
-    if(success == pdFALSE)
+    MQTTMsg msg;
+    switch(type)
     {
-        ERROR;
+        case MQTT_STATE:
+        {
+            msg.ID = MQTT_STATE;
+            msg.state = value;
+            break;
+        }
+        case MQTT_LEFTMOTOR:
+        {
+            msg.ID = MQTT_LEFTMOTOR;
+            msg.left = value;
+            break;
+        }
+        case MQTT_RIGHTMOTOR:
+        {
+            msg.ID = MQTT_RIGHTMOTOR;
+            msg.right = value;
+            break;
+        }
+        default:
+        {
+            ERROR;
+        }
     }
-    dbgOutputLoc(AFTER_SEND_QUEUE_ISR_TIMER1);
-}
-
-void sendLeftMotorMsgToMQTTQ(uint8_t leftmotor)
-{
-    dbgOutputLoc(BEFORE_SEND_QUEUE_ISR_TIMER1);
-    MQTTMsg msg = {MQTT_LEFTMOTOR, NULL, leftmotor, NULL};
-    BaseType_t success = xQueueSend(xQueue, (void *) &msg, pdFALSE);
-    if(success == pdFALSE)
-    {
-        ERROR;
-    }
-    dbgOutputLoc(AFTER_SEND_QUEUE_ISR_TIMER1);
-}
-
-void sendRightMotorMsgToMQTTQ(uint8_t rightmotor)
-{
-    dbgOutputLoc(BEFORE_SEND_QUEUE_ISR_TIMER1);
-    MQTTMsg msg = {MQTT_RIGHTMOTOR, NULL, NULL, rightmotor};
     BaseType_t success = xQueueSend(xQueue, (void *) &msg, pdFALSE);
     if(success == pdFALSE)
     {

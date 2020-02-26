@@ -16,7 +16,7 @@
 
 typedef struct
 {
-    uint8_t realLeftSpeed, realRightSpeed, setLeftSpeed, setRightSpeed, leftDir, rightDir, paused;
+    uint8_t realLeftSpeed, realRightSpeed, setLeftSpeed, setRightSpeed, leftDir, rightDir, paused;//, distance, distLeft, distRight;
 } MOTORS_DATA;
 
 void motorsUARTInit();

@@ -9,12 +9,36 @@
 
 static SPI_Handle masterSpi;
 
+void SPICallback(SPI_Handle handle, SPI_Transaction *trans)
+{
+    if(trans->status == SPI_TRANSFER_COMPLETED)
+    {
+        /*
+        if(toLeft)
+        {
+            sendMsgToPIDQ(TURNLEFT, 25);
+        }
+        else if(toRight)
+        {
+            sendMsgToPIDQ(TURNRIGHT, 25);
+        }
+        */
+    }
+    else if(trans->status == SPI_TRANSFER_FAILED)
+    {
+        ERROR;
+    }
+
+}
+
 void pixy_init()
 {
     SPI_Params spiParams;
     SPI_Params_init(&spiParams);
     spiParams.frameFormat = SPI_POL0_PHA1;
-    spiParams.bitRate = 10000000;
+    spiParams.transferMode = SPI_MODE_CALLBACK;
+    spiParams.bitRate = 2000000;
+    spiParams.transferCallbackFxn = SPICallback;
     masterSpi = SPI_open(CONFIG_SPI_0, &spiParams);
     if (masterSpi == NULL)
     {
@@ -35,9 +59,7 @@ int pixy_transfer(uint8_t *tx_buffer, uint8_t *rx_buffer, uint8_t len)
 
 void *pixyThread(void *arg0)
 {
-    pixy_init();
     dbgOutputLoc(ENTER_TASK);
-    //int received = 0;
     uint32_t value;
     uint8_t txBuffer[TXBUFFER];
     uint8_t rxBuffer[RXBUFFER];

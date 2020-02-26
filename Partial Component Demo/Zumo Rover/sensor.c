@@ -13,22 +13,17 @@ static int sensorDistLookup[DICTLEN] = {0};
 
 void *sensorThread(void *arg0)
 {
-    adcInit();
     dbgOutputLoc(ENTER_TASK);
+    adcInit();
     SENSOR_DATA curState;
     curState.state = Sensor_Init;
     uint16_t sensorVal = 0;
-    int success = sensor_fsm(&curState, sensorVal);
-    int received = 0;
+    sensor_fsm(&curState, sensorVal);
     dbgOutputLoc(WHILE1);
     while(1)
     {
-        received = receiveFromSensorQ(&sensorVal);
-        success = sensor_fsm(&curState, sensorVal);
-        if(success == -1 || received == -1)
-        {
-            ERROR;
-        }
+        receiveFromSensorQ(&sensorVal);
+        sensor_fsm(&curState, sensorVal);
     }
 }
 
@@ -46,7 +41,7 @@ void adcInit()
 
 void pollSensor()
 {
-    int result = 0, sent = 0;
+    int result = 0;
     uint16_t adcValue;
     uint32_t adcValueMicroVolt;
     int_fast16_t res = ADC_convert(adc, &adcValue);
@@ -56,11 +51,7 @@ void pollSensor()
         result = conversion(adcValueMicroVolt);
         if (result != -1)
         {
-            sent = sendSensorMsgToQ(result);
-            if(sent == -1)
-            {
-                ERROR;
-            }
+            sendSensorMsgToQ(result);
         }
         else
         {

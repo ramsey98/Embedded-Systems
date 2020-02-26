@@ -5,7 +5,7 @@
  *      Author: Holden Ramsey
  */
 
-#include <PID.h>
+#include "PID.h"
 
 static UART_Handle motors_uart;
 
@@ -81,10 +81,12 @@ void updateValues(MOTORS_DATA *motorsState, uint32_t type, uint32_t value)
         case PAUSE:
         {
             motorsState->paused = 1;
+            break;
         }
         case RESUME:
         {
             motorsState->paused = 0;
+            break;
         }
         case TURNLEFT:
         {
@@ -92,6 +94,7 @@ void updateValues(MOTORS_DATA *motorsState, uint32_t type, uint32_t value)
             motorsState->setLeftSpeed = value;
             motorsState->rightDir = 1;
             motorsState->setRightSpeed = value/2;
+            break;
         }
         case TURNRIGHT:
         {
@@ -99,6 +102,7 @@ void updateValues(MOTORS_DATA *motorsState, uint32_t type, uint32_t value)
             motorsState->setLeftSpeed = value/2;
             motorsState->rightDir = 0;
             motorsState->setRightSpeed = value;
+            break;
         }
         case FORWARD:
         {
@@ -106,6 +110,7 @@ void updateValues(MOTORS_DATA *motorsState, uint32_t type, uint32_t value)
             motorsState->setLeftSpeed = value;
             motorsState->rightDir = 0;
             motorsState->setRightSpeed = value;
+            break;
         }
         case REVERSE:
         {
@@ -113,6 +118,7 @@ void updateValues(MOTORS_DATA *motorsState, uint32_t type, uint32_t value)
             motorsState->setLeftSpeed = value;
             motorsState->rightDir = 1;
             motorsState->setRightSpeed = value;
+            break;
         }
         case ACCEL:
         {
@@ -132,6 +138,7 @@ void updateValues(MOTORS_DATA *motorsState, uint32_t type, uint32_t value)
             {
                 motorsState->setRightSpeed = 255;
             }
+            break;
         }
         case DECEL:
         {
@@ -151,10 +158,12 @@ void updateValues(MOTORS_DATA *motorsState, uint32_t type, uint32_t value)
             {
                 motorsState->setRightSpeed = 0;
             }
+            break;
         }
         default:
         {
             ERROR;
+            break;
         }
     }
 }
@@ -176,35 +185,43 @@ void *PIDThread(void *arg0)
     while(1)
     {
         receiveFromPIDQ(&type, &value);
-        if(type == TIMER)
+        switch(type)
         {
-            if(leftCount != getLeftCount() | rightCount != getRightCount())
+            case TIMER:
             {
-                ERROR;
+                if(leftCount != getLeftCount() | rightCount != getRightCount())
+                {
+                    ERROR;
+                }
+                clearCounts();
+                updateMotors(motorsState);
+                sendMsgToUARTDebugQ(TIMER, value);
+                sendMsgToUARTDebugQ(LEFTCAP, motorsState.realLeftSpeed);
+                sendMsgToUARTDebugQ(RIGHTCAP, motorsState.realRightSpeed);
+                sendMsgToUARTDebugQ(LEFTCOUNT, leftCount);
+                sendMsgToUARTDebugQ(RIGHTCOUNT, rightCount);
+                leftCount = 0;
+                rightCount = 0;
+                break;
             }
-            updateMotors(motorsState);
-            sendMsgToUARTDebugQ(TIMER, value);
-            sendMsgToUARTDebugQ(LEFTCAP, motorsState.realLeftSpeed);
-            sendMsgToUARTDebugQ(RIGHTCAP, motorsState.realRightSpeed);
-            sendMsgToUARTDebugQ(LEFTCOUNT, leftCount);
-            sendMsgToUARTDebugQ(RIGHTCOUNT, rightCount);
-            leftCount = 0;
-            rightCount = 0;
-        }
-        else if(type == LEFTCAP)
-        {
-            //1.6ms is full speed, need to measure min speed
-            motorsState.realLeftSpeed = value;
-            leftCount++;
-        }
-        else if(type == RIGHTCAP)
-        {
-            motorsState.realRightSpeed = value;
-            rightCount++;
-        }
-        else
-        {
-            updateValues(&motorsState, type, value);
+            case LEFTCAP:
+            {
+                //1.6ms is full speed, need to measure min speed
+                motorsState.realLeftSpeed = value;
+                leftCount++;
+                break;
+            }
+            case RIGHTCAP:
+            {
+                motorsState.realRightSpeed = value;
+                rightCount++;
+                break;
+            }
+            default:
+            {
+                updateValues(&motorsState, type, value);
+                break;
+            }
         }
     }
 }

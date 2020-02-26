@@ -7,9 +7,8 @@
 
 #include "sensor_state.h"
 
-int sensor_fsm(SENSOR_DATA *curState, int sensorVal)
+void sensor_fsm(SENSOR_DATA *curState, int sensorVal)
 {
-    int success = 0;
     switch (curState->state)
     {
         case Sensor_Init:
@@ -24,7 +23,7 @@ int sensor_fsm(SENSOR_DATA *curState, int sensorVal)
         {
             curState->sensorTotal += sensorVal;
             curState->sensorCount++;
-            if (curState->sensorCount == 4)
+            if (curState->sensorCount == 5)
             {
                 curState->state = Sensor_Averaging;
             }
@@ -33,6 +32,15 @@ int sensor_fsm(SENSOR_DATA *curState, int sensorVal)
         case Sensor_Averaging:
         {
             curState->sensorAvg = curState->sensorTotal/curState->sensorCount;
+            //sendMsgToPIDQ(SENSOR, curState->sensorAvg);
+            if(curState->sensorAvg > 65)
+            {
+                sendMsgToPIDQ(ACCEL, 25);
+            }
+            else if(curState->sensorAvg < 55)
+            {
+                sendMsgToPIDQ(DECEL, 25);
+            }
             curState->sensorTotal = 0;
             curState->sensorCount = 0;
             curState->state = Sensor_Polling;
@@ -40,11 +48,10 @@ int sensor_fsm(SENSOR_DATA *curState, int sensorVal)
         }
         default:
         {
-            success = -1;
+            ERROR;
             break;
         }
     }
-    return success;
 }
 
 
