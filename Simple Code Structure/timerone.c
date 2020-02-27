@@ -30,12 +30,12 @@ void timerOneInit()
     timer0 = Timer_open(CONFIG_TIMER_0, &timer_params);
     if (timer0 == 0)
     {
-        halt();
+        ERROR;
     }
 
     if (Timer_start(timer0) == Timer_STATUS_ERROR)
     {
-        halt();
+        ERROR;
     }
 
 }

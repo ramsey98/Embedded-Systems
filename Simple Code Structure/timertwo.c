@@ -56,12 +56,12 @@ void timerTwoInit()
     timer1 = Timer_open(CONFIG_TIMER_1, &timer_params);
     if (timer1 == NULL)
     {
-        halt();
+        ERROR;
     }
 
     if (Timer_start(timer1) == Timer_STATUS_ERROR)
     {
-        halt();
+        ERROR;
     }
 
 }

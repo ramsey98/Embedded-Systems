@@ -9,34 +9,104 @@
 #include "sensor_queue.h"
 #include "timerone.h"
 #include "timertwo.h"
+#include "tests.h"
+#include "motor_controller_queue.h"
+#include "motor_controller_thread.h"
+#include <pthread.h>
+#include <stdio.h>
+#include <ti/drivers/UART.h>
+
+#define THREADSTACKSIZE (1024)
 
 void *mainThread(void *arg0)
 {
+    int retc;
+
+
+    pthread_t motors, tests;
+    pthread_attr_t attrs;
+    struct sched_param  priParam;
+
     Board_init();
     dbgUARTInit();
     dbgGPIOInit();
     adcInit();
+
     createSensorQueue();
+    createMotorControllerQueue();
+
     Timer_init();
     timerOneInit();
     timerTwoInit();
+
     dbgOutputLoc(ENTER_TASK);
     SENSOR_DATA curState;
     curState.state = Init;
     int timeInc = 0;
     int sensorVal = 0;
     int success = fsm(&curState, timeInc, sensorVal);
-    int received = 0;
+//    int received = 0;
     dbgOutputLoc(WHILE1);
-    while(1)
+
+
+    GPIO_write(CONFIG_LED_2_GPIO, CONFIG_GPIO_LED_OFF);
+
+//    UART_Handle uart;
+//    initialize(&uart);
+//    int i;
+//    for (i = 0; i < 10; i++) {
+//        GPIO_write(CONFIG_LED_1_GPIO, CONFIG_GPIO_LED_OFF);
+//        GPIO_write(CONFIG_LED_0_GPIO, CONFIG_GPIO_LED_ON);
+//        sleep(1);
+////        sendMsgToMCQ(0x00);
+//        GPIO_write(CONFIG_LED_1_GPIO, CONFIG_GPIO_LED_ON);
+//        GPIO_write(CONFIG_LED_0_GPIO, CONFIG_GPIO_LED_OFF);
+//        sleep(1);
+//        uint8_t checksum = (0x10 + 0x04 + 0x0F) & 0b01111111;
+//        uint8_t buffer[] = {0x10, 0x04, 0x0F, checksum};
+//        UART_write(uart, *buffer, sizeof(buffer));
+//    }
+
+
+
+    pthread_attr_init(&attrs);
+    priParam.sched_priority = 1;
+    pthread_attr_setschedparam(&attrs, &priParam);
+    int detachState = PTHREAD_CREATE_DETACHED;
+    retc = pthread_attr_setdetachstate(&attrs, detachState);
+    if (retc != 0)
     {
-        received = receiveFromQ1(&timeInc, &sensorVal);
-        success = fsm(&curState, timeInc, sensorVal);
-        if(success == -1 || received == -1)
-        {
-            halt();
-        }
+        ERROR;
     }
+
+    retc |= pthread_attr_setstacksize(&attrs, THREADSTACKSIZE);
+    if (retc != 0)
+    {
+        ERROR;
+    }
+
+
+
+    retc = pthread_create(&motors, &attrs, mcThread, NULL);
+    if (retc != SUCCESS)
+    {
+        ERROR;
+    }
+//    while(1)
+//    {
+//        received = receiveFromQ1(&timeInc, &sensorVal);
+//        success = fsm(&curState, timeInc, sensorVal);
+//        if(success == -1 || received == -1)
+//        {
+//            ERROR;
+//        }
+//    }
+//    retc = pthread_create(&tests, &attrs, testThread, NULL);
+//    if (retc != 0)
+//    {
+//        ERROR;
+//    }
+    return(NULL);
 }
 
 

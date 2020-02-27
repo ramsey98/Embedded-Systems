@@ -4,7 +4,7 @@
 <stringAttribute key="com.ti.ccstudio.debug.debugModel.ATTR_PROGRAM.CC3220SF.ccxml.Texas Instruments XDS110 USB Debug Probe_0/Cortex_M4_0" value="${build_artifact:Simple Code Structure}"/>
 <stringAttribute key="com.ti.ccstudio.debug.debugModel.ATTR_PROJECT.CC3220SF.ccxml.Texas Instruments XDS110 USB Debug Probe_0/Cortex_M4_0" value="Simple Code Structure"/>
 <stringAttribute key="com.ti.ccstudio.debug.debugModel.ATTR_TARGET_CONFIG" value="${target_config_active_default:Simple Code Structure}"/>
-<stringAttribute key="com.ti.ccstudio.debug.debugModel.MRU_PROGRAM.CC3220SF.ccxml.Texas Instruments XDS110 USB Debug Probe_0/Cortex_M4_0" value="C:/Users\Jon Glaser\Desktop\repo\Embedded-Systems\Simple Code Structure\Debug\Simple Code Structure.out"/>
+<stringAttribute key="com.ti.ccstudio.debug.debugModel.MRU_PROGRAM.CC3220SF.ccxml.Texas Instruments XDS110 USB Debug Probe_0/Cortex_M4_0" value="C:/Users\jared\git\Embedded-Systems\Simple Code Structure\Debug\Simple Code Structure.out"/>
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
 <listEntry value="/Simple Code Structure"/>
 </listAttribute>

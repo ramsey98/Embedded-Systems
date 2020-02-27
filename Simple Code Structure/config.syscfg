@@ -22,6 +22,8 @@ var LED1 = LED.addInstance();
 var ADC = scripting.addModule("/ti/drivers/ADC", {}, false);
 var ADC1 = ADC.addInstance();
 var Timer2 = Timer.addInstance();
+var GPIO10 = GPIO.addInstance();
+var GPIO11 = GPIO.addInstance();
 // name - Select the RTOS being used
 RTOS.name = "FreeRTOS";
 // Name - The C/C++ identifier used in applications as the index parameter passed to Timer runtime APIs
@@ -77,8 +79,10 @@ UART1.dataDirection = "Send Only";
 UART1.uart.$name = "MyUART1";
 // Name - The C/C++ identifier used in applications as the index parameter passed to LED runtime APIs
 LED1.$name = "CONFIG_LED_0";
+// Name - The C/C++ identifier used in applications as the index parameter passed to GPIO runtime APIs
+LED1.gpioPin.$name = "CONFIG_LED_1_GPIO";
 // Use Hardware - Select the hardware to use, or 'None' to use available header pins
-LED1.gpioPin.$hardware = system.deviceData.board.components.LED_RED;
+LED1.gpioPin.$hardware = system.deviceData.board.components.LED_GREEN;
 // Name - The C/C++ identifier used in applications as the index parameter passed to ADC runtime APIs
 ADC1.$name = "CONFIG_ADC_0";
 // Name
@@ -87,6 +91,14 @@ ADC1.adc.$name = "MyADC1";
 Timer2.$name = "CONFIG_TIMER_1";
 // Name
 Timer2.timer.$name = "MyTimer1";
+// Name - The C/C++ identifier used in applications as the index parameter passed to GPIO runtime APIs
+GPIO10.$name = "CONFIG_LED_0_GPIO";
+// Use Hardware - Select the hardware to use, or 'None' to use available header pins
+GPIO10.$hardware = system.deviceData.board.components.LED_RED;
+// Name - The C/C++ identifier used in applications as the index parameter passed to GPIO runtime APIs
+GPIO11.$name = "CONFIG_LED_2_GPIO";
+// Use Hardware - Select the hardware to use, or 'None' to use available header pins
+GPIO11.$hardware = system.deviceData.board.components.LED_YELLOW;
 // Suggest solution
 Timer1.timer.$suggestSolution = "Timer1";
 // Suggest solution
@@ -110,10 +122,14 @@ UART1.uart.$suggestSolution = "UART0";
 // Suggest solution
 UART1.uart.txPin.$suggestSolution = "55";
 // Suggest solution
-LED1.gpioPin.gpioPin.$suggestSolution = "64";
+LED1.gpioPin.gpioPin.$suggestSolution = "2";
 // Suggest solution
 ADC1.adc.$suggestSolution = "ADC0";
 // Suggest solution
 ADC1.adc.adcPin.$suggestSolution = "58";
 // Suggest solution
 Timer2.timer.$suggestSolution = "Timer0";
+// Suggest solution
+GPIO10.gpioPin.$suggestSolution = "64";
+// Suggest solution
+GPIO11.gpioPin.$suggestSolution = "1";

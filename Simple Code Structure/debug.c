@@ -21,7 +21,7 @@ void dbgUARTInit()
     //UART_control(uart, UART_CMD_RXDISABLE, NULL);
     if (uart == NULL)
     {
-        halt();
+        ERROR;
     }
 }
 
@@ -96,11 +96,11 @@ void dbgOutputLoc(unsigned int outLoc)
     }
     else
     {
-        halt();
+        ERROR;
     }
 }
 
-void halt()
+void halt(int line, const char* func)
 {
     GPIO_write(CONFIG_GPIO_0, CONFIG_GPIO_LED_OFF);
     GPIO_write(CONFIG_GPIO_1, CONFIG_GPIO_LED_OFF);
@@ -110,7 +110,7 @@ void halt()
     GPIO_write(CONFIG_GPIO_5, CONFIG_GPIO_LED_OFF);
     GPIO_write(CONFIG_GPIO_6, CONFIG_GPIO_LED_OFF);
     GPIO_write(CONFIG_GPIO_7, CONFIG_GPIO_LED_OFF);
-    GPIO_write(CONFIG_LED_0_GPIO, CONFIG_GPIO_LED_ON);
+    GPIO_write(CONFIG_LED_2_GPIO, CONFIG_GPIO_LED_ON);
     vTaskSuspendAll();
     taskDISABLE_INTERRUPTS();
     while(1) {}
