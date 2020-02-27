@@ -33,40 +33,29 @@ void *mainThread(void *arg0)
     int success = fsm(&curState, timeInc, sensorVal);
     int received = 0;
 
-    int count = 0;
-    //uint8_t rx_buffer[SPI_MSG_LENGTH];
-    //uint8_t tx_buffer[SPI_MSG_LENGTH];
+    int timeIncPixy = 0;
     uint64_t block_data;
     PIXY_DATA pixyState;
     pixyState.state = PixyInit;
+    initBuffers(pixyState.rx_buffer, pixyState.tx_buffer);
     success = pixyFsm(&pixyState, timeInc, &block_data);
 
     dbgOutputLoc(WHILE1);
     while(1)
     {
 
-        /*
         received = receiveFromQ1(&timeInc, &sensorVal);
         success = fsm(&curState, timeInc, sensorVal);
         if(success == -1 || received == -1)
         {
             halt();
-        } */
+        }
 
-        received = receiveFromPixyQ1(&timeInc, &block_data);
-        success = pixyFsm(&pixyState, timeInc, &block_data);
+        received = receiveFromPixyQ1(&timeIncPixy, &block_data);
+        success = pixyFsm(&pixyState, timeIncPixy, &block_data);
         if(success == -1 || received == -1)
         {
             halt();
         }
-
-        /*
-        count++;
-
-        if(count > 1000000) {
-            count = 0;
-            spiGetVersionPacket(rx_buffer, tx_buffer, SPI_MSG_LENGTH);
-            //spiSetColorPacket(rx_buffer, tx_buffer, SPI_MSG_LENGTH, 0, 255, 0);
-        } */
     }
 }

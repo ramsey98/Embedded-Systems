@@ -15,7 +15,7 @@
 #include "debug.h"
 #include "string.h"
 
-#define SPI_MSG_LENGTH 128
+#define SPI_MSG_LENGTH 64
 #define SPI_TX_MSG_VERSION 4
 #define SPI_TX_MSG_CONNECTED 6
 #define SPI_TX_MSG_COLOR 7
@@ -24,13 +24,14 @@
 void spiInit();
 void spiCallback(SPI_Handle handle, SPI_Transaction *transaction);
 void setTxBuffer(uint8_t *tx_buffer, uint8_t *tx_msg, unsigned tx_length, unsigned msg_length);
-void setRxBuffer(uint8_t *rx_buffer, unsigned rx_length);
-void spiGetVersionPacket(uint8_t *rx_buffer, uint8_t *tx_buffer, unsigned frame_count);
-void spiSetColorPacket(uint8_t *rx_buffer, uint8_t *tx_buffer, unsigned frame_count, uint8_t r, uint8_t g, uint8_t b);
-void spiGetConnectedBlocks(uint8_t *rx_buffer, uint8_t *tx_buffer, unsigned frame_count);
-void spiTransfer(unsigned frame_count, uint8_t *rx_buffer, uint8_t *tx_buffer);
+void initBuffers(uint8_t *rx_buffer, uint8_t *tx_buffer);
+void spiGetVersionPacket(uint8_t *rx_buffer, uint8_t *tx_buffer);
+void spiSetColorPacket(uint8_t *rx_buffer, uint8_t *tx_buffer, uint8_t r, uint8_t g, uint8_t b);
+void spiGetConnectedBlocks(uint8_t *rx_buffer, uint8_t *tx_buffer);
+void spiTransfer(uint8_t *rx_buffer, uint8_t *tx_buffer);
 
 SPI_Handle      handle;
 SPI_Params      params;
+SPI_Transaction spi_transaction;
 
 #endif /* SPI_H_ */

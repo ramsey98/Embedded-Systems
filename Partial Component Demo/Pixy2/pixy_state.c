@@ -36,7 +36,6 @@ int pixyFsm(PIXY_DATA *curState, int timeInc, uint64_t *block_data) {
            curState->state = PixyWaitingForTime1;
            break;
        case PixyWaitingForTime1:
-
            dbgOutputLoc(ENTER_FSM_SPI_WAITING);
            if (timeInc == 0)
            {
@@ -44,7 +43,8 @@ int pixyFsm(PIXY_DATA *curState, int timeInc, uint64_t *block_data) {
            else if (timeInc > 0)
            {
                curState->curTime += timeInc;
-               spiGetVersionPacket(curState->rx_buffer, curState->tx_buffer, SPI_MSG_LENGTH);
+               spiGetConnectedBlocks(curState->rx_buffer, curState->tx_buffer);
+               //curState->state = PixyWaitingForBlockCount;
            }
 
            break;

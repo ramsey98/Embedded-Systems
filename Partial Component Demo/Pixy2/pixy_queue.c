@@ -39,10 +39,15 @@ int receiveFromPixyQ1(int *timeVal, uint64_t * block_data) {
    uint64_t received;
    success = xQueueReceive(xQueuePixy, &received, portMAX_DELAY);
 
+   if(success == pdFALSE)
+   {
+       ret = -1;
+   }
    if (received >> SHIFT_PIXY == TIMEMASK)
    {
        dbgOutputLoc(TIME_FOUND);
        *timeVal = received & FMASK;
+       //dbgUARTVal(*timeVal);
    }
    /* change to block data
    else if (received >> SHIFT_PIXY == SENSORMASK)
@@ -50,10 +55,6 @@ int receiveFromPixyQ1(int *timeVal, uint64_t * block_data) {
        *sensorVal = received & FMASK;
        *timeInc = 0;
    } */
-   if(success == pdFALSE)
-   {
-       ret = -1;
-   }
    dbgOutputLoc(SPI_AFTER_RECEIVE_QUEUE);
    return ret;
 }
