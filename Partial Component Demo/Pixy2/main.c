@@ -66,34 +66,9 @@ void *mainThread(void *arg0)
         count++;
         if(count > 1000000) {
             spiGetConnectedBlocks(pixyState.rx_buffer, pixyState.tx_buffer);
-
-            /*  15 is the second 175
-            if(pixyState.rx_buffer[15] == 175) {
-                dbgUARTVal(1);
-            }
-
-            if(pixyState.rx_buffer[15] == 0xaf) {
-                dbgUARTVal(2);
-            }
-
-            int i;
-            for(i=15; i < 40; i++) {
-                dbgUARTVal(pixyState.rx_buffer[i]);
-            }
-            int i = 0;
-            while(pixyState.rx_buffer[i] == 1) {
-                i++;
-            } i++;
-
-            if(pixyState.rx_buffer[i] == 175 && pixyState.rx_buffer[i+1] == 193) {
-                i+=2;
-            }
-
-            dbgUARTStr("Blocks:");
-            dbgUARTVal(pixyState.rx_buffer[18]);
-
             count = 0;
-        } */
+        }
+        */
 
     }
 }

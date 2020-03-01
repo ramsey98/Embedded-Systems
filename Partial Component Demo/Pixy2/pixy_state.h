@@ -17,6 +17,8 @@
 typedef enum
 {
     PixyInit,
+    PixySendVersion,
+    PixyWaitingForVersion,
     PixyWaitingForTime1,
     PixyWaitingForBlockCount,
     PixyWaitingForBlocks
