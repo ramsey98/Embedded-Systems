@@ -34,28 +34,66 @@ void *mainThread(void *arg0)
     int received = 0;
 
     int timeIncPixy = 0;
+    int complete = 0;
+    int count = 0;
     uint64_t block_data;
     PIXY_DATA pixyState;
     pixyState.state = PixyInit;
     initBuffers(pixyState.rx_buffer, pixyState.tx_buffer);
-    success = pixyFsm(&pixyState, timeInc, &block_data);
+    success = pixyFsm(&pixyState, &timeIncPixy, &complete, &block_data);
 
     dbgOutputLoc(WHILE1);
     while(1)
     {
-
+        /*
         received = receiveFromQ1(&timeInc, &sensorVal);
         success = fsm(&curState, timeInc, sensorVal);
         if(success == -1 || received == -1)
         {
             halt();
-        }
+        } */
 
-        received = receiveFromPixyQ1(&timeIncPixy, &block_data);
-        success = pixyFsm(&pixyState, timeIncPixy, &block_data);
+
+
+        received = receiveFromPixyQ1(&timeIncPixy, &complete, &block_data);
+        success = pixyFsm(&pixyState, &timeIncPixy, &complete, &block_data);
         if(success == -1 || received == -1)
         {
             halt();
         }
+
+        /*
+        count++;
+        if(count > 1000000) {
+            spiGetConnectedBlocks(pixyState.rx_buffer, pixyState.tx_buffer);
+
+            /*  15 is the second 175
+            if(pixyState.rx_buffer[15] == 175) {
+                dbgUARTVal(1);
+            }
+
+            if(pixyState.rx_buffer[15] == 0xaf) {
+                dbgUARTVal(2);
+            }
+
+            int i;
+            for(i=15; i < 40; i++) {
+                dbgUARTVal(pixyState.rx_buffer[i]);
+            }
+            int i = 0;
+            while(pixyState.rx_buffer[i] == 1) {
+                i++;
+            } i++;
+
+            if(pixyState.rx_buffer[i] == 175 && pixyState.rx_buffer[i+1] == 193) {
+                i+=2;
+            }
+
+            dbgUARTStr("Blocks:");
+            dbgUARTVal(pixyState.rx_buffer[18]);
+
+            count = 0;
+        } */
+
     }
 }

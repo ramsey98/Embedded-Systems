@@ -14,8 +14,9 @@
 #include "FreeRTOS.h"
 #include "debug.h"
 #include "string.h"
+#include "pixy_queue.h"
 
-#define SPI_MSG_LENGTH 64
+#define SPI_MSG_LENGTH 128
 #define SPI_TX_MSG_VERSION 4
 #define SPI_TX_MSG_CONNECTED 6
 #define SPI_TX_MSG_COLOR 7

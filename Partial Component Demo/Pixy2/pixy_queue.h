@@ -19,12 +19,15 @@
 #define PIXYBLOCKMASK1 (0x00000010)
 #define PIXYBLOCKMASK2 (0x00000011)
 #define PIXYBLOCKMASK3 (0x00000100)
+#define TRANSFERFLAG (0x1000000000000000)
+#define TRANSFERMASK (0x10000000)
 
 #define SHIFT_PIXY (32)
 
 int sendTimeMsgToPixyQ1(unsigned int timeVal);
 int sentBlockMsgToPixyQ1(uint8_t block_number, uint8_t data_block, uint8_t *data_bytes);
-int receiveFromPixyQ1(int *timeVal, uint64_t * block_data);
+int sendSpiMsgToPixyQ1();
+int receiveFromPixyQ1(int *timeInc, int *complete, uint64_t * block_data);
 void createPixyQueue();
 
 #endif /* PIXY_QUEUE_H_ */

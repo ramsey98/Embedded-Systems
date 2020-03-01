@@ -9,40 +9,10 @@
 void spiCallback(SPI_Handle handle, SPI_Transaction *transaction)
 {
    dbgOutputLoc(SPI_CALLBACK);
-   //SPI_transferCancel(handle);
    if(transaction->status == SPI_TRANSFER_COMPLETED)
    {
        dbgOutputLoc(SPI_SUCCESS_TRANSFER);
-       uint8_t *rx_buffptr = (*transaction).rxBuf;
-
-       //dbgUARTVal(rx_buffptr[0]);
-       //dbgUARTVal(rx_buffptr[3]);
-       /*
-       dbgUARTStr(rx_buffptr);
-       uint8_t i = 0;
-       while(rx_buffptr[i] == 1 && i < SPI_MSG_LENGTH) {
-           i++;
-       }
-
-       dbgUARTVal(i);
-
-       if(i == (*transaction).count || rx_buffptr[i] != 175 || rx_buffptr[i+1] != 193) {
-           halt();
-       }
-
-       i += 2;  //move to length
-
-       //color connected components response
-       if(rx_buffptr[i] == 33) {
-           uint8_t packet_length = rx_buffptr[i];
-           uint8_t block_count = packet_length/CONNECTED_PACKET_LENGTH;
-           dbgUARTVal(block_count);
-       }
-
-       //get version response
-       else if(rx_buffptr[i] == 15) {
-
-       } */
+       sendSpiMsgToPixyQ1();
    }
 
    return;
@@ -129,3 +99,42 @@ void spiTransfer(uint8_t *rx_buffer, uint8_t *tx_buffer)
     SPI_transfer(handle, &spi_transaction);
     dbgOutputLoc(SPI_WAIT_CALLBACK);
 }
+
+
+//uint8_t *rx_buffptr = (*transaction).rxBuf;
+//dbgUARTStr(rx_buffptr);
+
+/*
+uint8_t i;
+for(i = 0; i < SPI_MSG_LENGTH; i++) {
+   if(rx_buffptr[i] == 175) {
+       dbgUARTVal(i);
+   }
+}
+//dbgUARTVal(rx_buffptr[0]);
+//dbgUARTVal(rx_buffptr[3]);
+
+uint8_t i = 0;
+while(rx_buffptr[i] == 1 && i < SPI_MSG_LENGTH) {
+   i++;
+}
+
+dbgUARTVal(i);
+
+if(i == (*transaction).count || rx_buffptr[i] != 175 || rx_buffptr[i+1] != 193) {
+   halt();
+}
+
+i += 2;  //move to length
+
+//color connected components response
+if(rx_buffptr[i] == 33) {
+   uint8_t packet_length = rx_buffptr[i];
+   uint8_t block_count = packet_length/CONNECTED_PACKET_LENGTH;
+   dbgUARTVal(block_count);
+}
+
+//get version response
+else if(rx_buffptr[i] == 15) {
+
+} */

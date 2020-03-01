@@ -44,6 +44,6 @@ typedef struct
     uint8_t blockCount;
 } PIXY_DATA;
 
-int pixyFsm(PIXY_DATA *curState, int timeInc, uint64_t *block_data);
+int pixyFsm(PIXY_DATA *curState, int *timeInc, int *complete, uint64_t *block_data);
 
 #endif /* PIXY_STATE_H_ */
