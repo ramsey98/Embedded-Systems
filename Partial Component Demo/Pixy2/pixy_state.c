@@ -119,7 +119,7 @@ int pixyFsm(PIXY_DATA *curState, int *timeInc, int *complete, int *sendInc) {
        }
        case PixyWaitingForBlocks:
        {
-           dbgUARTStr("Blocks:");
+          dbgUARTStr("Blocks:");
           dbgUARTVal(curState->rx_buffer[CONNECTED_LENGTH_LOC]);
           curState->blockCount = curState->rx_buffer[CONNECTED_LENGTH_LOC];
           dbgUARTStr("Objects:");
@@ -131,11 +131,11 @@ int pixyFsm(PIXY_DATA *curState, int *timeInc, int *complete, int *sendInc) {
                //assign blocks
                for(i = 0; i < curState->blockCount/CONNECTED_PACKET_LENGTH; i++) {
                    curState->blocks[i].colorCode = curState->rx_buffer[loc+1];
-                   curState->blocks[i].xPos = (curState->rx_buffer[loc+3] << 8) | curState->rx_buffer[loc+2];
+                   curState->blocks[i].xPos = (curState->rx_buffer[loc+2] << 8) | curState->rx_buffer[loc+3];
                    curState->blocks[i].yPos = curState->rx_buffer[loc+5];
-                   curState->blocks[i].xPixels = (curState->rx_buffer[loc+7] << 8) | curState->rx_buffer[loc+6];
+                   curState->blocks[i].xPixels = (curState->rx_buffer[loc+6] << 8) | curState->rx_buffer[loc+7];
                    curState->blocks[i].yPos = curState->rx_buffer[loc+9];
-                   curState->blocks[i].angle = (curState->rx_buffer[loc+11] << 8) | curState->rx_buffer[loc+10];
+                   curState->blocks[i].angle = (curState->rx_buffer[loc+10] << 8) | curState->rx_buffer[loc+11];
                    curState->blocks[i].trackIndex = curState->rx_buffer[loc+12];
                    curState->blocks[i].age = curState->rx_buffer[loc+13];
 
