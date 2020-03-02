@@ -12,6 +12,8 @@ static ADC_Handle adc;
 void timer75Callback(Timer_Handle myHandle)
 {
     dbgOutputLoc(ENTER_ISR_TIMER2);
+    sendPollMsgToPixyQ1();
+    /*
     uint16_t adcValue;
     uint32_t adcValueMicroVolt;
     int_fast16_t res = ADC_convert(adc, &adcValue);
@@ -28,7 +30,7 @@ void timer75Callback(Timer_Handle myHandle)
     else
     {
         halt();
-    }
+    } */
     dbgOutputLoc(LEAVE_ISR_TIMER2);
 }
 

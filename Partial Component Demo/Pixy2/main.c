@@ -36,11 +36,11 @@ void *mainThread(void *arg0)
     int timeIncPixy = 0;
     int complete = 0;
     int count = 0;
-    uint64_t block_data;
+    int sendIncPixy = 0;
     PIXY_DATA pixyState;
     pixyState.state = PixyInit;
     initBuffers(pixyState.rx_buffer, pixyState.tx_buffer);
-    success = pixyFsm(&pixyState, &timeIncPixy, &complete, &block_data);
+    success = pixyFsm(&pixyState, &timeIncPixy, &complete, &sendIncPixy);
 
     dbgOutputLoc(WHILE1);
     while(1)
@@ -54,8 +54,9 @@ void *mainThread(void *arg0)
         } */
 
 
-        received = receiveFromPixyQ1(&timeIncPixy, &complete, &block_data);
-        success = pixyFsm(&pixyState, &timeIncPixy, &complete, &block_data);
+        /* */
+        received = receiveFromPixyQ1(&timeIncPixy, &complete, &sendIncPixy);
+        success = pixyFsm(&pixyState, &timeIncPixy, &complete, &sendIncPixy);
         if(success == -1 || received == -1)
         {
             halt();
@@ -67,6 +68,12 @@ void *mainThread(void *arg0)
         if(count > 1000000) {
             spiGetConnectedBlocks(pixyState.rx_buffer, pixyState.tx_buffer);
             count = 0;
+
+            dbgUARTStr("Blocks:");
+            dbgUARTVal(pixyState.rx_buffer[CONNECTED_LENGTH_LOC]);
+            pixyState.blockCount = pixyState.rx_buffer[CONNECTED_LENGTH_LOC];
+            dbgUARTStr("Objects:");
+            dbgUARTVal(pixyState.blockCount/CONNECTED_PACKET_LENGTH);
         } */
 
     }

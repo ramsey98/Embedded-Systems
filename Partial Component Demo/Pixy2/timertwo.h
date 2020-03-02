@@ -13,6 +13,7 @@
 
 #include "debug.h"
 #include "sensor_queue.h"
+#include "pixy_queue.h"
 
 #define TIMER1_PERIOD (75000)
 

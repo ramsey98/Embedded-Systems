@@ -32,6 +32,20 @@ int sendTimeMsgToPixyQ1(unsigned int timeVal)
     return ret;
 }
 
+int sendPollMsgToPixyQ1() {
+    int ret = 0;
+    BaseType_t success;
+    dbgOutputLoc(BEFORE_SEND_QUEUE_ISR_TIMER1);
+    uint64_t msg = POLLFLAG;
+    success = xQueueSendFromISR(xQueuePixy, (void *) &msg, pdFALSE);
+    if(success == pdFALSE)
+    {
+        ret = -1;
+    }
+    dbgOutputLoc(AFTER_SEND_QUEUE_ISR_TIMER1);
+    return ret;
+}
+
 int sendSpiMsgToPixyQ1() {
     int ret = 0;
     BaseType_t success;
@@ -46,7 +60,7 @@ int sendSpiMsgToPixyQ1() {
     return ret;
 }
 
-int receiveFromPixyQ1(int *timeInc, int *complete, uint64_t * block_data) {
+int receiveFromPixyQ1(int *timeInc, int *complete, int *sendInc) {
    int ret = 0;
    BaseType_t success;
    dbgOutputLoc(BEFORE_RECEIVE_QUEUE);
@@ -59,11 +73,13 @@ int receiveFromPixyQ1(int *timeInc, int *complete, uint64_t * block_data) {
    }
    if (received >> SHIFT_PIXY == TIMEMASK)
    {
-       *timeInc = received & FMASK;
+       *sendInc = received & FMASK;
    }
-
    if(received >> SHIFT_PIXY == TRANSFERMASK) {
        *complete = 1;
+   }
+   if(received >> SHIFT_PIXY == POLLMASK) {
+       *timeInc += 1;
    }
 
    /* change to block data

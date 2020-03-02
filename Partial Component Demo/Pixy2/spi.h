@@ -21,7 +21,7 @@
 #define SPI_TX_MSG_CONNECTED 6
 #define SPI_TX_MSG_COLOR 7
 #define CONNECTED_PACKET_LENGTH 14
-#define CONNECTED_LENGTH_LOC 18
+#define CONNECTED_LENGTH_LOC 17
 
 void spiInit();
 void spiCallback(SPI_Handle handle, SPI_Transaction *transaction);
