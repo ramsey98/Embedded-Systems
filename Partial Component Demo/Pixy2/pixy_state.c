@@ -134,7 +134,7 @@ int pixyFsm(PIXY_DATA *curState, int *timeInc, int *complete, int *sendInc) {
                    curState->blocks[i].xPos = (curState->rx_buffer[loc+2] << 8) | curState->rx_buffer[loc+3];
                    curState->blocks[i].yPos = curState->rx_buffer[loc+5];
                    curState->blocks[i].xPixels = (curState->rx_buffer[loc+6] << 8) | curState->rx_buffer[loc+7];
-                   curState->blocks[i].yPos = curState->rx_buffer[loc+9];
+                   curState->blocks[i].yPixels = curState->rx_buffer[loc+9];
                    curState->blocks[i].angle = (curState->rx_buffer[loc+10] << 8) | curState->rx_buffer[loc+11];
                    curState->blocks[i].trackIndex = curState->rx_buffer[loc+12];
                    curState->blocks[i].age = curState->rx_buffer[loc+13];
