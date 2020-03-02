@@ -54,7 +54,6 @@ void *mainThread(void *arg0)
         } */
 
 
-
         received = receiveFromPixyQ1(&timeIncPixy, &complete, &block_data);
         success = pixyFsm(&pixyState, &timeIncPixy, &complete, &block_data);
         if(success == -1 || received == -1)
@@ -62,13 +61,13 @@ void *mainThread(void *arg0)
             halt();
         }
 
+
         /*
         count++;
         if(count > 1000000) {
             spiGetConnectedBlocks(pixyState.rx_buffer, pixyState.tx_buffer);
             count = 0;
-        }
-        */
+        } */
 
     }
 }

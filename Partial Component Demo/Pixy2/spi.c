@@ -23,7 +23,7 @@ void spiInit()
     SPI_init();
     dbgOutputLoc(SPI_INIT);
     SPI_Params_init(&params);
-    params.bitRate  = 2000000;
+    params.bitRate  = 500000; //2000000;
     params.transferMode = SPI_MODE_CALLBACK;
     params.frameFormat = SPI_POL0_PHA1;
     params.transferCallbackFxn = spiCallback;
