@@ -6,6 +6,7 @@
  */
 #include "debug.h"
 #include <string.h>
+#include <stdio.h>
 static UART_Handle uart;
 
 void dbgUARTInit()
@@ -115,3 +116,19 @@ void halt(int line, const char* func)
     taskDISABLE_INTERRUPTS();
     while(1) {}
 }
+
+
+void dbgUARTNum(int outVal)
+{
+    char str[3];
+    if (outVal > 255)
+    {
+        sprintf(str, "%d", outVal);
+        dbgUARTStr(str);
+    }
+    else
+    {
+        dbgUARTVal(outVal);
+    }
+}
+

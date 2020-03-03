@@ -7,6 +7,8 @@
 
 #include "motor_controller_thread.h"
 
+//static UART_Handle motors_uart;
+
 void initWheels(MoveCommand * wheel_0, MoveCommand * wheel_1, MoveCommand * wheel_2) {
     uint16_t init = convertMovementCmd(STOP, STOP);
 
@@ -16,34 +18,16 @@ void initWheels(MoveCommand * wheel_0, MoveCommand * wheel_1, MoveCommand * whee
 }
 
 void *mcThread(void *arg0) {
-    GPIO_write(CONFIG_LED_0_GPIO, CONFIG_GPIO_LED_ON);
+    GPIO_toggle(CONFIG_LED_1_GPIO);
     sleep(1);
-    GPIO_write(CONFIG_LED_0_GPIO, CONFIG_GPIO_LED_OFF);
+//    initialize();
+    GPIO_toggle(CONFIG_LED_0_GPIO);
     sleep(1);
-    GPIO_write(CONFIG_LED_0_GPIO, CONFIG_GPIO_LED_ON);
+    GPIO_toggle(CONFIG_LED_1_GPIO);
     sleep(1);
-    GPIO_write(CONFIG_LED_0_GPIO, CONFIG_GPIO_LED_OFF);
+    GPIO_toggle(CONFIG_LED_0_GPIO);
     sleep(1);
-//    MoveCommand wheel_0;
-//    MoveCommand wheel_1;
-//    MoveCommand wheel_2;
-//    UART_Handle uart;
-//
-//    initialize(&uart);
-    GPIO_write(CONFIG_LED_0_GPIO, CONFIG_GPIO_LED_OFF);
-    sleep(1);
-
-    GPIO_write(CONFIG_LED_1_GPIO, CONFIG_GPIO_LED_ON);
-//    initWheels(&wheel_0, &wheel_1, &wheel_2);
-    GPIO_write(CONFIG_LED_1_GPIO, CONFIG_GPIO_LED_OFF);
-    sleep(1);
-
-
-    GPIO_write(CONFIG_LED_0_GPIO, CONFIG_GPIO_LED_ON);
-    GPIO_write(CONFIG_LED_1_GPIO, CONFIG_GPIO_LED_ON);
-    sleep(3);
-    GPIO_write(CONFIG_LED_1_GPIO, CONFIG_GPIO_LED_OFF);
-    GPIO_write(CONFIG_LED_1_GPIO, CONFIG_GPIO_LED_OFF);
+    GPIO_toggle(CONFIG_LED_1_GPIO);
     sleep(1);
 
 //    while (1) {
@@ -53,14 +37,16 @@ void *mcThread(void *arg0) {
 //            ERROR;
 //        }
 //
-//        moveRover(uart, command);
+//        moveRover(command);
 //    }
-    while(1) {
-
-    }
+//    while(1) {
+//
+//    }
+    return(NULL);
 }
 
-void initialize(UART_Handle * uart) {
+void initialize(UART_Handle * motors_uart) {
+
     UART_Params uartParams;
 
     UART_Params_init(&uartParams);
@@ -70,25 +56,118 @@ void initialize(UART_Handle * uart) {
     uartParams.readReturnMode = UART_RETURN_FULL;
     uartParams.baudRate = 9600;
     uartParams.readEcho = UART_ECHO_OFF;
-    *uart = UART_open(0, &uartParams);
+    *motors_uart = UART_open(CONFIG_UART_0, &uartParams);
 
-    if (uart == NULL) {
+    if (motors_uart == NULL) {
         ERROR;
     }
 
-    // sent baud rate
     sleep(2);
     uint8_t baudChar = 170;
-    UART_write(*uart, &baudChar, 1);
+    UART_write(*motors_uart, &baudChar, 1);
 
 }
 
-void moveRover(UART_Handle uart, uint16_t command) {
-    uint8_t direction = command >> 8;
-    uint8_t magnitude = command & 0xFF;
-    uint8_t checksum = (0x80 + 0x04 + 0x0F) & 0b01111111;
+void moveRover(uint16_t command) {
+    UART_Handle motors_uart;
+    initialize(&motors_uart);
 
-    uint8_t buffer[] = {0x80, direction, magnitude, checksum};
-    UART_write(uart, buffer, sizeof(buffer));
+    uint8_t direction = 0;
+    uint8_t magnitude = 64;
+
+    uint8_t address = 128;
+    uint8_t checksum28 = (address + direction + magnitude) & 0b01111111;
+    uint8_t buffer28[] = {address, direction, magnitude, checksum28};
+
+    address = 129;
+    uint8_t checksum29 = (address + direction + magnitude) & 0b01111111;
+    uint8_t buffer29[] = {address, direction, magnitude, checksum29};
+
+    address = 130;
+    uint8_t checksum30 = (address + direction + magnitude) & 0b01111111;
+    uint8_t buffer30[] = {address, direction, magnitude, checksum30};
+
+    UART_write(motors_uart, buffer28, sizeof(buffer28));
+    UART_write(motors_uart, buffer29, sizeof(buffer29));
+    UART_write(motors_uart, buffer30, sizeof(buffer30));
+
+    sleep(2);
+
+    magnitude = 0;
+
+    address = 128;
+    uint8_t checksum128 = (address + direction + magnitude) & 0b01111111;
+    uint8_t buffer128[] = {address, direction, magnitude, checksum128};
+
+    address = 129;
+    uint8_t checksum129 = (address + direction + magnitude) & 0b01111111;
+    uint8_t buffer129[] = {address, direction, magnitude, checksum129};
+
+    address = 130;
+    uint8_t checksum130 = (address + direction + magnitude) & 0b01111111;
+    uint8_t buffer130[] = {address, direction, magnitude, checksum130};
+
+    UART_write(motors_uart, buffer128, sizeof(buffer128));
+    UART_write(motors_uart, buffer129, sizeof(buffer129));
+    UART_write(motors_uart, buffer130, sizeof(buffer130));
+
+    GPIO_write(CONFIG_LED_1_GPIO, CONFIG_GPIO_LED_OFF);
 }
 
+//void *UARTTxThread(void *arg0)
+//{
+//    dbgOutputLoc(ENTER_TASK);
+//    uint8_t byte1;
+//    uint16_t value;
+//    int received = 0;
+//    dbgOutputLoc(WHILE1);
+//    while(1)
+//    {
+//        received = receiveFromUARTTxQ(&value);
+//        if(received == -1)
+//        {
+//            ERROR;
+//        }
+//        else
+//        {
+//            byte1 = value & 0xFF;
+//            if(byte1 == 0)
+//            {
+//                byte1 = value >> 8;
+//                UART_write(motors_uart, &byte1, sizeof(byte1));
+//            }
+//            else
+//            {
+//                UART_write(motors_uart, &value, sizeof(value));
+//            }
+//        }
+//    }
+//}
+//
+//void *UARTDebugThread(void *arg0)
+//{
+//    dbgOutputLoc(ENTER_TASK);
+//    uint8_t value, type;
+//    int received = 0;
+//    dbgOutputLoc(WHILE1);
+//    while(1)
+//    {
+//        received = receiveFromUARTDebugQ(&type, &value);
+//        if(received == -1)
+//        {
+//            ERROR;
+//        }
+//        else
+//        {
+//            if(type == 1)
+//            {
+//                dbgUARTStr("Left Motor:");
+//            }
+//            else if(type == 2)
+//            {
+//                dbgUARTStr("Right Motor:");
+//            }
+//            dbgUARTNum(value);
+//        }
+//    }
+//}

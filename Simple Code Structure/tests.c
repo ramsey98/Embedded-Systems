@@ -23,9 +23,10 @@ void tests(test_num* num)
     {
     case test1:
         //both motors forward max speed
-        sendMsgToMCQ(0x4F);
+//        moveRover(0x4F);
         sleep(3);
-        *num = test2;
+        GPIO_toggle(CONFIG_LED_0_GPIO);
+        *num = test1;
         break;
     case test2:
         GPIO_write(CONFIG_LED_0_GPIO, CONFIG_GPIO_LED_OFF);
@@ -39,7 +40,7 @@ void tests(test_num* num)
     default:
         break;
     }
-    sleep(3);
+    sleep(1);
     //GPIO_toggle(CONFIG_LED_1_GPIO);
 }
 

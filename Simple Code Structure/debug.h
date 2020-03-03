@@ -41,5 +41,6 @@ void dbgUARTVal(unsigned char outVal);
 void dbgUARTStr(char * uartOut);
 void dbgOutputLoc(unsigned int outVal);
 void halt(int line, const char * func);
+void dbgUARTNum(int outVal);
 
 #endif /* DEBUG_H_ */
