@@ -40,7 +40,7 @@ void setTxBuffer(uint8_t *tx_buffer, uint8_t *tx_msg, unsigned tx_length, unsign
         if(i < msg_length) {
             tx_buffer[i] = tx_msg[i];
         } else {
-            tx_buffer[i] = 0xff;
+            tx_buffer[i] = 0x00;
         }
     }
 }
@@ -57,6 +57,7 @@ void spiGetVersionPacket(uint8_t *rx_buffer, uint8_t *tx_buffer) {
                                                      0x0e,  // this is the version request type
                                                      0x00  // data_length is 0
                                                };
+    memset(rx_buffer, 0, SPI_MSG_LENGTH);
     setTxBuffer(tx_buffer, txMsgVersion, SPI_MSG_LENGTH, SPI_TX_MSG_VERSION);
     spiTransfer(rx_buffer, tx_buffer);
 }
@@ -71,6 +72,7 @@ void spiSetColorPacket(uint8_t *rx_buffer, uint8_t *tx_buffer, uint8_t r, uint8_
                                                      g,
                                                      b
                                                };
+    memset(rx_buffer, 0, SPI_MSG_LENGTH);
     setTxBuffer(tx_buffer, txMsgColor, SPI_MSG_LENGTH, SPI_TX_MSG_COLOR);
     spiTransfer(rx_buffer, tx_buffer);
 }
@@ -86,6 +88,7 @@ void spiGetConnectedBlocks(uint8_t *rx_buffer, uint8_t *tx_buffer) {
                                                        0xff,
                                                     };
 
+    memset(rx_buffer, 0, SPI_MSG_LENGTH);
     setTxBuffer(tx_buffer, txMsgConnected, SPI_MSG_LENGTH, SPI_TX_MSG_CONNECTED);
     spiTransfer(rx_buffer, tx_buffer);
 }
