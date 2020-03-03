@@ -11,6 +11,7 @@
 #include <ti/drivers/Timer.h>
 #include "debug.h"
 #include "sensor_queue.h"
+#include "pixy_queue.h"
 
 #define TIMER0_PERIOD (1000000)
 

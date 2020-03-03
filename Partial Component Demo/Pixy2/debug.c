@@ -70,8 +70,7 @@ void dbgUARTNum(int outVal)
 
 void dbgOutputLoc(unsigned int outLoc)
 {
-    GPIO_write(CONFIG_GPIO_7, CONFIG_GPIO_LED_OFF);
-    GPIO_toggle(CONFIG_GPIO_7); //when GPIO_7 is high, bits are being switched
+    GPIO_write(CONFIG_GPIO_7, CONFIG_GPIO_LED_ON);
     GPIO_write(CONFIG_GPIO_6, CONFIG_GPIO_LED_OFF);
     GPIO_write(CONFIG_GPIO_5, CONFIG_GPIO_LED_OFF);
     GPIO_write(CONFIG_GPIO_4, CONFIG_GPIO_LED_OFF);
@@ -111,12 +110,13 @@ void dbgOutputLoc(unsigned int outLoc)
             GPIO_write(CONFIG_GPIO_0, CONFIG_GPIO_LED_ON);
         }
 
-        GPIO_toggle(CONFIG_GPIO_7);
     }
     else
     {
         halt();
     }
+
+    GPIO_write(CONFIG_GPIO_7, CONFIG_GPIO_LED_OFF);
 }
 
 void halt() //call dgbOutputLoc, param: location of error
