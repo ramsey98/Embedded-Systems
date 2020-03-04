@@ -77,6 +77,12 @@ int pixyFsm(PIXY_DATA *curState, int *timeInc, int *complete, int *sendInc) {
    dbgOutputLoc(SPI_ENTER_FSM);
    int success = 0;
    int i;
+   if(*sendInc > 0) {
+       printState(curState);
+       curState->curTime += *sendInc;
+       *sendInc = 0;
+   }
+
    switch (curState->state)
    {
        case PixyInit:
@@ -144,11 +150,6 @@ int pixyFsm(PIXY_DATA *curState, int *timeInc, int *complete, int *sendInc) {
 
        case PixyWaitingForTime1:
        {
-           if(*sendInc > 0) {
-               printState(curState);
-               curState->curTime += *sendInc;
-               *sendInc = 0;
-           }
            if (*timeInc > 3)
            {
                dbgOutputLoc(SPI_SEND_CONNECTED_PACKET);
