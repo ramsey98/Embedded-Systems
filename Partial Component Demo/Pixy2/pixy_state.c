@@ -8,51 +8,11 @@
 
 #include "pixy_state.h"
 
-int printState(DISTANCE_DATA *curState) {
-    int i;
-    for(i = 0; i < curState->blockCount/CONNECTED_PACKET_LENGTH; i++) {
-        dbgUARTStr("c:");
-        if(curState->blocks[i].colorCode == 1) {
-            dbgUARTStr("r");
-        } else if(curState->blocks[i].colorCode == 2) {
-            dbgUARTStr("g");
-        } else if(curState->blocks[i].colorCode == 3) {
-            dbgUARTStr("y");
-        } else {
-            dbgUARTStr("?");
-        }
-        dbgUARTStr("x:");
-        dbgUARTVal(curState->blocks[i].xPos);
-        dbgUARTStr("y:");
-        dbgUARTVal(curState->blocks[i].yPos);
-        dbgUARTStr("xP:");
-        dbgUARTVal(curState->blocks[i].xPixels);
-        dbgUARTStr("yP:");
-        dbgUARTVal(curState->blocks[i].yPixels);
-        dbgUARTStr("d:");
-        //dbgUARTNum(findDistance(&curState->blocks[i]));
-
-        /*
-        dbgUARTVal(curState->blocks[i].angle);
-        dbgUARTVal(curState->blocks[i].trackIndex);
-        dbgUARTVal(curState->blocks[i].age); */
-    }
-
-    return 0;
-}
-
 void initDistanceData(DISTANCE_DATA *d, PIXY_DATA *p) {
     int j;
     d->blockCount = p->blockCount;
     for(j=0; j < d->blockCount/CONNECTED_PACKET_LENGTH; j++) {
         d->blocks[j] = p->blocks[j];
-        /*
-        d->blocks[j].colorCode = p->blocks[j].colorCode;
-        d->blocks[j].xPos = p->blocks[j].xPos;
-        d->blocks[j].yPos = p->blocks[j].yPos;
-        d->blocks[j].xPixels = p->blocks[j].xPixels;
-        d->blocks[j].yPixels = p->blocks[j].yPixels; */
-        dbgUARTVal(d->blocks[j].colorCode);
     }
 
 }
@@ -67,7 +27,6 @@ int pixyFsm(PIXY_DATA *curState, int *timeInc, int *complete, int *sendInc) {
 
        DISTANCE_DATA toSend;
        initDistanceData(&toSend, curState);
-       //printState(&toSend);
        sendBlockMsgToDistanceQ1(&toSend);
 
    }
@@ -167,10 +126,11 @@ int pixyFsm(PIXY_DATA *curState, int *timeInc, int *complete, int *sendInc) {
        }
        case PixyWaitingForBlocks:
        {
+           /*
            dbgUARTStr("Blocks:");
            dbgUARTVal(curState->rx_buffer[CONNECTED_LENGTH_LOC]);
            dbgUARTStr("Objects:");
-           dbgUARTVal(curState->blockCount/CONNECTED_PACKET_LENGTH);
+           dbgUARTVal(curState->blockCount/CONNECTED_PACKET_LENGTH); */
            if(curState->blockCount > 0) {
 
                int loc = CONNECTED_LENGTH_LOC + 2;

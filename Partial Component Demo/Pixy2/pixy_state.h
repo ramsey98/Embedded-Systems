@@ -36,7 +36,6 @@ typedef struct
     int yPan;
 } PIXY_DATA;
 
-int printState(DISTANCE_DATA *curState);
 void initDistanceData(DISTANCE_DATA *d, PIXY_DATA *p);
 int pixyFsm(PIXY_DATA *curState, int *timeInc, int *complete, int *sendInc);
 #endif /* PIXY_STATE_H_ */
