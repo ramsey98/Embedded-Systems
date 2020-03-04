@@ -57,8 +57,29 @@ void spiGetVersionPacket(uint8_t *rx_buffer, uint8_t *tx_buffer) {
                                                      0x0e,  // this is the version request type
                                                      0x00  // data_length is 0
                                                };
-    memset(rx_buffer, 0, SPI_MSG_LENGTH);
     setTxBuffer(tx_buffer, txMsgVersion, SPI_MSG_LENGTH, SPI_TX_MSG_VERSION);
+    spiTransfer(rx_buffer, tx_buffer);
+}
+
+void spiSetServos(uint8_t *rx_buffer, uint8_t *tx_buffer, int panX, int panY) {
+
+    uint8_t msg4 = (uint8_t)(panX >> 8);
+    uint8_t msg5 = (uint8_t)(panX & 0xff);
+    uint8_t msg6 = (uint8_t)(panY >> 8);
+    uint8_t msg7 = (uint8_t)(panY & 0xff);
+
+    uint8_t txMsgServos[SPI_TX_MSG_SERVOS] = {
+                                                     0xae,  // first byte of no_checksum_sync (little endian -> least-significant byte first)
+                                                     0xc1,  // second byte of no_checksum_sync
+                                                     0x12,  // this is the version request type
+                                                     0x04,  // data_length is 0
+                                                     msg4,
+                                                     msg5,
+                                                     msg6,
+                                                     msg7
+
+                                               };
+    setTxBuffer(tx_buffer, txMsgServos, SPI_MSG_LENGTH, SPI_TX_MSG_SERVOS);
     spiTransfer(rx_buffer, tx_buffer);
 }
 
@@ -72,7 +93,6 @@ void spiSetColorPacket(uint8_t *rx_buffer, uint8_t *tx_buffer, uint8_t r, uint8_
                                                      g,
                                                      b
                                                };
-    memset(rx_buffer, 0, SPI_MSG_LENGTH);
     setTxBuffer(tx_buffer, txMsgColor, SPI_MSG_LENGTH, SPI_TX_MSG_COLOR);
     spiTransfer(rx_buffer, tx_buffer);
 }
@@ -88,7 +108,6 @@ void spiGetConnectedBlocks(uint8_t *rx_buffer, uint8_t *tx_buffer) {
                                                        0xff,
                                                     };
 
-    memset(rx_buffer, 0, SPI_MSG_LENGTH);
     setTxBuffer(tx_buffer, txMsgConnected, SPI_MSG_LENGTH, SPI_TX_MSG_CONNECTED);
     spiTransfer(rx_buffer, tx_buffer);
 }

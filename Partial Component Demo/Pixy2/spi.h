@@ -20,6 +20,7 @@
 #define SPI_TX_MSG_VERSION 4
 #define SPI_TX_MSG_CONNECTED 6
 #define SPI_TX_MSG_COLOR 7
+#define SPI_TX_MSG_SERVOS 8
 #define CONNECTED_PACKET_LENGTH 14
 #define CONNECTED_LENGTH_LOC 17
 #define FOCAL_PIXELS_30 30
@@ -45,6 +46,7 @@ void spiCallback(SPI_Handle handle, SPI_Transaction *transaction);
 void setTxBuffer(uint8_t *tx_buffer, uint8_t *tx_msg, unsigned tx_length, unsigned msg_length);
 void initBuffers(uint8_t *rx_buffer, uint8_t *tx_buffer);
 void spiGetVersionPacket(uint8_t *rx_buffer, uint8_t *tx_buffer);
+void spiSetServos(uint8_t *rx_buffer, uint8_t *tx_buffer, int panX, int panY);
 void spiSetColorPacket(uint8_t *rx_buffer, uint8_t *tx_buffer, uint8_t r, uint8_t g, uint8_t b);
 void spiGetConnectedBlocks(uint8_t *rx_buffer, uint8_t *tx_buffer);
 void spiTransfer(uint8_t *rx_buffer, uint8_t *tx_buffer);

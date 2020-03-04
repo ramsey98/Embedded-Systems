@@ -19,6 +19,7 @@ typedef enum
     PixyInit,
     PixySendVersion,
     PixyWaitingForVersion,
+    PixyPan,
     PixyWaitingForTime1,
     PixyWaitingForBlockCount,
     PixyWaitingForBlocks
@@ -44,6 +45,8 @@ typedef struct
     uint8_t tx_buffer[SPI_MSG_LENGTH];
     int curTime;
     uint8_t blockCount;
+    int xPan;
+    int yPan;
 } PIXY_DATA;
 
 int printState(PIXY_DATA *curState);

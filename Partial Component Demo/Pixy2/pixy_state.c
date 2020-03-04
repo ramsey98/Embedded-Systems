@@ -35,7 +35,7 @@ int findDistance(BLOCK_DATA *data) {
         dy = (EGG_WIDTH * FOCAL_LENGTH_90_Y)/FOCAL_PIXELS_90_Y;
     }
 
-    return (0.7*dx + 0.3*dy);
+    return (0.9*dx + 0.1*dy);
 
 
 }
@@ -43,8 +43,16 @@ int findDistance(BLOCK_DATA *data) {
 int printState(PIXY_DATA *curState) {
     int i;
     for(i = 0; i < curState->blockCount/CONNECTED_PACKET_LENGTH; i++) {
-        dbgUARTStr("i:");
-        dbgUARTVal(curState->blocks[i].colorCode);
+        dbgUARTStr("c:");
+        if(curState->blocks[i].colorCode == 1) {
+            dbgUARTStr("r");
+        } else if(curState->blocks[i].colorCode == 2) {
+            dbgUARTStr("g");
+        } else if(curState->blocks[i].colorCode == 3) {
+            dbgUARTStr("b");
+        } else {
+            dbgUARTStr("?");
+        }
         dbgUARTStr("x:");
         dbgUARTVal(curState->blocks[i].xPos);
         dbgUARTStr("y:");
@@ -75,6 +83,8 @@ int pixyFsm(PIXY_DATA *curState, int *timeInc, int *complete, int *sendInc) {
        {
            curState->curTime = 0;
            curState->blockCount = 0;
+           curState->xPan = 0;
+           curState->yPan = 0;
 
            memset(curState->blocks, 0, MAX_BLOCKS * sizeof(BLOCK_DATA));
 
@@ -89,14 +99,11 @@ int pixyFsm(PIXY_DATA *curState, int *timeInc, int *complete, int *sendInc) {
                 curState->blocks[i].age = 0;
 
            }
-           curState->state = PixyWaitingForTime1;
+           curState->state = PixySendVersion;
            break;
        }
        case PixySendVersion:
-            if (*timeInc == 0)
-            {
-            }
-            else if (*timeInc > 0)
+            if (*timeInc > 0)
             {
                 dbgOutputLoc(SPI_SEND_VERSION_PACKET);
                 curState->curTime += *timeInc;
@@ -110,17 +117,33 @@ int pixyFsm(PIXY_DATA *curState, int *timeInc, int *complete, int *sendInc) {
            if(*complete > 0) {
                dbgOutputLoc(SPI_RECEIVE_VERSION_PACKET);
                *complete = 0;
-               curState->state = PixyWaitingForTime1;
+               curState->state = PixyWaitingForTime1;//PixyPan;
            }
+           break;
+
+       case PixyPan:
+           if(*timeInc % 30 == 0 && *timeInc <= 150 && *timeInc > 0) { //every 4.5 seconds
+
+               int pan_pos = *timeInc / 30;
+               dbgOutputLoc(SPI_SET_SERVO);
+               int panX = (55+ 100*(pan_pos-1));
+               dbgUARTNum(panX);
+               int panY = 255;
+               spiSetServos(curState->rx_buffer, curState->tx_buffer, panX, panY);
+           }
+           else if(*timeInc == 180) {
+
+           } else if(*timeInc >= 200) {
+               curState->state = PixyWaitingForTime1;
+               *complete = 0;
+               *timeInc = 0;
+           }
+
            break;
 
        case PixyWaitingForTime1:
        {
-           if (*timeInc == 0)
-           {
-
-           }
-           else if (*timeInc > 4)
+           if (*timeInc > 3)
            {
                if(*sendInc > 0) {
                    printState(curState);
@@ -143,6 +166,15 @@ int pixyFsm(PIXY_DATA *curState, int *timeInc, int *complete, int *sendInc) {
                dbgOutputLoc(SPI_RECEIVE_CONNECTED_PACKET);
                *complete = 0;
 
+               //dbgUARTVal(curState->rx_buffer[CONNECTED_LENGTH_LOC-1]);
+               //dbgUARTVal(curState->rx_buffer[CONNECTED_LENGTH_LOC]);
+               //dbgUARTVal(curState->rx_buffer[CONNECTED_LENGTH_LOC+1]);
+
+               int i;
+               for(i=15; i < 50; i++) {
+                   dbgUARTVal(i);
+                   dbgUARTVal(curState->rx_buffer[i]);
+               }
                if(curState->rx_buffer[CONNECTED_LENGTH_LOC-1] != 33) {
                    curState->state = PixyWaitingForTime1;
                } else {
@@ -154,10 +186,10 @@ int pixyFsm(PIXY_DATA *curState, int *timeInc, int *complete, int *sendInc) {
        }
        case PixyWaitingForBlocks:
        {
-          dbgUARTStr("Blocks:");
-          dbgUARTVal(curState->rx_buffer[CONNECTED_LENGTH_LOC]);
-          dbgUARTStr("Objects:");
-          dbgUARTVal(curState->blockCount/CONNECTED_PACKET_LENGTH);
+           dbgUARTStr("Blocks:");
+           dbgUARTVal(curState->rx_buffer[CONNECTED_LENGTH_LOC]);
+           dbgUARTStr("Objects:");
+           dbgUARTVal(curState->blockCount/CONNECTED_PACKET_LENGTH);
            if(curState->blockCount > 0) {
 
                int loc = CONNECTED_LENGTH_LOC + 2;
@@ -189,7 +221,8 @@ int pixyFsm(PIXY_DATA *curState, int *timeInc, int *complete, int *sendInc) {
            success = -1;
            break;
        }
-   }
 
+   }
+   dbgOutputLoc(SPI_EXIT_FSM);
    return success;
 }
