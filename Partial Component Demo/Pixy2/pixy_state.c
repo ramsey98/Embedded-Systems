@@ -49,7 +49,7 @@ int printState(PIXY_DATA *curState) {
         } else if(curState->blocks[i].colorCode == 2) {
             dbgUARTStr("g");
         } else if(curState->blocks[i].colorCode == 3) {
-            dbgUARTStr("b");
+            dbgUARTStr("y");
         } else {
             dbgUARTStr("?");
         }
