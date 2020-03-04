@@ -9,6 +9,7 @@
 #define MQTT_QUEUE_H_
 
 //#include "debug.h"
+#include "FreeRTOS.h"
 #include "queue.h"
 
 typedef struct

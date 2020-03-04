@@ -13,7 +13,7 @@ void createMQTTQueue()
     xQueue = xQueueCreate(16, sizeof(MQTTMsg));
     if(xQueue == NULL)
     {
-        ERROR;
+        //ERROR;
     }
 }
 
@@ -43,13 +43,13 @@ void sendMsgToMQTTQ(uint8_t type, uint8_t value)
         }
         default:
         {
-            ERROR;
+            //ERROR;
         }
     }
     BaseType_t success = xQueueSend(xQueue, (void *) &msg, pdFALSE);
     if(success == pdFALSE)
     {
-        ERROR;
+        //ERROR;
     }
     //dbgOutputLoc(AFTER_SEND_QUEUE_ISR_TIMER);
 }
@@ -61,7 +61,7 @@ void receiveFromMQTTQ(uint8_t *index, uint8_t *state, uint8_t *leftmotor, uint8_
     BaseType_t success = xQueueReceive(xQueue, &received, portMAX_DELAY);
     if(success == pdFALSE)
     {
-        ERROR;
+        //ERROR;
     }
     else
     {
@@ -77,7 +77,7 @@ void receiveFromMQTTQ(uint8_t *index, uint8_t *state, uint8_t *leftmotor, uint8_
             *rightmotor = received.right;
             break;
         default:
-            ERROR;
+            //ERROR;
             break;
         }
         *index = received.ID;

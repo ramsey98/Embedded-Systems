@@ -48,6 +48,9 @@
 
 /* Application includes                                                      */
 #include "client_cbs.h"
+#include "json_parse.h"
+//#include "debug.h"
+#define SUBSCRIPTION_TOPIC0      "/team20/topic0"
 
 extern bool gResetApplication;
 
@@ -171,8 +174,8 @@ void MqttClientCallback(int32_t event,
 
         struct publishMsgHeader msgHead;
 
-        char *pubBuff = NULL;
-        struct msgQueue queueElem;
+        //char *pubBuff = NULL;
+        //struct msgQueue queueElem;
 
         topicOffset = sizeof(struct publishMsgHeader);
         payloadOffset = sizeof(struct publishMsgHeader) +
@@ -181,13 +184,13 @@ void MqttClientCallback(int32_t event,
         bufSizeReqd += sizeof(struct publishMsgHeader);
         bufSizeReqd += recvMetaData->topLen + 1;
         bufSizeReqd += dataLen + 1;
-        pubBuff = (char *) malloc(bufSizeReqd);
-
-        if(pubBuff == NULL)
-        {
-            APP_PRINT("malloc failed: recv_cb\n\r");
-            return;
-        }
+        //pubBuff = (char *) malloc(bufSizeReqd);
+        static char pubBuff[PUBLISH_JSON_BUFFER_SIZE];
+        //if(pubBuff == NULL)
+        //{
+        //    APP_PRINT("malloc failed: recv_cb\n\r");
+        //    return;
+        //}
 
         msgHead.topicLen = recvMetaData->topLen;
         msgHead.payLen = dataLen;
@@ -222,14 +225,22 @@ void MqttClientCallback(int32_t event,
         }
 
         /* filling the queue element details                              */
-        queueElem.event = MSG_RECV_BY_CLIENT;
-        queueElem.msgPtr = pubBuff;
-        queueElem.topLen = recvMetaData->topLen;
+        //queueElem.event = MSG_RECV_BY_CLIENT;
+        //queueElem.msgPtr = pubBuff;
+        //queueElem.topLen = recvMetaData->topLen;
 
         /* signal to the main task                                        */
-        if(MQTT_SendMsgToQueue(&queueElem))
+        //if(MQTT_SendMsgToQueue(&queueElem))
+        //{
+        //    UART_PRINT("\n\n\rQueue is full\n\n\r");
+        //}
+        if(!strncmp(pubBuff+topicOffset, SUBSCRIPTION_TOPIC0, strlen(SUBSCRIPTION_TOPIC0)))
         {
-            UART_PRINT("\n\n\rQueue is full\n\n\r");
+            //json_read(pubBuff + payloadOffset, &msgType, &state);
+            if(recvMetaData->retain)
+            {
+
+            }
         }
         break;
     }
