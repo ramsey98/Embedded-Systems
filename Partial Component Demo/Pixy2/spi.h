@@ -40,6 +40,26 @@
 #define FOCAL_LENGTH_70_Y 299.21
 #define FOCAL_LENGTH_90_Y 344.206
 #define EGG_WIDTH 4.445
+#define MAX_BLOCKS 10
+
+typedef struct
+{
+    uint8_t colorCode;
+    uint16_t xPos;
+    uint8_t yPos;
+    uint16_t xPixels;
+    uint8_t yPixels;
+    int angle;
+    uint8_t trackIndex;
+    uint8_t age;
+    uint8_t distance;
+} BLOCK_DATA;
+
+typedef struct
+{
+    BLOCK_DATA blocks[MAX_BLOCKS];
+    uint8_t blockCount;
+} DISTANCE_DATA;
 
 void spiInit();
 void spiCallback(SPI_Handle handle, SPI_Transaction *transaction);

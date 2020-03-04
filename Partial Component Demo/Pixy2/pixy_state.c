@@ -8,39 +8,7 @@
 
 #include "pixy_state.h"
 
-int findDistance(BLOCK_DATA *data) {
-    int dx;
-    int dy;
-    if(data->xPixels > (FOCAL_PIXELS_30 + FOCAL_PIXELS_50)/2) {
-        dbgUARTVal(30);
-        dx = (EGG_WIDTH * FOCAL_LENGTH_30)/FOCAL_PIXELS_30;
-    } else if(data->xPixels > (FOCAL_PIXELS_50 + FOCAL_PIXELS_70)/2) {
-        dbgUARTVal(50);
-        dx = (EGG_WIDTH * FOCAL_LENGTH_50)/FOCAL_PIXELS_50;
-    } else if(data->xPixels > (FOCAL_PIXELS_70 + FOCAL_PIXELS_90)/2) {
-        dbgUARTVal(70);
-        dx = (EGG_WIDTH * FOCAL_LENGTH_70)/FOCAL_PIXELS_70;
-    } else {
-        dbgUARTVal(90);
-        dx = (EGG_WIDTH * FOCAL_LENGTH_90)/FOCAL_PIXELS_90;
-    }
-
-    if(data->yPixels > (FOCAL_PIXELS_30_Y + FOCAL_PIXELS_50_Y)/2) {
-        dy = (EGG_WIDTH * FOCAL_LENGTH_30_Y)/FOCAL_PIXELS_30_Y;
-    } else if(data->yPixels > (FOCAL_PIXELS_50_Y + FOCAL_PIXELS_70_Y)/2) {
-        dy = (EGG_WIDTH * FOCAL_LENGTH_50_Y)/FOCAL_PIXELS_50_Y;
-    } else if(data->yPixels > (FOCAL_PIXELS_70_Y + FOCAL_PIXELS_90_Y)/2) {
-        dy = (EGG_WIDTH * FOCAL_LENGTH_70_Y)/FOCAL_PIXELS_70_Y;
-    } else {
-        dy = (EGG_WIDTH * FOCAL_LENGTH_90_Y)/FOCAL_PIXELS_90_Y;
-    }
-
-    return (0.9*dx + 0.1*dy);
-
-
-}
-
-int printState(PIXY_DATA *curState) {
+int printState(DISTANCE_DATA *curState) {
     int i;
     for(i = 0; i < curState->blockCount/CONNECTED_PACKET_LENGTH; i++) {
         dbgUARTStr("c:");
@@ -62,7 +30,7 @@ int printState(PIXY_DATA *curState) {
         dbgUARTStr("yP:");
         dbgUARTVal(curState->blocks[i].yPixels);
         dbgUARTStr("d:");
-        dbgUARTNum(findDistance(&curState->blocks[i]));
+        //dbgUARTNum(findDistance(&curState->blocks[i]));
 
         /*
         dbgUARTVal(curState->blocks[i].angle);
@@ -73,14 +41,35 @@ int printState(PIXY_DATA *curState) {
     return 0;
 }
 
+void initDistanceData(DISTANCE_DATA *d, PIXY_DATA *p) {
+    int j;
+    d->blockCount = p->blockCount;
+    for(j=0; j < d->blockCount/CONNECTED_PACKET_LENGTH; j++) {
+        d->blocks[j] = p->blocks[j];
+        /*
+        d->blocks[j].colorCode = p->blocks[j].colorCode;
+        d->blocks[j].xPos = p->blocks[j].xPos;
+        d->blocks[j].yPos = p->blocks[j].yPos;
+        d->blocks[j].xPixels = p->blocks[j].xPixels;
+        d->blocks[j].yPixels = p->blocks[j].yPixels; */
+        dbgUARTVal(d->blocks[j].colorCode);
+    }
+
+}
+
 int pixyFsm(PIXY_DATA *curState, int *timeInc, int *complete, int *sendInc) {
    dbgOutputLoc(SPI_ENTER_FSM);
    int success = 0;
    int i;
    if(*sendInc > 0) {
-       printState(curState);
        curState->curTime += *sendInc;
        *sendInc = 0;
+
+       DISTANCE_DATA toSend;
+       initDistanceData(&toSend, curState);
+       //printState(&toSend);
+       sendBlockMsgToDistanceQ1(&toSend);
+
    }
 
    switch (curState->state)
@@ -103,6 +92,7 @@ int pixyFsm(PIXY_DATA *curState, int *timeInc, int *complete, int *sendInc) {
                 curState->blocks[i].angle = 0;
                 curState->blocks[i].trackIndex = 0;
                 curState->blocks[i].age = 0;
+                curState->blocks[i].distance = 0;
 
            }
            curState->state = PixySendVersion;
@@ -127,7 +117,6 @@ int pixyFsm(PIXY_DATA *curState, int *timeInc, int *complete, int *sendInc) {
            }
            break;
 
-       /*
        case PixyPan:
            if(*timeInc % 30 == 0 && *timeInc <= 150 && *timeInc > 0) { //every 4.5 seconds
 
@@ -146,7 +135,7 @@ int pixyFsm(PIXY_DATA *curState, int *timeInc, int *complete, int *sendInc) {
                *timeInc = 0;
            }
 
-           break; */
+           break;
 
        case PixyWaitingForTime1:
        {
@@ -167,16 +156,6 @@ int pixyFsm(PIXY_DATA *curState, int *timeInc, int *complete, int *sendInc) {
                dbgOutputLoc(SPI_RECEIVE_CONNECTED_PACKET);
                *complete = 0;
 
-               //dbgUARTVal(curState->rx_buffer[CONNECTED_LENGTH_LOC-1]);
-               //dbgUARTVal(curState->rx_buffer[CONNECTED_LENGTH_LOC]);
-               //dbgUARTVal(curState->rx_buffer[CONNECTED_LENGTH_LOC+1]);
-
-               /*
-               int i;
-               for(i=15; i < 50; i++) {
-                   dbgUARTVal(i);
-                   dbgUARTVal(curState->rx_buffer[i]);
-               } */
                if(curState->rx_buffer[CONNECTED_LENGTH_LOC-1] != 33) {
                    curState->state = PixyWaitingForTime1;
                } else {
@@ -207,9 +186,6 @@ int pixyFsm(PIXY_DATA *curState, int *timeInc, int *complete, int *sendInc) {
                    curState->blocks[i].trackIndex = curState->rx_buffer[loc+12];
                    curState->blocks[i].age = curState->rx_buffer[loc+13];
 
-                   dbgUARTVal(curState->blocks[i].colorCode);
-                   dbgUARTVal(curState->blocks[i].xPos);
-                   dbgUARTVal(curState->blocks[i].yPos);
                    loc += CONNECTED_PACKET_LENGTH;
                }
            }

@@ -14,13 +14,14 @@
 #include "pixy_state.h"
 #include "pixy_queue.h"
 #include "spi_thread.h"
+#include "distance_thread.h"
 #include <pthread.h>
 
 #define THREADSTACKSIZE (1024)
 
 void *mainThread(void *arg0)
 {
-    pthread_t spi;//, mqtt; //pixy, sensor;
+    pthread_t spi, distance;//, mqtt; //pixy, sensor;
     pthread_attr_t attrs;
     struct sched_param  priParam;
     int retc;
@@ -39,6 +40,7 @@ void *mainThread(void *arg0)
     adcInit();
     spiInit();
     createPixyQueue();
+    createDistanceQueue();
     dbgOutputLoc(ENTER_TASK);
 
     pthread_attr_init(&attrs);
@@ -60,6 +62,12 @@ void *mainThread(void *arg0)
     pthread_attr_setschedparam(&attrs, &priParam);
 
     retc = pthread_create(&spi, &attrs, spiThread, NULL);
+    if (retc != 0)
+    {
+        halt();
+    }
+
+    retc = pthread_create(&distance, &attrs, distanceThread, NULL);
     if (retc != 0)
     {
         halt();
