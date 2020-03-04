@@ -144,14 +144,13 @@ int pixyFsm(PIXY_DATA *curState, int *timeInc, int *complete, int *sendInc) {
 
        case PixyWaitingForTime1:
        {
+           if(*sendInc > 0) {
+               printState(curState);
+               curState->curTime += *sendInc;
+               *sendInc = 0;
+           }
            if (*timeInc > 3)
            {
-               if(*sendInc > 0) {
-                   printState(curState);
-                   curState->curTime += *sendInc;
-                   *sendInc = 0;
-               }
-
                dbgOutputLoc(SPI_SEND_CONNECTED_PACKET);
 
                spiGetConnectedBlocks(curState->rx_buffer, curState->tx_buffer);
