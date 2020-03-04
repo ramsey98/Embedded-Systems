@@ -23,7 +23,7 @@ void spiInit()
     SPI_init();
     dbgOutputLoc(SPI_INIT);
     SPI_Params_init(&params);
-    params.bitRate  = 500000; //2000000;
+    params.bitRate  = 2000000;
     params.transferMode = SPI_MODE_CALLBACK;
     params.frameFormat = SPI_POL0_PHA1;
     params.transferCallbackFxn = spiCallback;
@@ -57,6 +57,7 @@ void spiGetVersionPacket(uint8_t *rx_buffer, uint8_t *tx_buffer) {
                                                      0x0e,  // this is the version request type
                                                      0x00  // data_length is 0
                                                };
+    memset(rx_buffer, 0, SPI_MSG_LENGTH);
     setTxBuffer(tx_buffer, txMsgVersion, SPI_MSG_LENGTH, SPI_TX_MSG_VERSION);
     spiTransfer(rx_buffer, tx_buffer);
 }
@@ -79,6 +80,7 @@ void spiSetServos(uint8_t *rx_buffer, uint8_t *tx_buffer, int panX, int panY) {
                                                      msg7
 
                                                };
+    memset(rx_buffer, 0, SPI_MSG_LENGTH);
     setTxBuffer(tx_buffer, txMsgServos, SPI_MSG_LENGTH, SPI_TX_MSG_SERVOS);
     spiTransfer(rx_buffer, tx_buffer);
 }
@@ -93,6 +95,7 @@ void spiSetColorPacket(uint8_t *rx_buffer, uint8_t *tx_buffer, uint8_t r, uint8_
                                                      g,
                                                      b
                                                };
+    memset(rx_buffer, 0, SPI_MSG_LENGTH);
     setTxBuffer(tx_buffer, txMsgColor, SPI_MSG_LENGTH, SPI_TX_MSG_COLOR);
     spiTransfer(rx_buffer, tx_buffer);
 }
@@ -107,7 +110,7 @@ void spiGetConnectedBlocks(uint8_t *rx_buffer, uint8_t *tx_buffer) {
                                                        0xff,
                                                        0xff,
                                                     };
-
+    //memset(rx_buffer, 0, SPI_MSG_LENGTH);
     setTxBuffer(tx_buffer, txMsgConnected, SPI_MSG_LENGTH, SPI_TX_MSG_CONNECTED);
     spiTransfer(rx_buffer, tx_buffer);
 }
@@ -121,42 +124,3 @@ void spiTransfer(uint8_t *rx_buffer, uint8_t *tx_buffer)
     SPI_transfer(handle, &spi_transaction);
     dbgOutputLoc(SPI_WAIT_CALLBACK);
 }
-
-
-//uint8_t *rx_buffptr = (*transaction).rxBuf;
-//dbgUARTStr(rx_buffptr);
-
-/*
-uint8_t i;
-for(i = 0; i < SPI_MSG_LENGTH; i++) {
-   if(rx_buffptr[i] == 175) {
-       dbgUARTVal(i);
-   }
-}
-//dbgUARTVal(rx_buffptr[0]);
-//dbgUARTVal(rx_buffptr[3]);
-
-uint8_t i = 0;
-while(rx_buffptr[i] == 1 && i < SPI_MSG_LENGTH) {
-   i++;
-}
-
-dbgUARTVal(i);
-
-if(i == (*transaction).count || rx_buffptr[i] != 175 || rx_buffptr[i+1] != 193) {
-   halt();
-}
-
-i += 2;  //move to length
-
-//color connected components response
-if(rx_buffptr[i] == 33) {
-   uint8_t packet_length = rx_buffptr[i];
-   uint8_t block_count = packet_length/CONNECTED_PACKET_LENGTH;
-   dbgUARTVal(block_count);
-}
-
-//get version response
-else if(rx_buffptr[i] == 15) {
-
-} */

@@ -121,6 +121,7 @@ int pixyFsm(PIXY_DATA *curState, int *timeInc, int *complete, int *sendInc) {
            }
            break;
 
+       /*
        case PixyPan:
            if(*timeInc % 30 == 0 && *timeInc <= 150 && *timeInc > 0) { //every 4.5 seconds
 
@@ -139,7 +140,7 @@ int pixyFsm(PIXY_DATA *curState, int *timeInc, int *complete, int *sendInc) {
                *timeInc = 0;
            }
 
-           break;
+           break; */
 
        case PixyWaitingForTime1:
        {
@@ -170,11 +171,12 @@ int pixyFsm(PIXY_DATA *curState, int *timeInc, int *complete, int *sendInc) {
                //dbgUARTVal(curState->rx_buffer[CONNECTED_LENGTH_LOC]);
                //dbgUARTVal(curState->rx_buffer[CONNECTED_LENGTH_LOC+1]);
 
+               /*
                int i;
                for(i=15; i < 50; i++) {
                    dbgUARTVal(i);
                    dbgUARTVal(curState->rx_buffer[i]);
-               }
+               } */
                if(curState->rx_buffer[CONNECTED_LENGTH_LOC-1] != 33) {
                    curState->state = PixyWaitingForTime1;
                } else {

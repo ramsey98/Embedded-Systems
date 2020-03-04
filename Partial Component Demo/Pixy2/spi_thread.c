@@ -7,7 +7,6 @@
 
 #include "spi_thread.h"
 
-
 void *spiThread(void *arg0) {
 
     dbgOutputLoc(ENTER_TASK);
@@ -20,8 +19,6 @@ void *spiThread(void *arg0) {
     initBuffers(pixyState.rx_buffer, pixyState.tx_buffer);
     int success = pixyFsm(&pixyState, &timeIncPixy, &complete, &sendIncPixy);
     dbgOutputLoc(WHILE1);
-
-    //spiSetServos(pixyState.rx_buffer, pixyState.tx_buffer, 100, 255);
 
     while(1) {
         received = receiveFromPixyQ1(&timeIncPixy, &complete, &sendIncPixy);

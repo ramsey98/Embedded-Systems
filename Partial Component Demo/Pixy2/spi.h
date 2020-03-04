@@ -16,13 +16,13 @@
 #include "string.h"
 #include "pixy_queue.h"
 
-#define SPI_MSG_LENGTH 64
+#define SPI_MSG_LENGTH 128
 #define SPI_TX_MSG_VERSION 4
 #define SPI_TX_MSG_CONNECTED 6
 #define SPI_TX_MSG_COLOR 7
 #define SPI_TX_MSG_SERVOS 8
 #define CONNECTED_PACKET_LENGTH 14
-#define CONNECTED_LENGTH_LOC 17
+#define CONNECTED_LENGTH_LOC 18
 #define FOCAL_PIXELS_30 30
 #define FOCAL_PIXELS_50 20
 #define FOCAL_PIXELS_70 16
