@@ -7,6 +7,44 @@
 
 #include "distance_thread.h"
 
+const int focalPixels[FOCAL_LENGTH] = {
+                                         36,      //25 cm
+                                         30,      //30 cm
+                                         28,      //35 cm
+                                         24,      //40 cm
+                                         22,      //45 cm
+                                         20,      //50 cm
+                                         20,      //55 cm
+                                         16,      //60 cm
+                                         16,      //65 cm
+                                         14,      //70 cm
+                                         14,      //75 cm
+                                         14,      //80 cm
+                                         12,      //85 cm
+                                         12,      //90 cm
+                                         12,      //95 cm
+                                         12,      //100 cm
+                                };
+
+const int focalDistances[FOCAL_LENGTH] = {
+                                         25,
+                                         30,
+                                         35,
+                                         40,
+                                         45,
+                                         50,
+                                         55,
+                                         60,
+                                         65,
+                                         70,
+                                         75,
+                                         80,
+                                         85,
+                                         90,
+                                         95,
+                                         100
+                                    };
+
 void *distanceThread(void *arg0) {
 
     dbgOutputLoc(ENTER_TASK);
@@ -64,8 +102,25 @@ int findDistances(DISTANCE_DATA *data, int * transfer) {
 }
 
 int findDistance(BLOCK_DATA *data) {
-    int dx;
-    int dy;
+    int dx, dy, i;
+    int computed = 0;
+
+    for(i=0; i < FOCAL_LENGTH-1; i++) {
+        if(data->xPixels > (focalPixels[i] + focalPixels[i+1])/2) {
+            computed = 1;
+            int focus = focalPixels[i] * focalDistances[i]/EGG_WIDTH;
+            dx = EGG_WIDTH * focus/data->xPixels;
+        }
+    }
+
+    if(!computed) {
+        int focus = focalPixels[FOCAL_LENGTH-1] * focalDistances[FOCAL_LENGTH-1]/EGG_WIDTH;
+        dx = EGG_WIDTH * focus/data->xPixels;
+    }
+
+    data->distance = dx;
+
+    /*
     if(data->xPixels > (FOCAL_PIXELS_30 + FOCAL_PIXELS_50)/2) {
         dbgUARTVal(30);
         dx = (EGG_WIDTH * FOCAL_LENGTH_30)/FOCAL_PIXELS_30;
@@ -88,8 +143,8 @@ int findDistance(BLOCK_DATA *data) {
         dy = (EGG_WIDTH * FOCAL_LENGTH_70_Y)/FOCAL_PIXELS_70_Y;
     } else {
         dy = (EGG_WIDTH * FOCAL_LENGTH_90_Y)/FOCAL_PIXELS_90_Y;
-    }
+    } */
 
-    data->distance = (0.9*dx + 0.1*dy);
+    //data->distance = (0.9*dx + 0.1*dy);
     return data->distance;
 }

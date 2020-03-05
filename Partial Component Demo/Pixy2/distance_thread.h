@@ -26,6 +26,8 @@
 #define FOCAL_LENGTH_90_Y 344.206
 #define EGG_WIDTH 4.445
 
+#define FOCAL_LENGTH 16
+
 #include "debug.h"
 #include "spi.h"
 #include "distance_queue.h"
