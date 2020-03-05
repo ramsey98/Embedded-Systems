@@ -12,9 +12,10 @@ static ADC_Handle adc;
 void timer75Callback(Timer_Handle myHandle)
 {
     dbgOutputLoc(ENTER_ISR_TIMER2);
-    int res;
-    res = conversion(adc);
-    sendSensorMsgToQ1(res);
+//    int res;
+//    res = conversion(adc);
+//    sendSensorMsgToQ1(res);
+    sendMsgToEncoderQueue();
     dbgOutputLoc(LEAVE_ISR_TIMER2);
 }
 
@@ -43,9 +44,9 @@ void adcInit()
     adc = ADC_open(CONFIG_ADC_0, &adc_params);
 }
 
-void timerTwoInit()
+Timer_Handle timerTwoInit()
 {
-    Timer_Handle timer1;
+    Timer_Handle timer2;
     Timer_Params timer_params;
     Timer_Params_init(&timer_params);
     timer_params.period = 75000;
@@ -53,16 +54,18 @@ void timerTwoInit()
     timer_params.timerMode = Timer_CONTINUOUS_CALLBACK;
     timer_params.timerCallback = timer75Callback;
 
-    timer1 = Timer_open(CONFIG_TIMER_1, &timer_params);
-    if (timer1 == NULL)
+    timer2 = Timer_open(CONFIG_TIMER_1, &timer_params);
+    if (timer2 == NULL)
     {
         ERROR;
     }
 
-    if (Timer_start(timer1) == Timer_STATUS_ERROR)
-    {
-        ERROR;
-    }
+    return timer2;
+
+//    if (Timer_start(timer1) == Timer_STATUS_ERROR)
+//    {
+//        ERROR;
+//    }
 
 }
 

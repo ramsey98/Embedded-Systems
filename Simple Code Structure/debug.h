@@ -33,6 +33,9 @@
 #define BEFORE_SEND_QUEUE_ISR_TIMER2 (0x15)
 #define AFTER_SEND_QUEUE_ISR_TIMER2 (0x16)
 
+#define FAILURE 0
+#define SUCCESS 1
+
 #define ERROR halt(__LINE__, __func__);
 
 void dbgGPIOInit();

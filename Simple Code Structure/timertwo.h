@@ -13,10 +13,11 @@
 
 #include "debug.h"
 #include "sensor_queue.h"
+#include "motor_encoder_queue.h"
 
 //Timer functions
 void timer75Callback(Timer_Handle myHandle);
-void timerTwoInit();
+Timer_Handle timerTwoInit();
 
 //ADC function
 int conversion(ADC_Handle adc);

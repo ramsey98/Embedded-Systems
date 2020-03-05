@@ -6,6 +6,7 @@
  */
 
 #include "sensor_queue.h"
+
 static QueueHandle_t xQueue = NULL;
 
 void createSensorQueue()

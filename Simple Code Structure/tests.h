@@ -10,13 +10,14 @@
 
 #include "debug.h"
 #include "motor_controller_thread.h"
+#include "motor_encoder_thread.h"
 //#include "mqtt_queue.h"
 #include <unistd.h>
 #include <stdio.h>
 
 typedef enum
 {
-    test0,
+    init,
     test1,
     test2,
     test3,
@@ -27,6 +28,8 @@ typedef enum
     test8,
     test9,
     test10,
+    test11,
+    test12,
     end,
 } test_num;
 

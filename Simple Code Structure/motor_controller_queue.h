@@ -17,14 +17,6 @@ typedef struct {
     uint16_t move;
 } MoveCommand;
 
-#define FAILURE 0
-#define SUCCESS 1
-
-#define STOP 0x0
-#define LEFT 0x1
-#define RIGHT 0x2
-#define FORWARD 0x3
-#define BACKWARD 0x4
 
 static QueueHandle_t xQueue = NULL;
 

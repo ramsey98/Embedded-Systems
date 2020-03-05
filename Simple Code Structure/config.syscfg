@@ -24,6 +24,9 @@ var ADC1 = ADC.addInstance();
 var Timer2 = Timer.addInstance();
 var GPIO10 = GPIO.addInstance();
 var GPIO11 = GPIO.addInstance();
+var SPI = scripting.addModule("/ti/drivers/SPI");
+var SPI1 = SPI.addInstance();
+var GPIO12 = GPIO.addInstance();
 // name - Select the RTOS being used
 RTOS.name = "FreeRTOS";
 // Name - The C/C++ identifier used in applications as the index parameter passed to Timer runtime APIs
@@ -99,24 +102,31 @@ GPIO10.$hardware = system.deviceData.board.components.LED_RED;
 GPIO11.$name = "CONFIG_LED_2_GPIO";
 // Use Hardware - Select the hardware to use, or 'None' to use available header pins
 GPIO11.$hardware = system.deviceData.board.components.LED_YELLOW;
+var DMA = scripting.addModule("/ti/drivers/DMA", {}, false);
+// Name - The C/C++ identifier used in applications as the index parameter passed to SPI runtime APIs
+SPI1.$name = "CONFIG_SPI_0";
+// Name
+SPI1.spi.$name = "MySPI1";
+// Name - The C/C++ identifier used in applications as the index parameter passed to GPIO runtime APIs
+GPIO12.$name = "CONFIG_GPIO_8";
 // Suggest solution
 Timer1.timer.$suggestSolution = "Timer1";
 // Suggest solution
-GPIO1.gpioPin.$suggestSolution = "5";
+GPIO1.gpioPin.$suggestSolution = "8";
 // Suggest solution
-GPIO2.gpioPin.$suggestSolution = "6";
+GPIO2.gpioPin.$suggestSolution = "18";
 // Suggest solution
-GPIO3.gpioPin.$suggestSolution = "7";
+GPIO3.gpioPin.$suggestSolution = "21";
 // Suggest solution
-GPIO4.gpioPin.$suggestSolution = "8";
+GPIO4.gpioPin.$suggestSolution = "45";
 // Suggest solution
-GPIO5.gpioPin.$suggestSolution = "18";
+GPIO5.gpioPin.$suggestSolution = "50";
 // Suggest solution
-GPIO6.gpioPin.$suggestSolution = "21";
+GPIO6.gpioPin.$suggestSolution = "53";
 // Suggest solution
-GPIO7.gpioPin.$suggestSolution = "45";
+GPIO7.gpioPin.$suggestSolution = "59";
 // Suggest solution
-GPIO8.gpioPin.$suggestSolution = "50";
+GPIO8.gpioPin.$suggestSolution = "60";
 // Suggest solution
 UART1.uart.$suggestSolution = "UART0";
 // Suggest solution
@@ -131,3 +141,17 @@ Timer2.timer.$suggestSolution = "Timer0";
 GPIO10.gpioPin.$suggestSolution = "64";
 // Suggest solution
 GPIO11.gpioPin.$suggestSolution = "1";
+// Suggest solution
+SPI1.spi.$suggestSolution = "SPI0";
+// Suggest solution
+SPI1.spi.sclkPin.$suggestSolution = "5";
+// Suggest solution
+SPI1.spi.misoPin.$suggestSolution = "6";
+// Suggest solution
+SPI1.spi.mosiPin.$suggestSolution = "7";
+// Suggest solution
+SPI1.spi.dmaRxChannel.$suggestSolution = "UDMA_CH30";
+// Suggest solution
+SPI1.spi.dmaTxChannel.$suggestSolution = "UDMA_CH31";
+// Suggest solution
+GPIO12.gpioPin.$suggestSolution = "61";

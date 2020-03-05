@@ -18,31 +18,18 @@ void initWheels(MoveCommand * wheel_0, MoveCommand * wheel_1, MoveCommand * whee
 }
 
 void *mcThread(void *arg0) {
-    GPIO_toggle(CONFIG_LED_1_GPIO);
-    sleep(1);
-//    initialize();
-    GPIO_toggle(CONFIG_LED_0_GPIO);
-    sleep(1);
-    GPIO_toggle(CONFIG_LED_1_GPIO);
-    sleep(1);
-    GPIO_toggle(CONFIG_LED_0_GPIO);
-    sleep(1);
-    GPIO_toggle(CONFIG_LED_1_GPIO);
-    sleep(1);
+    UART_Handle motors_uart;
+    initialize(&motors_uart);
 
-//    while (1) {
-//        uint16_t command;
-//        int receive = receiveMsgFromMCQueue(&command);
-//        if (receive != SUCCESS) {
-//            ERROR;
-//        }
-//
-//        moveRover(command);
-//    }
-//    while(1) {
-//
-//    }
-    return(NULL);
+    while (1) {
+        uint16_t command;
+        int receive = receiveMsgFromMCQueue(&command);
+        if (receive != SUCCESS) {
+            ERROR;
+        }
+
+        handleMovementType(motors_uart, command);
+    }
 }
 
 void initialize(UART_Handle * motors_uart) {
@@ -68,50 +55,75 @@ void initialize(UART_Handle * motors_uart) {
 
 }
 
-void moveRover(uint16_t command) {
-    UART_Handle motors_uart;
-    initialize(&motors_uart);
+void handleMovementType(UART_Handle motors_uart, uint16_t command) {
+    uint8_t movementType = (command >> 2) & 0x3F;
 
+    switch (movementType) {
+        case STOP:
+            stopRover(motors_uart);
+            break;
+        case TURN:
+            turnRover(motors_uart, command);
+            break;
+        case MOVE:
+            moveRover(motors_uart, command);
+            break;
+        case SINGLE:
+            moveSingle(motors_uart, command);
+            break;
+        default:
+            GPIO_write(CONFIG_LED_0_GPIO, CONFIG_GPIO_LED_ON);
+            break;
+    }
+}
+
+void moveRover(UART_Handle motors_uart, uint16_t command) {
+    uint8_t direction1 = command >> 15; // 0 for forward, 1 for backward
+    uint8_t direction2 = direction1 ? 0 : 1;
+
+    uint8_t magnitude = (command >> 8) & 0x7F;
+
+    uint8_t address1 = (command & 0x3) + 128;
+    uint8_t address2 = (address1 != 130) ? address1 + 1 : 128;
+
+    moveWheel(motors_uart, address1, direction1, magnitude);
+    moveWheel(motors_uart, address2, direction2, magnitude);
+}
+
+void moveSingle(UART_Handle motors_uart, uint16_t command) {
+    uint8_t direction = command >> 15; // 0 for left, 1 for right
+    uint8_t magnitude = (command >> 8) & 0x7F;
+    uint8_t address = (command & 0x3) + 128;
+
+    moveWheel(motors_uart, address, direction, magnitude);
+}
+
+void moveWheel(UART_Handle motors_uart, uint8_t address, uint8_t direction, uint8_t magnitude) {
+    uint8_t checksum = (address + direction + magnitude) & 0b01111111;
+    uint8_t buffer[] = {address, direction, magnitude, checksum};
+    UART_write(motors_uart, buffer, sizeof(buffer));
+}
+
+void stopRover(UART_Handle motors_uart) {
+    uint8_t magnitude = 0;
     uint8_t direction = 0;
-    uint8_t magnitude = 64;
 
-    uint8_t address = 128;
-    uint8_t checksum28 = (address + direction + magnitude) & 0b01111111;
-    uint8_t buffer28[] = {address, direction, magnitude, checksum28};
+    moveAllMotorsSame(motors_uart, magnitude, direction);
+}
 
-    address = 129;
-    uint8_t checksum29 = (address + direction + magnitude) & 0b01111111;
-    uint8_t buffer29[] = {address, direction, magnitude, checksum29};
+void turnRover(UART_Handle motors_uart, uint16_t command) {
+    uint8_t direction = command >> 15; // 0 for forward, 1 for backward
+    uint8_t magnitude = (command >> 8) & 0x7F;
 
-    address = 130;
-    uint8_t checksum30 = (address + direction + magnitude) & 0b01111111;
-    uint8_t buffer30[] = {address, direction, magnitude, checksum30};
+    moveAllMotorsSame(motors_uart, magnitude, direction);
+}
 
-    UART_write(motors_uart, buffer28, sizeof(buffer28));
-    UART_write(motors_uart, buffer29, sizeof(buffer29));
-    UART_write(motors_uart, buffer30, sizeof(buffer30));
+void moveAllMotorsSame(UART_Handle motors_uart, uint8_t magnitude, uint8_t direction) {
+    uint8_t address;
 
-    sleep(2);
-
-    magnitude = 0;
-
-    address = 128;
-    uint8_t checksum128 = (address + direction + magnitude) & 0b01111111;
-    uint8_t buffer128[] = {address, direction, magnitude, checksum128};
-
-    address = 129;
-    uint8_t checksum129 = (address + direction + magnitude) & 0b01111111;
-    uint8_t buffer129[] = {address, direction, magnitude, checksum129};
-
-    address = 130;
-    uint8_t checksum130 = (address + direction + magnitude) & 0b01111111;
-    uint8_t buffer130[] = {address, direction, magnitude, checksum130};
-
-    UART_write(motors_uart, buffer128, sizeof(buffer128));
-    UART_write(motors_uart, buffer129, sizeof(buffer129));
-    UART_write(motors_uart, buffer130, sizeof(buffer130));
-
-    GPIO_write(CONFIG_LED_1_GPIO, CONFIG_GPIO_LED_OFF);
+    for (address = 128; address <= 130; address++) {
+        moveWheel(motors_uart, address, direction, magnitude);
+    }
 }
 
 //void *UARTTxThread(void *arg0)

@@ -36,6 +36,7 @@ int receiveMsgFromMCQueue(uint16_t * command) {
     int receive = xQueueReceive(xQueue, &msg, portMAX_DELAY);
     if (receive == SUCCESS) {
         //Change state
+        *command = msg;
         return SUCCESS;
     }
 
