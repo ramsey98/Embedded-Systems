@@ -49,10 +49,11 @@
 /* Application includes                                                      */
 #include "client_cbs.h"
 #include "json_parse.h"
+#include "mqtt_queue.h"
 //#include "debug.h"
 #define SUBSCRIPTION_TOPIC0      "/team20/topic0"
 
-extern bool gResetApplication;
+//extern bool gResetApplication;
 
 //*****************************************************************************
 //                          LOCAL DEFINES
@@ -78,7 +79,7 @@ struct client_info client_info_table[MAX_CONNECTION];
 //*****************************************************************************
 //                 Queue external function
 //*****************************************************************************
-extern int32_t MQTT_SendMsgToQueue(struct msgQueue *queueElement);
+//extern int32_t MQTT_SendMsgToQueue(struct msgQueue *queueElement);
 
 //****************************************************************************
 //                      CLIENT CALLBACKS
@@ -110,146 +111,164 @@ void MqttClientCallback(int32_t event,
 
     switch((MQTTClient_EventCB)event)
     {
-    case MQTTClient_OPERATION_CB_EVENT:
-    {
-        switch(((MQTTClient_OperationMetaDataCB *)metaData)->messageType)
+        case MQTTClient_OPERATION_CB_EVENT:
         {
-        case MQTTCLIENT_OPERATION_CONNACK:
-        {
-            uint16_t *ConnACK = (uint16_t*) data;
-            APP_PRINT("CONNACK:\n\r");
-            /* Check if Conn Ack return value is Success (0) or       */
-            /* Error - Negative value                                 */
-            if(0 == (MQTTClientCbs_ConnackRC(*ConnACK)))
+            switch(((MQTTClient_OperationMetaDataCB *)metaData)->messageType)
             {
-                APP_PRINT("Connection Success\n\r");
-            }
-            else
+            case MQTTCLIENT_OPERATION_CONNACK:
             {
-                APP_PRINT("Connection Error: %d\n\r", *ConnACK);
+                uint16_t *ConnACK = (uint16_t*) data;
+                APP_PRINT("CONNACK:\n\r");
+                /* Check if Conn Ack return value is Success (0) or       */
+                /* Error - Negative value                                 */
+                if(0 == (MQTTClientCbs_ConnackRC(*ConnACK)))
+                {
+                    APP_PRINT("Connection Success\n\r");
+                }
+                else
+                {
+                    APP_PRINT("Connection Error: %d\n\r", *ConnACK);
+                }
+                break;
             }
-            break;
-        }
 
-        case MQTTCLIENT_OPERATION_EVT_PUBACK:
-        {
-            char *PubAck = (char *) data;
-            APP_PRINT("PubAck:\n\r");
-            APP_PRINT("%s\n\r", PubAck);
-            break;
-        }
-
-        case MQTTCLIENT_OPERATION_SUBACK:
-        {
-            APP_PRINT("Sub Ack:\n\r");
-            APP_PRINT("Granted QoS Levels are:\n\r");
-            for(i = 0; i < dataLen; i++)
+            case MQTTCLIENT_OPERATION_EVT_PUBACK:
             {
-                APP_PRINT("%s :QoS %d\n\r", topic[i],
-                          ((unsigned char*) data)[i]);
+                char *PubAck = (char *) data;
+                APP_PRINT("PubAck:\n\r");
+                APP_PRINT("%s\n\r", PubAck);
+                break;
+            }
+
+            case MQTTCLIENT_OPERATION_SUBACK:
+            {
+                APP_PRINT("Sub Ack:\n\r");
+                APP_PRINT("Granted QoS Levels are:\n\r");
+                for(i = 0; i < dataLen; i++)
+                {
+                    APP_PRINT("%s :QoS %d\n\r", topic[i],
+                              ((unsigned char*) data)[i]);
+                }
+                break;
+            }
+
+            case MQTTCLIENT_OPERATION_UNSUBACK:
+            {
+                char *UnSub = (char *) data;
+                APP_PRINT("UnSub Ack \n\r");
+                APP_PRINT("%s\n\r", UnSub);
+                break;
+            }
+
+            default:
+                break;
             }
             break;
         }
-
-        case MQTTCLIENT_OPERATION_UNSUBACK:
+        case MQTTClient_RECV_CB_EVENT:
         {
-            char *UnSub = (char *) data;
-            APP_PRINT("UnSub Ack \n\r");
-            APP_PRINT("%s\n\r", UnSub);
-            break;
-        }
+            MQTTClient_RecvMetaDataCB *recvMetaData =
+                (MQTTClient_RecvMetaDataCB *)metaData;
+            uint32_t bufSizeReqd = 0;
+            uint32_t topicOffset;
+            uint32_t payloadOffset;
+            struct publishMsgHeader msgHead;
 
-        default:
-            break;
-        }
-        break;
-    }
-    case MQTTClient_RECV_CB_EVENT:
-    {
-        MQTTClient_RecvMetaDataCB *recvMetaData =
-            (MQTTClient_RecvMetaDataCB *)metaData;
-        uint32_t bufSizeReqd = 0;
-        uint32_t topicOffset;
-        uint32_t payloadOffset;
+            static char pubBuff[PUBLISH_JSON_BUFFER_SIZE] = {0};
+            static int expectedMsgID = 0;
+            int msgID = 0;
 
-        struct publishMsgHeader msgHead;
+            //char *pubBuff = NULL;
+            //struct msgQueue queueElem;
 
-        //char *pubBuff = NULL;
-        //struct msgQueue queueElem;
+            topicOffset = sizeof(struct publishMsgHeader);
+            payloadOffset = sizeof(struct publishMsgHeader) +
+                            recvMetaData->topLen + 1;
 
-        topicOffset = sizeof(struct publishMsgHeader);
-        payloadOffset = sizeof(struct publishMsgHeader) +
-                        recvMetaData->topLen + 1;
+            bufSizeReqd += sizeof(struct publishMsgHeader);
+            bufSizeReqd += recvMetaData->topLen + 1;
+            bufSizeReqd += dataLen + 1;
+            if(bufSizeReqd > PUBLISH_JSON_BUFFER_SIZE)
+            {
+                APP_PRINT("ERROR: Payload larger than buffer");
+                sendMsgToMQTTQ(MQTT_MISS, 1);
+                return;
+            }
+            //pubBuff = (char *) malloc(bufSizeReqd);
 
-        bufSizeReqd += sizeof(struct publishMsgHeader);
-        bufSizeReqd += recvMetaData->topLen + 1;
-        bufSizeReqd += dataLen + 1;
-        //pubBuff = (char *) malloc(bufSizeReqd);
-        static char pubBuff[PUBLISH_JSON_BUFFER_SIZE];
-        //if(pubBuff == NULL)
-        //{
-        //    APP_PRINT("malloc failed: recv_cb\n\r");
-        //    return;
-        //}
+            //if(pubBuff == NULL)
+            //{
+            //    APP_PRINT("malloc failed: recv_cb\n\r");
+            //    return;
+            //}
 
-        msgHead.topicLen = recvMetaData->topLen;
-        msgHead.payLen = dataLen;
-        msgHead.retain = recvMetaData->retain;
-        msgHead.dup = recvMetaData->dup;
-        msgHead.qos = recvMetaData->qos;
-        memcpy((void*) pubBuff, &msgHead, sizeof(struct publishMsgHeader));
+            msgHead.topicLen = recvMetaData->topLen;
+            msgHead.payLen = dataLen;
+            msgHead.retain = recvMetaData->retain;
+            msgHead.dup = recvMetaData->dup;
+            msgHead.qos = recvMetaData->qos;
+            memcpy((void*) pubBuff, &msgHead, sizeof(struct publishMsgHeader));
 
-        /* copying the topic name into the buffer                        */
-        memcpy((void*) (pubBuff + topicOffset),
-               (const void*)recvMetaData->topic,
-               recvMetaData->topLen);
-        memset((void*) (pubBuff + topicOffset + recvMetaData->topLen),'\0',1);
+            /* copying the topic name into the buffer                        */
+            memcpy((void*) (pubBuff + topicOffset),
+                   (const void*)recvMetaData->topic,
+                   recvMetaData->topLen);
+            memset((void*) (pubBuff + topicOffset + recvMetaData->topLen),'\0',1);
 
-        /* copying the payload into the buffer                           */
-        memcpy((void*) (pubBuff + payloadOffset), (const void*) data, dataLen);
-        memset((void*) (pubBuff + payloadOffset + dataLen), '\0', 1);
+            /* copying the payload into the buffer                           */
+            memcpy((void*) (pubBuff + payloadOffset), (const void*) data, dataLen);
+            memset((void*) (pubBuff + payloadOffset + dataLen), '\0', 1);
 
-        APP_PRINT("\n\rMsg Recvd. by client\n\r");
-        APP_PRINT("TOPIC: %s\n\r", pubBuff + topicOffset);
-        APP_PRINT("PAYLOAD: %s\n\r", pubBuff + payloadOffset);
-        APP_PRINT("QOS: %d\n\r", recvMetaData->qos);
+            APP_PRINT("\n\rMsg Recvd. by client\n\r");
+            APP_PRINT("TOPIC: %s\n\r", pubBuff + topicOffset);
+            APP_PRINT("PAYLOAD: %s\n\r", pubBuff + payloadOffset);
+            APP_PRINT("QOS: %d\n\r", recvMetaData->qos);
 
-        if(recvMetaData->retain)
-        {
-            APP_PRINT("Retained\n\r");
-        }
-
-        if(recvMetaData->dup)
-        {
-            APP_PRINT("Duplicate\n\r");
-        }
-
-        /* filling the queue element details                              */
-        //queueElem.event = MSG_RECV_BY_CLIENT;
-        //queueElem.msgPtr = pubBuff;
-        //queueElem.topLen = recvMetaData->topLen;
-
-        /* signal to the main task                                        */
-        //if(MQTT_SendMsgToQueue(&queueElem))
-        //{
-        //    UART_PRINT("\n\n\rQueue is full\n\n\r");
-        //}
-        if(!strncmp(pubBuff+topicOffset, SUBSCRIPTION_TOPIC0, strlen(SUBSCRIPTION_TOPIC0)))
-        {
-            //json_read(pubBuff + payloadOffset, &msgType, &state);
             if(recvMetaData->retain)
             {
-
+                APP_PRINT("Retained\n\r");
             }
+
+            if(recvMetaData->dup)
+            {
+                APP_PRINT("Duplicate\n\r");
+            }
+
+            /* filling the queue element details                              */
+            //queueElem.event = MSG_RECV_BY_CLIENT;
+            //queueElem.msgPtr = pubBuff;
+            //queueElem.topLen = recvMetaData->topLen;
+
+            /* signal to the main task                                        */
+            //if(MQTT_SendMsgToQueue(&queueElem))
+            //{
+            //    UART_PRINT("\n\n\rQueue is full\n\n\r");
+            //}
+            if(!strncmp(pubBuff+topicOffset, SUBSCRIPTION_TOPIC0, strlen(SUBSCRIPTION_TOPIC0)))
+            {
+                //json_read(pubBuff + payloadOffset, $msgID);
+                if(recvMetaData->retain)
+                {
+                    expectedMsgID = msgID;
+                }
+                else
+                {
+                    sendMsgToMQTTQ(MQTT_RECEIVE, 1);
+                    if(msgID != expectedMsgID)
+                    {
+                        sendMsgToMQTTQ(MQTT_MISS, msgID - expectedMsgID);
+                    }
+                    expectedMsgID = msgID + 1;
+                }
+            }
+            break;
         }
-        break;
-    }
-    case MQTTClient_DISCONNECT_CB_EVENT:
-    {
-        gResetApplication = true;
-        APP_PRINT("BRIDGE DISCONNECTION\n\r");
-        break;
-    }
+        case MQTTClient_DISCONNECT_CB_EVENT:
+        {
+            //gResetApplication = true;
+            APP_PRINT("BRIDGE DISCONNECTION\n\r");
+            break;
+        }
     }
 }
 
