@@ -16,9 +16,9 @@ void timerSecondCallback(Timer_Handle myHandle)
     //int ret1 = sendTimeMsgToQ1(time);
     int ret2 = sendTimeMsgToPixyQ1(time);
 
-    //if(ret1 < 0 || ret2 < 0) {
-      //  halt();
-    //}
+    if(ret2 < 0) {
+        halt();
+    }
 
     dbgOutputLoc(LEAVE_ISR_TIMER1);
 }

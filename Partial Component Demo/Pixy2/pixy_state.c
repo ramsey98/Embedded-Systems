@@ -8,73 +8,37 @@
 
 #include "pixy_state.h"
 
-int findDistance(BLOCK_DATA *data) {
-    int dx;
-    int dy;
-    if(data->xPixels > (FOCAL_PIXELS_30 + FOCAL_PIXELS_50)/2) {
-        dbgUARTVal(30);
-        dx = (EGG_WIDTH * FOCAL_LENGTH_30)/FOCAL_PIXELS_30;
-    } else if(data->xPixels > (FOCAL_PIXELS_50 + FOCAL_PIXELS_70)/2) {
-        dbgUARTVal(50);
-        dx = (EGG_WIDTH * FOCAL_LENGTH_50)/FOCAL_PIXELS_50;
-    } else if(data->xPixels > (FOCAL_PIXELS_70 + FOCAL_PIXELS_90)/2) {
-        dbgUARTVal(70);
-        dx = (EGG_WIDTH * FOCAL_LENGTH_70)/FOCAL_PIXELS_70;
-    } else {
-        dbgUARTVal(90);
-        dx = (EGG_WIDTH * FOCAL_LENGTH_90)/FOCAL_PIXELS_90;
+void initDistanceData(DISTANCE_DATA *d, PIXY_DATA *p) {
+    int j;
+    d->blockCount = p->blockCount;
+    for(j=0; j < d->blockCount/CONNECTED_PACKET_LENGTH; j++) {
+        d->blocks[j] = p->blocks[j];
     }
 
-    if(data->yPixels > (FOCAL_PIXELS_30_Y + FOCAL_PIXELS_50_Y)/2) {
-        dy = (EGG_WIDTH * FOCAL_LENGTH_30_Y)/FOCAL_PIXELS_30_Y;
-    } else if(data->yPixels > (FOCAL_PIXELS_50_Y + FOCAL_PIXELS_70_Y)/2) {
-        dy = (EGG_WIDTH * FOCAL_LENGTH_50_Y)/FOCAL_PIXELS_50_Y;
-    } else if(data->yPixels > (FOCAL_PIXELS_70_Y + FOCAL_PIXELS_90_Y)/2) {
-        dy = (EGG_WIDTH * FOCAL_LENGTH_70_Y)/FOCAL_PIXELS_70_Y;
-    } else {
-        dy = (EGG_WIDTH * FOCAL_LENGTH_90_Y)/FOCAL_PIXELS_90_Y;
-    }
-
-    return (0.7*dx + 0.3*dy);
-
-
-}
-
-int printState(PIXY_DATA *curState) {
-    int i;
-    for(i = 0; i < curState->blockCount/CONNECTED_PACKET_LENGTH; i++) {
-        dbgUARTStr("i:");
-        dbgUARTVal(curState->blocks[i].colorCode);
-        dbgUARTStr("x:");
-        dbgUARTVal(curState->blocks[i].xPos);
-        dbgUARTStr("y:");
-        dbgUARTVal(curState->blocks[i].yPos);
-        dbgUARTStr("xP:");
-        dbgUARTVal(curState->blocks[i].xPixels);
-        dbgUARTStr("yP:");
-        dbgUARTVal(curState->blocks[i].yPixels);
-        dbgUARTStr("d:");
-        dbgUARTNum(findDistance(&curState->blocks[i]));
-
-        /*
-        dbgUARTVal(curState->blocks[i].angle);
-        dbgUARTVal(curState->blocks[i].trackIndex);
-        dbgUARTVal(curState->blocks[i].age); */
-    }
-
-    return 0;
 }
 
 int pixyFsm(PIXY_DATA *curState, int *timeInc, int *complete, int *sendInc) {
    dbgOutputLoc(SPI_ENTER_FSM);
    int success = 0;
    int i;
+   if(*sendInc > 0) {
+       curState->curTime += *sendInc;
+       *sendInc = 0;
+
+       DISTANCE_DATA toSend;
+       initDistanceData(&toSend, curState);
+       sendBlockMsgToDistanceQ1(&toSend);
+
+   }
+
    switch (curState->state)
    {
        case PixyInit:
        {
            curState->curTime = 0;
            curState->blockCount = 0;
+           curState->xPan = 0;
+           curState->yPan = 0;
 
            memset(curState->blocks, 0, MAX_BLOCKS * sizeof(BLOCK_DATA));
 
@@ -87,16 +51,14 @@ int pixyFsm(PIXY_DATA *curState, int *timeInc, int *complete, int *sendInc) {
                 curState->blocks[i].angle = 0;
                 curState->blocks[i].trackIndex = 0;
                 curState->blocks[i].age = 0;
+                curState->blocks[i].distance = 0;
 
            }
-           curState->state = PixyWaitingForTime1;
+           curState->state = PixySendVersion;
            break;
        }
        case PixySendVersion:
-            if (*timeInc == 0)
-            {
-            }
-            else if (*timeInc > 0)
+            if (*timeInc > 0)
             {
                 dbgOutputLoc(SPI_SEND_VERSION_PACKET);
                 curState->curTime += *timeInc;
@@ -110,24 +72,34 @@ int pixyFsm(PIXY_DATA *curState, int *timeInc, int *complete, int *sendInc) {
            if(*complete > 0) {
                dbgOutputLoc(SPI_RECEIVE_VERSION_PACKET);
                *complete = 0;
-               curState->state = PixyWaitingForTime1;
+               curState->state = PixyWaitingForTime1;//PixyPan;
            }
+           break;
+
+       case PixyPan:
+           if(*timeInc % 30 == 0 && *timeInc <= 150 && *timeInc > 0) { //every 4.5 seconds
+
+               int pan_pos = *timeInc / 30;
+               dbgOutputLoc(SPI_SET_SERVO);
+               int panX = (55+ 100*(pan_pos-1));
+               dbgUARTNum(panX);
+               int panY = 255;
+               spiSetServos(curState->rx_buffer, curState->tx_buffer, panX, panY);
+           }
+           else if(*timeInc == 180) {
+
+           } else if(*timeInc >= 200) {
+               curState->state = PixyWaitingForTime1;
+               *complete = 0;
+               *timeInc = 0;
+           }
+
            break;
 
        case PixyWaitingForTime1:
        {
-           if (*timeInc == 0)
+           if (*timeInc > 3)
            {
-
-           }
-           else if (*timeInc > 4)
-           {
-               if(*sendInc > 0) {
-                   printState(curState);
-                   curState->curTime += *sendInc;
-                   *sendInc = 0;
-               }
-
                dbgOutputLoc(SPI_SEND_CONNECTED_PACKET);
 
                spiGetConnectedBlocks(curState->rx_buffer, curState->tx_buffer);
@@ -154,10 +126,11 @@ int pixyFsm(PIXY_DATA *curState, int *timeInc, int *complete, int *sendInc) {
        }
        case PixyWaitingForBlocks:
        {
-          dbgUARTStr("Blocks:");
-          dbgUARTVal(curState->rx_buffer[CONNECTED_LENGTH_LOC]);
-          dbgUARTStr("Objects:");
-          dbgUARTVal(curState->blockCount/CONNECTED_PACKET_LENGTH);
+           /*
+           dbgUARTStr("Blocks:");
+           dbgUARTVal(curState->rx_buffer[CONNECTED_LENGTH_LOC]);
+           dbgUARTStr("Objects:");
+           dbgUARTVal(curState->blockCount/CONNECTED_PACKET_LENGTH); */
            if(curState->blockCount > 0) {
 
                int loc = CONNECTED_LENGTH_LOC + 2;
@@ -173,9 +146,6 @@ int pixyFsm(PIXY_DATA *curState, int *timeInc, int *complete, int *sendInc) {
                    curState->blocks[i].trackIndex = curState->rx_buffer[loc+12];
                    curState->blocks[i].age = curState->rx_buffer[loc+13];
 
-                   dbgUARTVal(curState->blocks[i].colorCode);
-                   dbgUARTVal(curState->blocks[i].xPos);
-                   dbgUARTVal(curState->blocks[i].yPos);
                    loc += CONNECTED_PACKET_LENGTH;
                }
            }
@@ -189,7 +159,8 @@ int pixyFsm(PIXY_DATA *curState, int *timeInc, int *complete, int *sendInc) {
            success = -1;
            break;
        }
-   }
 
+   }
+   dbgOutputLoc(SPI_EXIT_FSM);
    return success;
 }

@@ -82,12 +82,6 @@ int receiveFromPixyQ1(int *timeInc, int *complete, int *sendInc) {
        *timeInc += 1;
    }
 
-   /* change to block data
-   else if (received >> SHIFT_PIXY == SENSORMASK)
-   {
-       *sensorVal = received & FMASK;
-       *timeInc = 0;
-   } */
    dbgOutputLoc(AFTER_RECEIVE_QUEUE);
    return ret;
 }

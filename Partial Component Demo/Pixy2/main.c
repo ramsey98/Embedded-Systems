@@ -13,68 +13,66 @@
 #include "spi.h"
 #include "pixy_state.h"
 #include "pixy_queue.h"
+#include "spi_thread.h"
+#include "distance_thread.h"
+#include <pthread.h>
+
+#define THREADSTACKSIZE (1024)
 
 void *mainThread(void *arg0)
 {
+    pthread_t spi, distance;//, mqtt; //pixy, sensor;
+    pthread_attr_t attrs;
+    struct sched_param  priParam;
+    int retc;
+    int detachState;
+
+    ADC_init();
+    SPI_init();
+    Timer_init();
+    GPIO_init();
+    UART_init();
+
+    timerOneInit();
+    timerTwoInit();
     dbgUARTInit();
     dbgGPIOInit();
     adcInit();
     spiInit();
-    createSensorQueue();
     createPixyQueue();
-    Timer_init();
-    timerOneInit();
-    timerTwoInit();
+    createDistanceQueue();
     dbgOutputLoc(ENTER_TASK);
-    SENSOR_DATA curState;
-    curState.state = Init;
-    int timeInc = 0;
-    int sensorVal = 0;
-    int success = fsm(&curState, timeInc, sensorVal);
-    int received = 0;
 
-    int timeIncPixy = 0;
-    int complete = 0;
-    int count = 0;
-    int sendIncPixy = 0;
-    PIXY_DATA pixyState;
-    pixyState.state = PixyInit;
-    initBuffers(pixyState.rx_buffer, pixyState.tx_buffer);
-    success = pixyFsm(&pixyState, &timeIncPixy, &complete, &sendIncPixy);
+    pthread_attr_init(&attrs);
+    detachState = PTHREAD_CREATE_DETACHED;
 
-    dbgOutputLoc(WHILE1);
-    while(1)
+    retc = pthread_attr_setdetachstate(&attrs, detachState);
+    if (retc != 0)
     {
-        /*
-        received = receiveFromQ1(&timeInc, &sensorVal);
-        success = fsm(&curState, timeInc, sensorVal);
-        if(success == -1 || received == -1)
-        {
-            halt();
-        } */
-
-
-        /* */
-        received = receiveFromPixyQ1(&timeIncPixy, &complete, &sendIncPixy);
-        success = pixyFsm(&pixyState, &timeIncPixy, &complete, &sendIncPixy);
-        if(success == -1 || received == -1)
-        {
-            halt();
-        }
-
-
-        /*
-        count++;
-        if(count > 1000000) {
-            spiGetConnectedBlocks(pixyState.rx_buffer, pixyState.tx_buffer);
-            count = 0;
-
-            dbgUARTStr("Blocks:");
-            dbgUARTVal(pixyState.rx_buffer[CONNECTED_LENGTH_LOC]);
-            pixyState.blockCount = pixyState.rx_buffer[CONNECTED_LENGTH_LOC];
-            dbgUARTStr("Objects:");
-            dbgUARTVal(pixyState.blockCount/CONNECTED_PACKET_LENGTH);
-        } */
-
+        halt();
     }
+
+    retc |= pthread_attr_setstacksize(&attrs, THREADSTACKSIZE);
+    if (retc != 0)
+    {
+        halt();
+    }
+
+    priParam.sched_priority = 1;
+    pthread_attr_setschedparam(&attrs, &priParam);
+
+    retc = pthread_create(&spi, &attrs, spiThread, NULL);
+    if (retc != 0)
+    {
+        halt();
+    }
+
+    retc = pthread_create(&distance, &attrs, distanceThread, NULL);
+    if (retc != 0)
+    {
+        halt();
+    }
+
+    return (NULL);
+
 }

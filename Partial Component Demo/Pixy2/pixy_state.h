@@ -10,31 +10,19 @@
 
 #include "debug.h"
 #include "spi.h"
+#include "distance_queue.h"
 #include <string.h>
-
-#define MAX_BLOCKS 10
 
 typedef enum
 {
     PixyInit,
     PixySendVersion,
     PixyWaitingForVersion,
+    PixyPan,
     PixyWaitingForTime1,
     PixyWaitingForBlockCount,
     PixyWaitingForBlocks
 } PIXY_STATES;
-
-typedef struct
-{
-    uint8_t colorCode;
-    uint16_t xPos;
-    uint8_t yPos;
-    uint16_t xPixels;
-    uint8_t yPixels;
-    int angle;
-    uint8_t trackIndex;
-    uint8_t age;
-} BLOCK_DATA;
 
 typedef struct
 {
@@ -44,8 +32,10 @@ typedef struct
     uint8_t tx_buffer[SPI_MSG_LENGTH];
     int curTime;
     uint8_t blockCount;
+    int xPan;
+    int yPan;
 } PIXY_DATA;
 
-int printState(PIXY_DATA *curState);
+void initDistanceData(DISTANCE_DATA *d, PIXY_DATA *p);
 int pixyFsm(PIXY_DATA *curState, int *timeInc, int *complete, int *sendInc);
 #endif /* PIXY_STATE_H_ */
