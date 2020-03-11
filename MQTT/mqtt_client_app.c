@@ -166,8 +166,8 @@
 //*****************************************************************************
 //                      LOCAL FUNCTION PROTOTYPES
 //*****************************************************************************
-void pushButtonInterruptHandler2(uint_least8_t index);
-void pushButtonInterruptHandler3(uint_least8_t index);
+//void pushButtonInterruptHandler2(uint_least8_t index);
+//void pushButtonInterruptHandler3(uint_least8_t index);
 void TimerPeriodicIntHandler(sigval val);
 void LedTimerConfigNStart();
 void LedTimerDeinitStop();
@@ -180,7 +180,7 @@ void Mqtt_start();
 int32_t Mqtt_IF_Connect();
 int32_t MqttServer_start();
 int32_t MqttClient_start();
-int32_t MQTT_SendMsgToQueue(struct msgQueue *queueElement);
+//int32_t MQTT_SendMsgToQueue(struct msgQueue *queueElement);
 
 //*****************************************************************************
 //                 GLOBAL VARIABLES
@@ -190,7 +190,7 @@ int32_t MQTT_SendMsgToQueue(struct msgQueue *queueElement);
 int32_t gApConnectionState = -1;
 uint32_t gInitState = 0;
 uint32_t memPtrCounterfree = 0;
-bool gResetApplication = false;
+//bool gResetApplication = false;
 static MQTTClient_Handle gMqttClient;
 MQTTClient_Params MqttClientExmple_params;
 unsigned short g_usTimerInts;
@@ -317,6 +317,7 @@ MQTTClient_Will will_param =
 //! \return 0 on success, -1 on error
 //
 //*****************************************************************************
+/*
 int32_t MQTT_SendMsgToQueue(struct msgQueue *queueElement)
 {
     struct timespec abstime = {0};
@@ -325,7 +326,7 @@ int32_t MQTT_SendMsgToQueue(struct msgQueue *queueElement)
 
     if(g_PBQueue)
     {
-        /* send message to the queue                                        */
+        // send message to the queue
         if(mq_timedsend(g_PBQueue, (char *) queueElement,
                         sizeof(struct msgQueue), 0, &abstime) == 0)
         {
@@ -334,7 +335,7 @@ int32_t MQTT_SendMsgToQueue(struct msgQueue *queueElement)
     }
     return(-1);
 }
-
+*/
 //*****************************************************************************
 //
 //! Push Button Handler1(GPIOSW2). Press push button1 (GPIOSW2) Whenever user
@@ -346,23 +347,24 @@ int32_t MQTT_SendMsgToQueue(struct msgQueue *queueElement)
 //! return none
 //
 //*****************************************************************************
+/*
 void pushButtonInterruptHandler2(uint_least8_t index)
 {
     struct msgQueue queueElement;
 
-    /* Disable the SW2 interrupt */
+    // Disable the SW2 interrupt
     GPIO_disableInt(CONFIG_GPIO_BUTTON_0); // SW2
 
     queueElement.event = PUBLISH_PUSH_BUTTON_PRESSED;
     queueElement.msgPtr = NULL;
 
-    /* write message indicating publish message                             */
+    // write message indicating publish message
     if(MQTT_SendMsgToQueue(&queueElement))
     {
         UART_PRINT("\n\n\rQueue is full\n\n\r");
     }
 }
-
+*/
 //*****************************************************************************
 //
 //! Push Button Handler2(GPIOSW3). Press push button3 Whenever user wants to
@@ -374,6 +376,7 @@ void pushButtonInterruptHandler2(uint_least8_t index)
 //! return none
 //
 //*****************************************************************************
+/*
 void pushButtonInterruptHandler3(uint_least8_t index)
 {
     struct msgQueue queueElement;
@@ -382,7 +385,7 @@ void pushButtonInterruptHandler3(uint_least8_t index)
     queueElement.event = DISC_PUSH_BUTTON_PRESSED;
     queueElement.msgPtr = NULL;
 
-    /* write message indicating disconnect push button pressed message      */
+    // write message indicating disconnect push button pressed message
     if(MQTT_SendMsgToQueue(&queueElement))
     {
         UART_PRINT(
@@ -392,7 +395,7 @@ void pushButtonInterruptHandler3(uint_least8_t index)
         MQTT_SendMsgToQueue(&queueElement);
     }
 }
-
+*/
 //*****************************************************************************
 //
 //! Periodic Timer Interrupt Handler
@@ -483,6 +486,7 @@ static void DisplayBanner(char * AppName)
 
 void * MqttClientThread(void * pvParameters)
 {
+    /*
     struct msgQueue queueElement;
     struct msgQueue queueElemRecv;
 
@@ -491,7 +495,7 @@ void * MqttClientThread(void * pvParameters)
     queueElement.event = LOCAL_CLIENT_DISCONNECTION;
     queueElement.msgPtr = NULL;
 
-    /*write message indicating disconnect Broker message.                   */
+    write message indicating disconnect Broker message.
     if(MQTT_SendMsgToQueue(&queueElement))
     {
         UART_PRINT(
@@ -500,7 +504,7 @@ void * MqttClientThread(void * pvParameters)
                    NULL);
         MQTT_SendMsgToQueue(&queueElement);
     }
-
+    */
     pthread_exit(0);
 
     return(NULL);
@@ -607,7 +611,7 @@ void * MqttClient(void *pvParameters)
 
         /*Push button for full restart check                         */
         case DISC_PUSH_BUTTON_PRESSED:
-            gResetApplication = true;
+            //gResetApplication = true;
             break;
 
         case THREAD_TERMINATE_REQ:
@@ -755,11 +759,11 @@ void Mqtt_start()
     }
 
     /*enable interrupt for the GPIO 13 (SW3) and GPIO 22 (SW2).              */
-    GPIO_setCallback(CONFIG_GPIO_BUTTON_0, pushButtonInterruptHandler2);
-    GPIO_enableInt(CONFIG_GPIO_BUTTON_0); // SW2
+    //GPIO_setCallback(CONFIG_GPIO_BUTTON_0, pushButtonInterruptHandler2);
+    //GPIO_enableInt(CONFIG_GPIO_BUTTON_0); // SW2
 
-    GPIO_setCallback(CONFIG_GPIO_BUTTON_1, pushButtonInterruptHandler3);
-    GPIO_enableInt(CONFIG_GPIO_BUTTON_1); // SW3
+    //GPIO_setCallback(CONFIG_GPIO_BUTTON_1, pushButtonInterruptHandler3);
+    //GPIO_enableInt(CONFIG_GPIO_BUTTON_1); // SW3
 
     gInitState &= ~MQTT_INIT_STATE;
 }
@@ -777,6 +781,7 @@ void Mqtt_start()
 
 void Mqtt_Stop()
 {
+    /*
     struct msgQueue queueElement;
     struct msgQueue queueElemRecv;
 
@@ -788,7 +793,7 @@ void Mqtt_Stop()
     queueElement.event = THREAD_TERMINATE_REQ;
     queueElement.msgPtr = NULL;
 
-    /*write message indicating publish message                               */
+    //write message indicating publish message
     if(MQTT_SendMsgToQueue(&queueElement))
     {
         UART_PRINT(
@@ -806,9 +811,10 @@ void Mqtt_Stop()
     sl_Stop(SL_STOP_TIMEOUT);
     UART_PRINT("\n\r Client Stop completed\r\n");
 
-    /*Disable the SW2 and SW3 interrupt */
+    Disable the SW2 and SW3 interrupt
     GPIO_disableInt(CONFIG_GPIO_BUTTON_0); // SW2
     GPIO_disableInt(CONFIG_GPIO_BUTTON_1); // SW3
+    */
 }
 
 int32_t MqttClient_start()
@@ -1131,7 +1137,7 @@ int32_t DisplayAppBanner(char* appName,
 
 void mainThread(void * args)
 {
-    uint32_t count = 0;
+    //uint32_t count = 0;
     pthread_t spawn_thread = (pthread_t) NULL;
     pthread_attr_t pAttrs_spawn;
     struct sched_param priParam;
@@ -1168,10 +1174,11 @@ void mainThread(void * args)
     if(retc != 0)
     {
         UART_PRINT("could not create simplelink task\n\r");
-        while(1)
-        {
-            ;
-        }
+        //ERROR;
+        //while(1)
+        //{
+        //    ;
+        //}
     }
 
     retc = sl_Start(0, 0, 0);
@@ -1179,10 +1186,11 @@ void mainThread(void * args)
     {
         /*Handle Error */
         UART_PRINT("\n sl_Start failed\n");
-        while(1)
-        {
-            ;
-        }
+        //ERROR;
+        //while(1)
+        //{
+        //    ;
+        //}
     }
 
     /*Output device information to the UART terminal */
@@ -1196,25 +1204,27 @@ void mainThread(void * args)
     {
         /*Handle Error */
         UART_PRINT("\n sl_Stop failed\n");
-        while(1)
-        {
-            ;
-        }
+        //ERROR;
+        //while(1)
+        //{
+        //    ;
+        //}
     }
 
     if(retc < 0)
     {
         /*Handle Error */
         UART_PRINT("mqtt_client - Unable to retrieve device information \n");
-        while(1)
-        {
-            ;
-        }
+        //ERROR;
+        //while(1)
+        //{
+        //    ;
+        //}
     }
 
     while(1)
     {
-        gResetApplication = false;
+        //gResetApplication = false;
         topic[0] = SUBSCRIPTION_TOPIC0;
         topic[1] = SUBSCRIPTION_TOPIC1;
         topic[2] = SUBSCRIPTION_TOPIC2;
@@ -1236,17 +1246,19 @@ void mainThread(void * args)
         }
         UART_PRINT(".\r\n");
 
-        while(gResetApplication == false)
-        {
-            ;
-        }
 
-        UART_PRINT("TO Complete - Closing all threads and resources\r\n");
+        //while(gResetApplication == false)
+        //{
+        //    ;
+        //}
+
+        //UART_PRINT("TO Complete - Closing all threads and resources\r\n");
 
         /*Stop the MQTT Process                                              */
-        Mqtt_Stop();
+        //Mqtt_Stop();
 
-        UART_PRINT("reopen MQTT # %d  \r\n", ++count);
+        //UART_PRINT("reopen MQTT # %d  \r\n", ++count);
+
     }
 }
 
