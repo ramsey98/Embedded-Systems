@@ -13,76 +13,30 @@ void createMQTTQueue()
     xQueue = xQueueCreate(16, sizeof(MQTTMsg));
     if(xQueue == NULL)
     {
-        //ERROR;
+        ERROR;
     }
 }
 
-void sendMsgToMQTTQ(uint8_t type, uint8_t value)
+void sendMsgToMQTTQ(MQTTMsg msg)
 {
-    //dbgOutputLoc(BEFORE_SEND_QUEUE_ISR_TIMER);
-    MQTTMsg msg;
-    switch(type)
-    {
-        case MQTT_STATE:
-        {
-            msg.ID = MQTT_STATE;
-            msg.state = value;
-            break;
-        }
-        case MQTT_LEFTMOTOR:
-        {
-            msg.ID = MQTT_LEFTMOTOR;
-            msg.left = value;
-            break;
-        }
-        case MQTT_RIGHTMOTOR:
-        {
-            msg.ID = MQTT_RIGHTMOTOR;
-            msg.right = value;
-            break;
-        }
-        default:
-        {
-            //ERROR;
-        }
-    }
+    dbgOutputLoc(BEFORE_SEND_QUEUE_ISR_TIMER);
     BaseType_t success = xQueueSend(xQueue, (void *) &msg, pdFALSE);
     if(success == pdFALSE)
     {
-        //ERROR;
+        ERROR;
     }
-    //dbgOutputLoc(AFTER_SEND_QUEUE_ISR_TIMER);
+    dbgOutputLoc(AFTER_SEND_QUEUE_ISR_TIMER);
 }
 
-void receiveFromMQTTQ(uint8_t *index, uint8_t *state, uint8_t *leftmotor, uint8_t *rightmotor)
+void receiveFromMQTTQ(MQTTMsg *received)
 {
-    //dbgOutputLoc(BEFORE_RECEIVE_QUEUE);
-    MQTTMsg received;
+    dbgOutputLoc(BEFORE_RECEIVE_QUEUE);
     BaseType_t success = xQueueReceive(xQueue, &received, portMAX_DELAY);
     if(success == pdFALSE)
     {
-        //ERROR;
+        ERROR;
     }
-    else
-    {
-        switch(received.ID)
-        {
-        case MQTT_STATE:
-            *state = received.state;
-            break;
-        case MQTT_LEFTMOTOR:
-            *leftmotor = received.left;
-            break;
-        case MQTT_RIGHTMOTOR:
-            *rightmotor = received.right;
-            break;
-        default:
-            //ERROR;
-            break;
-        }
-        *index = received.ID;
-    }
-    //dbgOutputLoc(AFTER_RECEIVE_QUEUE);
+    dbgOutputLoc(AFTER_RECEIVE_QUEUE);
 }
 
 

@@ -18,7 +18,7 @@ void json_miss()
 void json_receive(char *payload, char *msgTopic)
 {
     int msgID = 0;
-    if(strcmp(msgTopic, SUBSCRIPTION) == 0)
+    if(strcmp(msgTopic, SUBSCRIPTION_TOPIC) == 0)
     {
         received++;
         json_read(payload, &msgID);
@@ -43,7 +43,7 @@ void json_read(char *payload, int *msgID)
     ret5 = Json_destroyTemplate(templateHandle);
     if(ret1 != 0  | ret2 != 0 | ret3 != 0 | ret4 != 0 | ret5 != 0)
     {
-        //ERROR;
+        ERROR;
     }
 }
 
@@ -61,7 +61,7 @@ void json_send_stats(char *payload)
     ret6 = Json_build(templateHandle, payload, &buf);
     if(ret1 != 0  | ret2 != 0 | ret3 != 0 | ret4 != 0 | ret5 != 0 | ret6 != 0)
     {
-        //ERROR;
+        ERROR;
     }
     attempts++;
     statsID++;

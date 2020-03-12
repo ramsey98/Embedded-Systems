@@ -49,7 +49,7 @@
 /* Application includes                                                      */
 #include "client_cbs.h"
 #include "json_parse.h"
-//#include "debug.h"
+#include "debug.h"
 
 //extern bool gResetApplication;
 
@@ -70,7 +70,7 @@
 //*****************************************************************************
 
 /* Message Queue                                                              */
-extern mqd_t g_PBQueue;
+//extern mqd_t g_PBQueue;
 extern char *topic[];
 struct client_info client_info_table[MAX_CONNECTION];
 
@@ -174,9 +174,6 @@ void MqttClientCallback(int32_t event,
 
             static char pubBuff[PUBLISH_JSON_BUFFER_SIZE] = {0};
 
-            //char *pubBuff = NULL;
-            //struct msgQueue queueElem;
-
             topicOffset = sizeof(struct publishMsgHeader);
             payloadOffset = sizeof(struct publishMsgHeader) +
                             recvMetaData->topLen + 1;
@@ -190,13 +187,6 @@ void MqttClientCallback(int32_t event,
                 json_miss();
                 return;
             }
-            //pubBuff = (char *) malloc(bufSizeReqd);
-
-            //if(pubBuff == NULL)
-            //{
-            //    APP_PRINT("malloc failed: recv_cb\n\r");
-            //    return;
-            //}
 
             msgHead.topicLen = recvMetaData->topLen;
             msgHead.payLen = dataLen;
@@ -230,16 +220,6 @@ void MqttClientCallback(int32_t event,
                 APP_PRINT("Duplicate\n\r");
             }
 
-            /* filling the queue element details                              */
-            //queueElem.event = MSG_RECV_BY_CLIENT;
-            //queueElem.msgPtr = pubBuff;
-            //queueElem.topLen = recvMetaData->topLen;
-
-            /* signal to the main task                                        */
-            //if(MQTT_SendMsgToQueue(&queueElem))
-            //{
-            //    UART_PRINT("\n\n\rQueue is full\n\n\r");
-            //}
             json_receive(pubBuff + payloadOffset, pubBuff+topicOffset);
             break;
         }

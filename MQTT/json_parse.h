@@ -10,9 +10,11 @@
 
 #include <ti/utils/json/json.h>
 #include "definitions.h"
-//#include "mqtt_queue.h"
+#include "mqtt_queue.h"
+#include "debug.h"
 
 #define PUBLISH_JSON_BUFFER_SIZE (512)
+#define PUBLISH_TOPIC_BUFFER_SIZE (256)
 
 #define JSON_STATS      \
 "{"                        \

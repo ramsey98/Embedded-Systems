@@ -8,26 +8,13 @@
 #ifndef MQTT_QUEUE_H_
 #define MQTT_QUEUE_H_
 
-//#include "debug.h"
 #include "FreeRTOS.h"
 #include "queue.h"
+#include "debug.h"
+#include "definitions.h"
 
-typedef struct
-{
-    char ID;
-    uint8_t state;
-    uint8_t left;
-    uint8_t right;
-} MQTTMsg;
-
-#define MQTT_RECEIVE (0)
-#define MQTT_MISS (1)
-#define MQTT_STATE (2)
-#define MQTT_LEFTMOTOR (3)
-#define MQTT_RIGHTMOTOR (4)
-
-void sendMsgToMQTTQ(uint8_t type, uint8_t value);
-void receiveFromMQTTQ(uint8_t *index, uint8_t *state, uint8_t *leftmotor, uint8_t *rightmotor);
+void sendMsgToMQTTQ(MQTTMsg msg);
+void receiveFromMQTTQ(MQTTMsg *received);
 void createMQTTQueue();
 
 
