@@ -7,8 +7,7 @@
 
 #include "json_parse.h"
 
-const char *stats_keys[4] = {"ID", "Attempts", "Received", "Missed"};
-static int received = 0, missed = 0, expected = 0;
+static int statsID = 0, dataID = 0, attempts = 0, received = 0, missed = 0, expected = 0;
 
 void json_miss()
 {
@@ -34,7 +33,6 @@ void json_read(char *payload, int *msgID)
 {
     Json_Handle templateHandle, objectHandle;
     int ret1 = 0, ret2 = 0, ret3 = 0, ret4 = 0, ret5 = 0;
-
     ret1 = Json_createTemplate(&templateHandle, JSON_FORMAT, strlen(JSON_FORMAT));
     ret2 = Json_createObject(&objectHandle, templateHandle, 0);
     ret3 = Json_parse(objectHandle, payload, strlen(payload));
@@ -49,7 +47,6 @@ void json_read(char *payload, int *msgID)
 
 void json_send_stats(char *payload)
 {
-    static int statsID = 0, attempts = 0;
     Json_Handle templateHandle;
     int ret1 = 0, ret2 = 0, ret3 = 0, ret4 = 0, ret5 = 0, ret6 = 0;
     uint16_t buf = PUBLISH_JSON_BUFFER_SIZE;
@@ -65,4 +62,20 @@ void json_send_stats(char *payload)
     }
     attempts++;
     statsID++;
+}
+
+void json_send_data(char *payload, MQTTMsg msg)
+{
+    Json_Handle templateHandle;
+    int ret1 = 0, ret2 = 0;
+    uint16_t buf = PUBLISH_JSON_BUFFER_SIZE;
+    ret1 = Json_createTemplate(&templateHandle, JSON_FORMAT, strlen(JSON_FORMAT));
+    sendValues(templateHandle, msg, dataID);
+    ret2 = Json_build(templateHandle, payload, &buf);
+    if(ret1 != 0  | ret2 != 0)
+    {
+        ERROR;
+    }
+    attempts++;
+    dataID++;
 }

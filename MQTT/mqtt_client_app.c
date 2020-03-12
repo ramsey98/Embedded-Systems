@@ -367,8 +367,18 @@ void * MqttClient(void *pvParameters)
         MQTTMsg msg = {0, 0};
         receiveFromMQTTQ(&msg);
         memset(publish_data, 0, PUBLISH_JSON_BUFFER_SIZE);
-        //json_send(publish_data, msg);
-        json_send_stats(publish_data);
+        if(msg.type == 1)
+        {
+            json_send_stats(publish_data);
+        }
+        else if(msg.type == 2)
+        {
+            json_send_data(publish_data, msg);
+        }
+        else
+        {
+            ERROR;
+        }
         lRetVal = MQTTClient_publish(
                           gMqttClient, (char*) publish_topic,
                           strlen((char*)publish_topic),

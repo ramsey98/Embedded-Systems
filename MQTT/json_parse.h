@@ -28,5 +28,6 @@ void json_miss();
 void json_receive(char *payload, char *msgTopic);
 void json_read(char *payload, int *msgID);
 void json_send_stats(char *payload);
+void json_send_data(char *payload, MQTTMsg msg);
 
 #endif /* JSON_PARSE_H_ */

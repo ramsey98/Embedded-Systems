@@ -27,4 +27,17 @@ void parseValues(Json_Handle objectHandle)
     }
 }
 
-
+void sendValues(Json_Handle templateHandle, MQTTMsg msg, int msgID)
+{
+    int ret1 = 0, ret2 = 0, ret3 = 0;
+    uint8_t item1, item2;
+    item1 = msg.type;
+    item2 = msg.value;
+    ret1 = Json_setValue(templateHandle, "ID", &msgID, sizeof(msgID));
+    ret2 = Json_setValue(templateHandle, "item1", &item1, sizeof(item1));
+    ret3 = Json_setValue(templateHandle, "item2", &item2, sizeof(item2));
+    if(ret1 != 0  | ret2 != 0 | ret3 != 0)
+    {
+        ERROR;
+    }
+}
