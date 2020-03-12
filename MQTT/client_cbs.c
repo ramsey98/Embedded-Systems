@@ -175,8 +175,6 @@ void MqttClientCallback(int32_t event,
             struct publishMsgHeader msgHead;
 
             static char pubBuff[PUBLISH_JSON_BUFFER_SIZE] = {0};
-            static int expectedMsgID = 0;
-            int msgID = 0;
 
             //char *pubBuff = NULL;
             //struct msgQueue queueElem;
@@ -244,23 +242,7 @@ void MqttClientCallback(int32_t event,
             //{
             //    UART_PRINT("\n\n\rQueue is full\n\n\r");
             //}
-            if(!strncmp(pubBuff+topicOffset, SUBSCRIPTION_TOPIC0, strlen(SUBSCRIPTION_TOPIC0)))
-            {
-                //json_read(pubBuff + payloadOffset, $msgID);
-                if(recvMetaData->retain)
-                {
-                    expectedMsgID = msgID;
-                }
-                else
-                {
-                    sendMsgToMQTTQ(MQTT_RECEIVE, 1);
-                    if(msgID != expectedMsgID)
-                    {
-                        sendMsgToMQTTQ(MQTT_MISS, msgID - expectedMsgID);
-                    }
-                    expectedMsgID = msgID + 1;
-                }
-            }
+            json_receive(pubBuff + payloadOffset, pubBuff+topicOffset);
             break;
         }
         case MQTTClient_DISCONNECT_CB_EVENT:

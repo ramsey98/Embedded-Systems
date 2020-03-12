@@ -3,10 +3,10 @@ import time
 import json
 import threading
 
-topics = {"/team20/rover_stats": ["Attempts", "Received", "Expected"],
-          "/team20/sensors_stats": ["Attempts", "Received", "Expected"],
-          "/team20/arm_stats": ["Attempts", "Received", "Expected"],
-          "/team20/zumo_stats": ["Attempts", "Received", "Expected"],
+topics = {"/team20/rover_stats": ["ID", "Attempts", "Received", "Expected"],
+          "/team20/sensors_stats": ["ID", "Attempts", "Received", "Expected"],
+          "/team20/arm_stats": ["ID", "Attempts", "Received", "Expected"],
+          "/team20/zumo_stats": ["ID", "Attempts", "Received", "Expected"],
           "/team20/zumo_debug": ["ID", "item1", "item2", "item3"],
           }
 
