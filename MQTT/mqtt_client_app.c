@@ -168,9 +168,9 @@
 //*****************************************************************************
 //void pushButtonInterruptHandler2(uint_least8_t index);
 //void pushButtonInterruptHandler3(uint_least8_t index);
-void TimerPeriodicIntHandler(sigval val);
-void LedTimerConfigNStart();
-void LedTimerDeinitStop();
+//void TimerPeriodicIntHandler(sigval val);
+//void LedTimerConfigNStart();
+//void LedTimerDeinitStop();
 static void DisplayBanner(char * AppName);
 void * MqttClient(void *pvParameters);
 void Mqtt_ClientStop(uint8_t disconnect);
@@ -405,22 +405,23 @@ void pushButtonInterruptHandler3(uint_least8_t index)
 //! \return None
 //
 //*****************************************************************************
-void TimerPeriodicIntHandler(sigval val)
-{
-    /* Increment our interrupt counter.                                      */
-    g_usTimerInts++;
 
-    if(!(g_usTimerInts & 0x1))
-    {
+//void TimerPeriodicIntHandler(sigval val)
+//{
+    /* Increment our interrupt counter.                                      */
+//    g_usTimerInts++;
+
+//    if(!(g_usTimerInts & 0x1))
+//    {
         /* Turn Led Off                                                      */
-        GPIO_write(CONFIG_GPIO_LED_0, CONFIG_GPIO_LED_OFF);
-    }
-    else
-    {
+//        GPIO_write(CONFIG_GPIO_LED_0, CONFIG_GPIO_LED_OFF);
+//    }
+//    else
+//    {
         /* Turn Led On                                                       */
-        GPIO_write(CONFIG_GPIO_LED_0, CONFIG_GPIO_LED_ON);
-    }
-}
+//        GPIO_write(CONFIG_GPIO_LED_0, CONFIG_GPIO_LED_ON);
+//    }
+//}
 
 //*****************************************************************************
 //
@@ -432,24 +433,24 @@ void TimerPeriodicIntHandler(sigval val)
 //! return none
 //
 //*****************************************************************************
-void LedTimerConfigNStart()
-{
-    struct itimerspec value;
-    sigevent sev;
+//void LedTimerConfigNStart()
+//{
+//    struct itimerspec value;
+//    sigevent sev;
 
     /* Create Timer                                                          */
-    sev.sigev_notify = SIGEV_SIGNAL;
-    sev.sigev_notify_function = &TimerPeriodicIntHandler;
-    timer_create(2, &sev, &g_timer);
+//    sev.sigev_notify = SIGEV_SIGNAL;
+//    sev.sigev_notify_function = &TimerPeriodicIntHandler;
+//    timer_create(2, &sev, &g_timer);
 
     /* start timer                                                           */
-    value.it_interval.tv_sec = 0;
-    value.it_interval.tv_nsec = TIMER_EXPIRATION_VALUE;
-    value.it_value.tv_sec = 0;
-    value.it_value.tv_nsec = TIMER_EXPIRATION_VALUE;
+//    value.it_interval.tv_sec = 0;
+//    value.it_interval.tv_nsec = TIMER_EXPIRATION_VALUE;
+//    value.it_value.tv_sec = 0;
+//    value.it_value.tv_nsec = TIMER_EXPIRATION_VALUE;
 
-    timer_settime(g_timer, 0, &value, NULL);
-}
+//    timer_settime(g_timer, 0, &value, NULL);
+//}
 
 //*****************************************************************************
 //
@@ -460,11 +461,11 @@ void LedTimerConfigNStart()
 //! return none
 //
 //*****************************************************************************
-void LedTimerDeinitStop()
-{
+//void LedTimerDeinitStop()
+//{
     /* Disable the LED blinking Timer as Device is connected to AP.          */
-    timer_delete(g_timer);
-}
+//    timer_delete(g_timer);
+//}
 
 //*****************************************************************************
 //
@@ -574,8 +575,8 @@ void * MqttClient(void *pvParameters)
             UART_PRINT("Data: %s\n\r", publish_data);
 
             /* Clear and enable again the SW2 interrupt */
-            GPIO_clearInt(CONFIG_GPIO_BUTTON_0);     // SW2
-            GPIO_enableInt(CONFIG_GPIO_BUTTON_0);     // SW2
+            //GPIO_clearInt(CONFIG_GPIO_BUTTON_0);     // SW2
+            //GPIO_enableInt(CONFIG_GPIO_BUTTON_0);     // SW2
 
             break;
 
@@ -586,17 +587,17 @@ void * MqttClient(void *pvParameters)
             if(strncmp
                 (tmpBuff, SUBSCRIPTION_TOPIC1, queueElemRecv.topLen) == 0)
             {
-                GPIO_toggle(CONFIG_GPIO_LED_0);
+                //GPIO_toggle(CONFIG_GPIO_LED_0);
             }
             else if(strncmp(tmpBuff, SUBSCRIPTION_TOPIC2,
                             queueElemRecv.topLen) == 0)
             {
-                GPIO_toggle(CONFIG_GPIO_LED_1);
+                //GPIO_toggle(CONFIG_GPIO_LED_1);
             }
             else if(strncmp(tmpBuff, SUBSCRIPTION_TOPIC3,
                             queueElemRecv.topLen) == 0)
             {
-                GPIO_toggle(CONFIG_GPIO_LED_2);
+                //GPIO_toggle(CONFIG_GPIO_LED_2);
             }
 
             free(queueElemRecv.msgPtr);
@@ -656,9 +657,9 @@ int32_t Mqtt_IF_Connect()
     /*Display Application Banner                                             */
     DisplayBanner(APPLICATION_NAME);
 
-    GPIO_write(CONFIG_GPIO_LED_0, CONFIG_GPIO_LED_OFF);
-    GPIO_write(CONFIG_GPIO_LED_1, CONFIG_GPIO_LED_OFF);
-    GPIO_write(CONFIG_GPIO_LED_2, CONFIG_GPIO_LED_OFF);
+    //GPIO_write(CONFIG_GPIO_LED_0, CONFIG_GPIO_LED_OFF);
+    //GPIO_write(CONFIG_GPIO_LED_1, CONFIG_GPIO_LED_OFF);
+    //GPIO_write(CONFIG_GPIO_LED_2, CONFIG_GPIO_LED_OFF);
 
     /*Reset The state of the machine                                         */
     Network_IF_ResetMCUStateMachine();
@@ -672,10 +673,10 @@ int32_t Mqtt_IF_Connect()
     }
 
     /*switch on CONFIG_GPIO_LED_2 to indicate Simplelink is properly up.       */
-    GPIO_write(CONFIG_GPIO_LED_2, CONFIG_GPIO_LED_ON);
+    //GPIO_write(CONFIG_GPIO_LED_2, CONFIG_GPIO_LED_ON);
 
     /*Start Timer to blink CONFIG_GPIO_LED_0 till AP connection                */
-    LedTimerConfigNStart();
+    //LedTimerConfigNStart();
 
     /*Initialize AP security params                                          */
     SecurityParams.Key = (signed char *) SECURITY_KEY;
@@ -691,16 +692,16 @@ int32_t Mqtt_IF_Connect()
     }
 
     /*Disable the LED blinking Timer as Device is connected to AP.           */
-    LedTimerDeinitStop();
+    //LedTimerDeinitStop();
 
     /*Switch ON CONFIG_GPIO_LED_0 to indicate that Device acquired an IP.      */
-    GPIO_write(CONFIG_GPIO_LED_0, CONFIG_GPIO_LED_ON);
+    //GPIO_write(CONFIG_GPIO_LED_0, CONFIG_GPIO_LED_ON);
 
     sleep(1);
 
-    GPIO_write(CONFIG_GPIO_LED_0, CONFIG_GPIO_LED_OFF);
-    GPIO_write(CONFIG_GPIO_LED_1, CONFIG_GPIO_LED_OFF);
-    GPIO_write(CONFIG_GPIO_LED_2, CONFIG_GPIO_LED_OFF);
+    //GPIO_write(CONFIG_GPIO_LED_0, CONFIG_GPIO_LED_OFF);
+    //GPIO_write(CONFIG_GPIO_LED_1, CONFIG_GPIO_LED_OFF);
+    //GPIO_write(CONFIG_GPIO_LED_2, CONFIG_GPIO_LED_OFF);
 
     return(0);
 }

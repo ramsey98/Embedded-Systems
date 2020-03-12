@@ -10,6 +10,11 @@
 const char *stats_keys[4] = {"ID", "Attempts", "Received", "Missed"};
 static int received = 0, missed = 0, expected = 0;
 
+void json_miss()
+{
+    missed++;
+}
+
 void json_receive(char *payload, char *msgTopic)
 {
     int msgID = 0;

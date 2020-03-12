@@ -49,9 +49,7 @@
 /* Application includes                                                      */
 #include "client_cbs.h"
 #include "json_parse.h"
-#include "mqtt_queue.h"
 //#include "debug.h"
-#define SUBSCRIPTION_TOPIC0      "/team20/topic0"
 
 //extern bool gResetApplication;
 
@@ -189,7 +187,7 @@ void MqttClientCallback(int32_t event,
             if(bufSizeReqd > PUBLISH_JSON_BUFFER_SIZE)
             {
                 APP_PRINT("ERROR: Payload larger than buffer");
-                sendMsgToMQTTQ(MQTT_MISS, 1);
+                json_miss();
                 return;
             }
             //pubBuff = (char *) malloc(bufSizeReqd);

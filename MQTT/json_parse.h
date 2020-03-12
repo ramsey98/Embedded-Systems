@@ -22,6 +22,7 @@
     "\"Expected\": int32"\
 "}"
 
+void json_miss();
 void json_receive(char *payload, char *msgTopic);
 void json_read(char *payload, int *msgID);
 void json_send_stats(char *payload);
