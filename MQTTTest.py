@@ -3,49 +3,27 @@ import time
 import json
 import threading
 
-topics = {"/team20/rover_stats": ["ID", "Attempts", "Received", "Expected"],
-          "/team20/sensors_stats": ["ID", "Attempts", "Received", "Expected"],
-          "/team20/arm_stats": ["ID", "Attempts", "Received", "Expected"],
-          "/team20/zumo_stats": ["ID", "Attempts", "Received", "Expected"],
-          "/team20/zumo_debug": ["ID", "item1", "item2", "item3"],
-          }
-
-pub_attempts = {"/team20/rover_stats": 0,
-          "/team20/sensors_stats": 0,
-          "/team20/arm_stats": 0,
-          "/team20/zumo_stats": 0,
-          }
-
-pub_received = {"/team20/rover_stats": 0,
-          "/team20/sensors_stats": 0,
-          "/team20/arm_stats": 0,
-          "/team20/zumo_stats": 0,
-          }
-
-pub_expected = {"/team20/rover_stats": 0,
-          "/team20/sensors_stats": 0,
-          "/team20/arm_stats": 0,
-          "/team20/zumo_stats": 0,
-          }
-
-pub_success = {"/team20/rover_stats": 0,
-          "/team20/sensors_stats": 0,
-          "/team20/arm_stats": 0,
-          "/team20/zumo_stats": 0,
-          "/team20/zumo_debug": 0,
-          }
-
-pub_time = {"/team20/rover_stats": 0,
-          "/team20/sensors_stats": 0,
-          "/team20/arm_stats": 0,
-          "/team20/zumo_stats": 0,
-          "/team20/zumo_debug": 0,
-          }
-
 connected = False
-starttime = 0
+starttime = time.time()
 IP = "192.168.2.1"
 PORT = 1883
+test_component = "zumo"
+
+topics = {"/team20/stats": ["ID", "Attempts", "Received", "Expected"]}
+
+if test_component == "rover":
+    topics["/team20/debug"] = ["ID", "item1", "item2", "item3"]
+elif test_component == "sensors":
+    topics["/team20/debug"] = ["ID", "item1", "item2", "item3"]
+elif test_component == "arm":
+    topics["/team20/debug"] = ["ID", "item1", "item2", "item3"]
+elif test_component == "zumo":
+    topics["/team20/debug"] = ["ID", "item1", "item2", "item3"]
+
+pub_results = {topic: {"Successes": 0, "Time": 0} for topic in topics.keys()}
+pub_stats = {"Attempts": 0,
+             "Received": 0,
+             "Expected": 0}
 
 def on_connect(client, data, flag, rc):
     print("Connected w/ result", str(rc),"@",round(time.time() - starttime,2))
@@ -63,18 +41,18 @@ def on_message(client, data, msg):
     package = msg.payload.decode()
     decoded = json.loads(package)
     if(set(topics[topic]).issubset(set(decoded.keys()))):
-        pub_success[topic] += 1
-        pub_attempt[topic] = decoded["Attempts"]
-        pub_receive[topic] = decoded["Received"]
-        pub_expected[topic] = decoded["Expected"]
-        pub_time[topic] = recvtime
+        pub_stats["Attempts"] = decoded["Attempts"]
+        pub_stats["Received"] = decoded["Received"]
+        pub_stats["Expected"] = decoded["Expected"]
+        pub_results[topic]["Successes"] += 1
+        pub_results[topic]["Time"] = recvtime
         print("Success:", topic.split("/")[-1], "@", round(time.time() - starttime,2))
     else:
         print("Error:", topic.split("/")[-1], "@", round(time.time() - starttime,2))
 
 def test_rover():
     print("Running test: Rover @",round(time.time() - starttime,2))
-    topic = "/team20/zumo"
+    topic = "/team20/debug"
     data = dict(topics[topic])
     data["ID"] = 0
     data["item1"] = 1
@@ -86,7 +64,7 @@ def test_rover():
 
 def test_sensors():
     print("Running test: Sensors @",round(time.time() - starttime,2))
-    topic = "/team20/zumo"
+    topic = "/team20/debug"
     data = dict(topics[topic])
     data["ID"] = 0
     data["item1"] = 1
@@ -98,7 +76,7 @@ def test_sensors():
 
 def test_arm():
     print("Running test: Arm @",round(time.time() - starttime,2))
-    topic = "/team20/zumo"
+    topic = "/team20/debug"
     data = dict(topics[topic])
     data["ID"] = 0
     data["item1"] = 1
@@ -110,7 +88,7 @@ def test_arm():
 
 def test_zumo():
     print("Running test: Zumo @",round(time.time() - starttime,2))
-    topic = "/team20/rover"
+    topic = "/team20/debug"
     data = dict(topics[topic])
     data["ID"] = 0
     data["item1"] = 1
@@ -122,7 +100,7 @@ def test_zumo():
 
 def test_badPayload():
     print("Running test: Bad Payload @",round(time.time() - starttime,2))
-    topic = "/team20/rover"
+    topic = "/team20/debug"
     data = {"NULL": 0}
     package = json.dumps(data)
     client.publish(topic,package)
@@ -130,7 +108,7 @@ def test_badPayload():
 
 def test_skipID():
     print("Running test: Skip ID @",round(time.time() - starttime,2))
-    topic = "/team20/rover"
+    topic = "/team20/debug"
     data["ID"] = 0
     data["item1"] = 1
     data["item2"] = 2
@@ -153,14 +131,18 @@ def run_tests():
         time.sleep(1)
         print("Waiting for connection:", waiting)
         waiting+=1
-    test_rover()
-    time.sleep(1)
-    test_sensors()
-    time.sleep(1)
-    test_arm()
-    time.sleep(1)
-    test_zumo()
-    time.sleep(1)
+    if test_component == "rover":
+        test_rover()
+        time.sleep(1)
+    elif test_component == "sensors":
+        test_sensors()
+        time.sleep(1)
+    elif test_component == "arm":
+        test_arm()
+        time.sleep(1)
+    elif test_component == "zumo":
+        test_zumo()
+        time.sleep(1)
     test_badPayload()
     time.sleep(1)
     test_skipID()
@@ -168,17 +150,14 @@ def run_tests():
 
 def display_data():
     print("Thread: Output started @",round(time.time() - starttime,2))
-    while(not connected):
-        time.sleep(1)
     while(True):
-        print(pub_attempts)
-        print(pub_success)
-        print(pub_received)
-        print(pub_expected)
-        print(pub_time)
-        time.sleep(10)
+        if not connected:
+            time.sleep(1)
+        else:
+            print(pub_stats)
+            print(pub_results)
+            time.sleep(10)
     
-
 def main():
     print("Thread: Connection started @",round(time.time() - starttime,2))
     client = mqtt.Client()
@@ -189,7 +168,6 @@ def main():
     client.loop_forever()
     
 if __name__ == "__main__":
-    starttime = time.time()
     threading.Thread(target=main).start()
     threading.Thread(target=run_tests).start()
     threading.Thread(target=display_data).start()
