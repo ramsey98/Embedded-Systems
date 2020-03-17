@@ -52,12 +52,11 @@
 /* Standard includes                                                         */
 #include <stdlib.h>
 #include <pthread.h>
-#include <mqueue.h>
-#include <time.h>
+//#include <mqueue.h>
+//#include <time.h>
 #include <unistd.h>
 
 /* TI-Driver includes                                                        */
-#include <ti/drivers/GPIO.h>
 #include <ti/drivers/SPI.h>
 
 /* Simplelink includes                                                       */
@@ -123,20 +122,6 @@
 
 /* Retain Flag. Used in publish message.                                     */
 #define RETAIN_ENABLE            1
-
-/* Defining Number of subscription topics                                    */
-//#define SUBSCRIPTION_TOPIC_COUNT 4
-
-/* Defining Subscription Topic Values                                        */
-//#define SUBSCRIPTION_TOPIC0      "/Broker/To/cc32xx"
-//#define SUBSCRIPTION_TOPIC1      "/cc3200/ToggleLEDCmdL1"
-//#define SUBSCRIPTION_TOPIC2      "/cc3200/ToggleLEDCmdL2"
-//#define SUBSCRIPTION_TOPIC3      "/cc3200/ToggleLEDCmdL3"
-
-/* Defining Publish Topic Values                                             */
-//#define PUBLISH_TOPIC0           "/cc32xx/ButtonPressEvtSw2"
-//#define PUBLISH_TOPIC0_DATA \
-//    "Push Button SW2 has been pressed on CC32xx device"
 
 /* Spawn task priority and Task and Thread Stack Size                        */
 #define TASKSTACKSIZE            2048

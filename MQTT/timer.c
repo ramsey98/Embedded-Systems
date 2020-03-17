@@ -6,7 +6,6 @@
  */
 
 #include "timer.h"
-static int count;
 
 void timerInit()
 {
@@ -17,7 +16,6 @@ void timerInit()
     timer_params.periodUnits = Timer_PERIOD_US;
     timer_params.timerMode = Timer_CONTINUOUS_CALLBACK;
     timer_params.timerCallback = timerCallback;
-    count = 0;
 
     timer = Timer_open(CONFIG_TIMER_0, &timer_params);
     if (timer == NULL)
@@ -33,6 +31,7 @@ void timerInit()
 
 void timerCallback(Timer_Handle myHandle)
 {
+    static int count = 0;
     dbgOutputLoc(ENTER_ISR_TIMER);
     MQTTMsg msg = {0, 0};
     if(count == 5)

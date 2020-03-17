@@ -24,6 +24,7 @@ void parseValues(Json_Handle objectHandle)
     else
     {
         //send data where needed
+        dbgUARTNum(state);
     }
 }
 
