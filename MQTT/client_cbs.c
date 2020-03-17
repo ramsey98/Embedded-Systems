@@ -51,8 +51,6 @@
 #include "json_parse.h"
 #include "debug.h"
 
-//extern bool gResetApplication;
-
 //*****************************************************************************
 //                          LOCAL DEFINES
 //*****************************************************************************
@@ -70,7 +68,6 @@
 //*****************************************************************************
 
 /* Message Queue                                                              */
-//extern mqd_t g_PBQueue;
 extern char *topic[];
 struct client_info client_info_table[MAX_CONNECTION];
 
@@ -225,7 +222,6 @@ void MqttClientCallback(int32_t event,
         }
         case MQTTClient_DISCONNECT_CB_EVENT:
         {
-            //gResetApplication = true;
             APP_PRINT("BRIDGE DISCONNECTION\n\r");
             break;
         }

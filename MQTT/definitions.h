@@ -9,17 +9,24 @@
 #define DEFINITIONS_H_
 
 #include <ti/utils/json/json.h>
+
 #include "debug.h"
 
-#define SUBSCRIPTION_TOPIC "/team20/zumo"
+#define SUBSCRIPTION_TOPIC "/team20/debug"
 #define SUBSCRIPTION_TOPIC_COUNT 1
-
-#define PUBLISH_TOPIC "/team20/zumo_stats"
-#define PUBLISH_TOPIC_COUNT 1
-#define JSON_FORMAT      \
+#define JSON_SUB_FORMAT      \
 "{"                        \
     "\"ID\": int32,"        \
-    "\"state\": char,"    \
+    "\"item1\": char,"    \
+"}"
+
+#define PUBLISH_TOPIC_0 "/team20/stats"
+#define PUBLISH_TOPIC_1 "/team20/debug"
+#define PUBLISH_TOPIC_COUNT 2
+#define JSON_PUB_FORMAT      \
+"{"                        \
+    "\"ID\": int32,"        \
+    "\"item1\": char,"    \
 "}"
 
 typedef struct

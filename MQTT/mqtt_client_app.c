@@ -83,6 +83,7 @@
 #include "json_parse.h"
 #include "definitions.h"
 #include "mqtt_queue.h"
+#include "timer.h"
 //*****************************************************************************
 //                          LOCAL DEFINES
 //*****************************************************************************
@@ -168,21 +169,11 @@
 //*****************************************************************************
 //                      LOCAL FUNCTION PROTOTYPES
 //*****************************************************************************
-//void pushButtonInterruptHandler2(uint_least8_t index);
-//void pushButtonInterruptHandler3(uint_least8_t index);
-//void TimerPeriodicIntHandler(sigval val);
-//void LedTimerConfigNStart();
-//void LedTimerDeinitStop();
 static void DisplayBanner(char * AppName);
 void * MqttClient(void *pvParameters);
-void Mqtt_ClientStop(uint8_t disconnect);
-//void Mqtt_ServerStop();
-//void Mqtt_Stop();
 void Mqtt_start();
 int32_t Mqtt_IF_Connect();
-//int32_t MqttServer_start();
 int32_t MqttClient_start();
-//int32_t MQTT_SendMsgToQueue(struct msgQueue *queueElement);
 
 //*****************************************************************************
 //                 GLOBAL VARIABLES
@@ -192,10 +183,8 @@ int32_t MqttClient_start();
 int32_t gApConnectionState = -1;
 uint32_t gInitState = 0;
 uint32_t memPtrCounterfree = 0;
-//bool gResetApplication = false;
 static MQTTClient_Handle gMqttClient;
 MQTTClient_Params MqttClientExmple_params;
-//unsigned short g_usTimerInts;
 
 /* Receive task handle                                                       */
 pthread_t g_rx_task_hndl = (pthread_t) NULL;
@@ -220,15 +209,8 @@ char *topic[SUBSCRIPTION_TOPIC_COUNT] =
 unsigned char qos[SUBSCRIPTION_TOPIC_COUNT] =
 { MQTT_QOS_0 };
 
-/* Publishing topics and messages                                            */
-//const char *publish_topic = { PUBLISH_TOPIC };
-//const char *publish_data = { PUBLISH_TOPIC0_DATA };
-
-/* Message Queue                                                             */
-//mqd_t g_PBQueue;
 pthread_t mqttThread = (pthread_t) NULL;
 pthread_t appThread = (pthread_t) NULL;
-timer_t g_timer;
 
 /* Printing new line                                                         */
 char lineBreak[] = "\n\r";
@@ -348,7 +330,7 @@ void * MqttClient(void *pvParameters)
 {
     long lRetVal = -1;
     char publish_data[PUBLISH_JSON_BUFFER_SIZE] = {0};
-    char publish_topic[PUBLISH_TOPIC_BUFFER_SIZE] = {PUBLISH_TOPIC};
+    char publish_topic[PUBLISH_TOPIC_BUFFER_SIZE] = {0};
 
     /*Initializing Client and Subscribing to the Broker.                     */
     if(gApConnectionState >= 0)
@@ -370,10 +352,12 @@ void * MqttClient(void *pvParameters)
         if(msg.type == 1)
         {
             json_send_stats(publish_data);
+            strncpy(publish_topic, PUBLISH_TOPIC_0, sizeof(PUBLISH_TOPIC_0));
         }
         else if(msg.type == 2)
         {
             json_send_data(publish_data, msg);
+            strncpy(publish_topic, PUBLISH_TOPIC_1, sizeof(PUBLISH_TOPIC_1));
         }
         else
         {
@@ -613,40 +597,6 @@ int32_t MqttClient_start()
 
 //*****************************************************************************
 //!
-//! MQTT Client stop - Unsubscribe from the subscription topics and exit the
-//! MQTT client lib.
-//!
-//! \param  none
-//!
-//! \return None
-//!
-//*****************************************************************************
-
-void Mqtt_ClientStop(uint8_t disconnect)
-{
-    uint32_t iCount;
-
-    MQTTClient_UnsubscribeParams subscriptionInfo[SUBSCRIPTION_TOPIC_COUNT];
-
-    for(iCount = 0; iCount < SUBSCRIPTION_TOPIC_COUNT; iCount++)
-    {
-        subscriptionInfo[iCount].topic = topic[iCount];
-    }
-
-    MQTTClient_unsubscribe(gMqttClient, subscriptionInfo,
-                           SUBSCRIPTION_TOPIC_COUNT);
-    for(iCount = 0; iCount < SUBSCRIPTION_TOPIC_COUNT; iCount++)
-    {
-        UART_PRINT("Unsubscribed from the topic %s\r\n", topic[iCount]);
-    }
-    gUiConnFlag = 0;
-
-    /*exiting the Client library                                             */
-    MQTTClient_delete(gMqttClient);
-}
-
-//*****************************************************************************
-//!
 //! Utility function which prints the borders
 //!
 //! \param[in] ch  -  hold the charater for the border.
@@ -835,9 +785,7 @@ void mainThread(void * args)
     priParam.sched_priority = SPAWN_TASK_PRIORITY;
     retc = pthread_attr_setschedparam(&pAttrs_spawn, &priParam);
     retc |= pthread_attr_setstacksize(&pAttrs_spawn, TASKSTACKSIZE);
-    retc |= pthread_attr_setdetachstate
-                                    (&pAttrs_spawn, PTHREAD_CREATE_DETACHED);
-
+    retc |= pthread_attr_setdetachstate(&pAttrs_spawn, PTHREAD_CREATE_DETACHED);
     retc = pthread_create(&spawn_thread, &pAttrs_spawn, sl_Task, NULL);
 
     if(retc != 0)
@@ -858,7 +806,6 @@ void mainThread(void * args)
     /*Set the ClientId with its own mac address */
     retc |= SetClientIdNamefromMacAddress();
 
-
     retc = sl_Stop(SL_STOP_TIMEOUT);
     if(retc < 0)
     {
@@ -872,19 +819,16 @@ void mainThread(void * args)
         ERROR;
     }
 
-    while(1)
-    {
-        topic[0] = SUBSCRIPTION_TOPIC;
-        gInitState = 0;
+    timerInit();
 
-        /*Connect to AP                                                      */
-        gApConnectionState = Mqtt_IF_Connect();
+    gInitState = 0;
 
-        gInitState |= MQTT_INIT_STATE;
-        /*Run MQTT Main Thread (it will open the Client and Server)          */
-        Mqtt_start();
+    /*Connect to AP                                                      */
+    gApConnectionState = Mqtt_IF_Connect();
 
-    }
+    gInitState |= MQTT_INIT_STATE;
+    /*Run MQTT Main Thread (it will open the Client and Server)          */
+    Mqtt_start();
 }
 
 //*****************************************************************************

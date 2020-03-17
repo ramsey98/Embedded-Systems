@@ -33,7 +33,7 @@ void json_read(char *payload, int *msgID)
 {
     Json_Handle templateHandle, objectHandle;
     int ret1 = 0, ret2 = 0, ret3 = 0, ret4 = 0, ret5 = 0;
-    ret1 = Json_createTemplate(&templateHandle, JSON_FORMAT, strlen(JSON_FORMAT));
+    ret1 = Json_createTemplate(&templateHandle, JSON_SUB_FORMAT, strlen(JSON_SUB_FORMAT));
     ret2 = Json_createObject(&objectHandle, templateHandle, 0);
     ret3 = Json_parse(objectHandle, payload, strlen(payload));
     parseValues(objectHandle);
@@ -69,7 +69,7 @@ void json_send_data(char *payload, MQTTMsg msg)
     Json_Handle templateHandle;
     int ret1 = 0, ret2 = 0;
     uint16_t buf = PUBLISH_JSON_BUFFER_SIZE;
-    ret1 = Json_createTemplate(&templateHandle, JSON_FORMAT, strlen(JSON_FORMAT));
+    ret1 = Json_createTemplate(&templateHandle, JSON_PUB_FORMAT, strlen(JSON_PUB_FORMAT));
     sendValues(templateHandle, msg, dataID);
     ret2 = Json_build(templateHandle, payload, &buf);
     if(ret1 != 0  | ret2 != 0)

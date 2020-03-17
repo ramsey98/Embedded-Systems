@@ -30,6 +30,8 @@ var GPIO8 = GPIO.addInstance();
 var LED = scripting.addModule("/ti/drivers/apps/LED", {}, false);
 var LED1 = LED.addInstance();
 var LED2 = LED.addInstance();
+var Timer = scripting.addModule("/ti/drivers/Timer", {}, false);
+var Timer1 = Timer.addInstance();
 // Name - The C/C++ identifier used in applications as the index parameter passed to Crypto runtime APIs
 Crypto1.$name = "CONFIG_Crypto_0";
 // IO Retention Shutdown - IO groups to be retained during Shutdown
@@ -110,6 +112,10 @@ GPIO8.$name = "CONFIG_GPIO_7";
 LED1.$name = "CONFIG_LED_0";
 // Name - The C/C++ identifier used in applications as the index parameter passed to LED runtime APIs
 LED2.$name = "CONFIG_LED_1";
+// Name - The C/C++ identifier used in applications as the index parameter passed to Timer runtime APIs
+Timer1.$name = "CONFIG_TIMER_0";
+// Name
+Timer1.timer.$name = "MyTimer1";
 // Suggest solution
 Display1.uart.uart.$suggestSolution = "UART1";
 // Suggest solution
@@ -134,3 +140,5 @@ GPIO8.gpioPin.$suggestSolution = "59";
 LED1.gpioPin.gpioPin.$suggestSolution = "60";
 // Suggest solution
 LED2.gpioPin.gpioPin.$suggestSolution = "61";
+// Suggest solution
+Timer1.timer.$suggestSolution = "Timer0";

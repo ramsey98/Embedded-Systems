@@ -16,7 +16,7 @@ void parseValues(Json_Handle objectHandle)
     bufSize = sizeof(msgID);
     ret1 = Json_getValue(objectHandle, "ID", &msgID, &bufSize);
     bufSize = sizeof(state);
-    ret2 = Json_getValue(objectHandle, "state", &state, &bufSize);
+    ret2 = Json_getValue(objectHandle, "item1", &state, &bufSize);
     if(ret1 != 0  | ret2 != 0)
     {
         ERROR;
