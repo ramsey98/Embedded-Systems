@@ -111,8 +111,8 @@
 
 /* Defining Broker IP address and port Number                                */
 //#define SERVER_ADDRESS           "messagesight.demos.ibm.com"
-#define SERVER_ADDRESS           "m2m.eclipse.org"
-#define SERVER_IP_ADDRESS        "192.168.178.67"
+#define SERVER_ADDRESS           "192.168.2.1"
+#define SERVER_IP_ADDRESS        "192.168.2.1"
 #define PORT_NUMBER              1883
 #define SECURED_PORT_NUMBER      8883
 #define LOOPBACK_PORT            1882
@@ -410,7 +410,6 @@ int32_t Mqtt_IF_Connect()
         UART_PRINT("Connection to an AP failed\n\r");
         return(-1);
     }
-
     return(0);
 }
 
@@ -759,7 +758,7 @@ void mainThread(void * args)
 
     GPIO_init();
     SPI_init();
-
+    Timer_init();
     /*Configure the UART                                                     */
     tUartHndl = InitTerm();
     /*remove uart receive from LPDS dependency                               */
@@ -804,7 +803,7 @@ void mainThread(void * args)
         ERROR;
     }
 
-    timerInit();
+    //timerInit();
 
     gInitState = 0;
 
@@ -813,7 +812,10 @@ void mainThread(void * args)
 
     gInitState |= MQTT_INIT_STATE;
     /*Run MQTT Main Thread (it will open the Client and Server)          */
-    Mqtt_start();
+    if (gApConnectionState >= 0)
+    {
+        Mqtt_start();
+    }
 }
 
 //*****************************************************************************
