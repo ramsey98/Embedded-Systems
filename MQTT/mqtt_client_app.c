@@ -329,10 +329,16 @@ void * MqttClient(void *pvParameters)
         }
     }
 
+    //timerInit(); //timer isn't opening
+
     for(;;)
     {
+        MQTTMsg msg2 = {2, 10};
+        sendMsgToMQTTQ(msg2); //msg isn't being overwritten
         MQTTMsg msg = {0, 0};
         receiveFromMQTTQ(&msg);
+        msg.type = 1;
+        UART_PRINT("Here");
         memset(publish_data, 0, PUBLISH_JSON_BUFFER_SIZE);
         if(msg.type == 1)
         {
@@ -759,10 +765,15 @@ void mainThread(void * args)
     GPIO_init();
     SPI_init();
     Timer_init();
+
     /*Configure the UART                                                     */
     tUartHndl = InitTerm();
     /*remove uart receive from LPDS dependency                               */
     UART_control(tUartHndl, UART_CMD_RXDISABLE, NULL);
+
+    dbgUARTInit(tUartHndl);
+    dbgGPIOInit();
+    createMQTTQueue();
 
     /*Create the sl_Task                                                     */
     pthread_attr_init(&pAttrs_spawn);
@@ -802,8 +813,6 @@ void mainThread(void * args)
         UART_PRINT("mqtt_client - Unable to retrieve device information \n");
         ERROR;
     }
-
-    //timerInit();
 
     gInitState = 0;
 

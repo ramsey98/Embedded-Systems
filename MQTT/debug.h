@@ -33,7 +33,7 @@
 #define ERROR halt(__LINE__, __func__);
 
 void dbgGPIOInit();
-void dbgUARTInit();
+void dbgUARTInit(UART_Handle uartHandle);
 void dbgUARTVal(unsigned char outVal);
 void dbgUARTStr(const char* uartOut);
 void dbgUARTNum(int outVal);

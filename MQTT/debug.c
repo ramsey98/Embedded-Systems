@@ -10,19 +10,9 @@
 #include <ti/drivers/dpl/HwiP.h>
 static UART_Handle uart;
 
-void dbgUARTInit()
+void dbgUARTInit(UART_Handle uartHandle)
 {
-    UART_Params uartParams;
-    UART_Params_init(&uartParams);
-    uartParams.writeMode = UART_MODE_BLOCKING;
-    uartParams.writeDataMode = UART_DATA_BINARY;
-    uartParams.baudRate = 38400;
-    uartParams.readEcho = UART_ECHO_OFF;
-    uart = UART_open(CONFIG_UART_1, &uartParams);
-    if (uart == NULL)
-    {
-        ERROR;
-    }
+    uart = uartHandle;
 }
 
 void dbgGPIOInit()

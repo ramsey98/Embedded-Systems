@@ -21,7 +21,15 @@
     "\"ID\": int32,"        \
     "\"Attempts\": int32,"    \
     "\"Received\": int32,"\
-    "\"Expected\": int32"\
+    "\"Missed\": int32"\
+"}"
+
+#define JSON_STATS_BUF      \
+"{"                        \
+    "\"ID\": 0,"        \
+    "\"Attempts\": 0,"    \
+    "\"Received\": 0,"\
+    "\"Missed\": 0"\
 "}"
 
 void json_miss();
