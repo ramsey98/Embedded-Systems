@@ -9,15 +9,14 @@
 #define DEFINITIONS_H_
 
 #include <ti/utils/json/json.h>
-
 #include "debug.h"
 
-#define SUBSCRIPTION_TOPIC "/team20/debug"
+#define SUBSCRIPTION_TOPIC "/team20/config"
 #define SUBSCRIPTION_TOPIC_COUNT 1
 #define JSON_SUB      \
 "{"                        \
     "\"ID\": int32,"        \
-    "\"item1\": char"    \
+    "\"item1\": int32"    \
 "}"
 #define JSON_SUB_BUF      \
 "{"                        \
@@ -25,16 +24,14 @@
     "\"item1\": 0"    \
 "}"
 
-
 #define PUBLISH_TOPIC_0 "/team20/stats"
 #define PUBLISH_TOPIC_1 "/team20/debug"
 #define PUBLISH_TOPIC_COUNT 2
 #define JSON_PUB      \
 "{"                        \
     "\"ID\": int32,"        \
-    "\"item1\": char,"    \
+    "\"item1\": int32,"    \
 "}"
-
 #define JSON_PUB_BUF      \
 "{"                        \
     "\"ID\": 0,"        \

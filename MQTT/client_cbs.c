@@ -169,7 +169,7 @@ void MqttClientCallback(int32_t event,
             uint32_t payloadOffset;
             struct publishMsgHeader msgHead;
 
-            static char pubBuff[PUBLISH_JSON_BUFFER_SIZE] = {0};
+            static char pubBuff[JSON_DATA_BUFFER_SIZE] = {0};
 
             topicOffset = sizeof(struct publishMsgHeader);
             payloadOffset = sizeof(struct publishMsgHeader) +
@@ -178,7 +178,7 @@ void MqttClientCallback(int32_t event,
             bufSizeReqd += sizeof(struct publishMsgHeader);
             bufSizeReqd += recvMetaData->topLen + 1;
             bufSizeReqd += dataLen + 1;
-            if(bufSizeReqd > PUBLISH_JSON_BUFFER_SIZE)
+            if(bufSizeReqd > JSON_DATA_BUFFER_SIZE)
             {
                 APP_PRINT("ERROR: Payload larger than buffer");
                 json_miss();
@@ -223,6 +223,7 @@ void MqttClientCallback(int32_t event,
         case MQTTClient_DISCONNECT_CB_EVENT:
         {
             APP_PRINT("BRIDGE DISCONNECTION\n\r");
+            ERROR;
             break;
         }
     }

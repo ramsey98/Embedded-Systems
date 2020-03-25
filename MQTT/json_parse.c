@@ -7,7 +7,7 @@
 
 #include "json_parse.h"
 
-static int statsID = 0, dataID = 0, attempts = 0, received = 0, missed = 0, expected = 0;
+static int ID = 0, attempts = 0, received = 0, missed = 0, expected = 0;
 
 void json_miss()
 {
@@ -58,7 +58,7 @@ void json_read(char *payload, int *msgID)
 void json_send_stats(char *payload)
 {
     Json_Handle templateHandle, objectHandle;
-    uint16_t buf = PUBLISH_JSON_BUFFER_SIZE;
+    uint16_t buf = JSON_DATA_BUFFER_SIZE;
     if(Json_createTemplate(&templateHandle, JSON_STATS, strlen(JSON_STATS)) != 0)
     {
         ERROR;
@@ -71,7 +71,7 @@ void json_send_stats(char *payload)
     {
         ERROR;
     }
-    if(Json_setValue(objectHandle, "\"ID\"", &statsID, sizeof(statsID)) != 0)
+    if(Json_setValue(objectHandle, "\"ID\"", &ID, sizeof(ID)) != 0)
     {
         ERROR;
     }
@@ -99,14 +99,12 @@ void json_send_stats(char *payload)
     {
         ERROR;
     }
-    attempts++;
-    statsID++;
 }
 
-void json_send_data(char *payload, MQTTMsg msg)
+void json_send_debug(char *payload, MQTTMsg msg)
 {
     Json_Handle templateHandle, objectHandle;
-    uint16_t buf = PUBLISH_JSON_BUFFER_SIZE;
+    uint16_t buf = JSON_DATA_BUFFER_SIZE;
     if(Json_createTemplate(&templateHandle, JSON_PUB, strlen(JSON_PUB)) != 0)
     {
         ERROR;
@@ -119,7 +117,7 @@ void json_send_data(char *payload, MQTTMsg msg)
     {
         ERROR;
     }
-    sendValues(objectHandle, msg, dataID);
+    sendValues(objectHandle, msg, ID);
     if(Json_build(objectHandle, payload, &buf) != 0)
     {
         ERROR;
@@ -132,6 +130,33 @@ void json_send_data(char *payload, MQTTMsg msg)
     {
         ERROR;
     }
+}
+
+void json_send(char *publish_topic, char *publish_data, MQTTMsg msg)
+{
     attempts++;
-    dataID++;
+    memset(publish_data, 0, JSON_DATA_BUFFER_SIZE);
+    if(msg.type == 1)
+    {
+        json_send_stats(publish_data);
+        strncpy(publish_topic, PUBLISH_TOPIC_0, sizeof(PUBLISH_TOPIC_0));
+    }
+    else if(msg.type == 2)
+    {
+        json_send_debug(publish_data, msg);
+        strncpy(publish_topic, PUBLISH_TOPIC_1, sizeof(PUBLISH_TOPIC_1));
+    }
+    else
+    {
+        ERROR;
+    }
+    if(sizeof(publish_data) > JSON_DATA_BUFFER_SIZE)
+    {
+       ERROR;
+    }
+    if(sizeof(publish_topic) > JSON_TOPIC_BUFFER_SIZE)
+    {
+       ERROR;
+    }
+    ID++;
 }

@@ -13,8 +13,8 @@
 #include "mqtt_queue.h"
 #include "debug.h"
 
-#define PUBLISH_JSON_BUFFER_SIZE (512)
-#define PUBLISH_TOPIC_BUFFER_SIZE (256)
+#define JSON_DATA_BUFFER_SIZE (512)
+#define JSON_TOPIC_BUFFER_SIZE (256)
 
 #define JSON_STATS      \
 "{"                        \
@@ -36,6 +36,7 @@ void json_miss();
 void json_receive(char *payload, char *msgTopic);
 void json_read(char *payload, int *msgID);
 void json_send_stats(char *payload);
-void json_send_data(char *payload, MQTTMsg msg);
+void json_send_debug(char *payload, MQTTMsg msg);
+void json_send(char *publish_topic, char *publish_data, MQTTMsg msg);
 
 #endif /* JSON_PARSE_H_ */

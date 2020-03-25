@@ -314,8 +314,8 @@ void * MqttClientThread(void * pvParameters)
 void * MqttClient(void *pvParameters)
 {
     long lRetVal = -1;
-    char publish_data[PUBLISH_JSON_BUFFER_SIZE] = {0};
-    char publish_topic[PUBLISH_TOPIC_BUFFER_SIZE] = {0};
+    char publish_data[JSON_DATA_BUFFER_SIZE] = {0};
+    char publish_topic[JSON_TOPIC_BUFFER_SIZE] = {0};
 
     /*Initializing Client and Subscribing to the Broker.                     */
     if(gApConnectionState >= 0)
@@ -329,31 +329,12 @@ void * MqttClient(void *pvParameters)
         }
     }
 
-    //timerInit(); //timer isn't opening
-
+    timerInit();
     for(;;)
     {
-        MQTTMsg msg2 = {2, 10};
-        sendMsgToMQTTQ(msg2); //msg isn't being overwritten
-        MQTTMsg msg = {0, 0};
+        MQTTMsg msg;
         receiveFromMQTTQ(&msg);
-        msg.type = 1;
-        UART_PRINT("Here");
-        memset(publish_data, 0, PUBLISH_JSON_BUFFER_SIZE);
-        if(msg.type == 1)
-        {
-            json_send_stats(publish_data);
-            strncpy(publish_topic, PUBLISH_TOPIC_0, sizeof(PUBLISH_TOPIC_0));
-        }
-        else if(msg.type == 2)
-        {
-            json_send_data(publish_data, msg);
-            strncpy(publish_topic, PUBLISH_TOPIC_1, sizeof(PUBLISH_TOPIC_1));
-        }
-        else
-        {
-            ERROR;
-        }
+        json_send(publish_topic, publish_data, msg);
         lRetVal = MQTTClient_publish(
                           gMqttClient, (char*) publish_topic,
                           strlen((char*)publish_topic),

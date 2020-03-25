@@ -20,7 +20,7 @@ void createMQTTQueue()
 void sendMsgToMQTTQ(MQTTMsg msg)
 {
     dbgOutputLoc(BEFORE_SEND_QUEUE_ISR_TIMER);
-    BaseType_t success = xQueueSend(xQueue, (void *) &msg, pdFALSE);
+    BaseType_t success = xQueueSendFromISR(xQueue, (void *) &msg, pdFALSE);
     if(success == pdFALSE)
     {
         ERROR;
@@ -31,11 +31,13 @@ void sendMsgToMQTTQ(MQTTMsg msg)
 void receiveFromMQTTQ(MQTTMsg *received)
 {
     dbgOutputLoc(BEFORE_RECEIVE_QUEUE);
-    BaseType_t success = xQueueReceive(xQueue, &received, portMAX_DELAY);
+    MQTTMsg temp;
+    BaseType_t success = xQueueReceive(xQueue, &temp, portMAX_DELAY);
     if(success == pdFALSE)
     {
         ERROR;
     }
+    *received = temp;
     dbgOutputLoc(AFTER_RECEIVE_QUEUE);
 }
 
