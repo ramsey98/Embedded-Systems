@@ -26,6 +26,7 @@ pub_stats = {"Attempts": 0,
              "Expected": 0}
 
 def on_connect(client, data, flag, rc):
+    global connected
     print("Connected w/ result", str(rc),"@",round(time.time() - starttime,2))
     for topic in topics.keys():
         client.subscribe(topic)
@@ -34,6 +35,14 @@ def on_connect(client, data, flag, rc):
 def on_disconnect(client, data, rc):
     print("Disconnected w/ result", str(rc),"@",round(time.time() - starttime,2))
 
+def on_stats(decoded):
+    pub_stats["Attempts"] = decoded["Attempts"]
+    pub_stats["Received"] = decoded["Received"]
+    pub_stats["Expected"] = decoded["Expected"]
+
+def on_debug(decoded):
+    pass
+
 def on_message(client, data, msg):
     rcvtime = round(time.time() - starttime,2)
     print("Message Received @", recvtime)
@@ -41,11 +50,12 @@ def on_message(client, data, msg):
     package = msg.payload.decode()
     decoded = json.loads(package)
     if(set(topics[topic]).issubset(set(decoded.keys()))):
-        pub_stats["Attempts"] = decoded["Attempts"]
-        pub_stats["Received"] = decoded["Received"]
-        pub_stats["Expected"] = decoded["Expected"]
+        if(topic == "/team20/stats"):
+            on_stats(decoded)
+        elif(topic == "team20/debug"):
+            on_debug(decoded)
         pub_results[topic]["Successes"] += 1
-        pub_results[topic]["Time"] = recvtime
+        pub_results[topic]["Time"] = recvtime 
         print("Success:", topic.split("/")[-1], "@", round(time.time() - starttime,2))
     else:
         print("Error:", topic.split("/")[-1], "@", round(time.time() - starttime,2))
@@ -53,7 +63,7 @@ def on_message(client, data, msg):
 def test_rover():
     print("Running test: Rover @",round(time.time() - starttime,2))
     topic = "/team20/debug"
-    data = dict(topics[topic])
+    data = dict.fromkeys(topics[topic], 0)
     data["ID"] = 0
     data["item1"] = 1
     data["item2"] = 2
@@ -65,7 +75,7 @@ def test_rover():
 def test_sensors():
     print("Running test: Sensors @",round(time.time() - starttime,2))
     topic = "/team20/debug"
-    data = dict(topics[topic])
+    data = dict.fromkeys(topics[topic], 0)
     data["ID"] = 0
     data["item1"] = 1
     data["item2"] = 2
@@ -77,7 +87,7 @@ def test_sensors():
 def test_arm():
     print("Running test: Arm @",round(time.time() - starttime,2))
     topic = "/team20/debug"
-    data = dict(topics[topic])
+    data = dict.fromkeys(topics[topic], 0)
     data["ID"] = 0
     data["item1"] = 1
     data["item2"] = 2
@@ -89,7 +99,7 @@ def test_arm():
 def test_zumo():
     print("Running test: Zumo @",round(time.time() - starttime,2))
     topic = "/team20/debug"
-    data = dict(topics[topic])
+    data = dict.fromkeys(topics[topic], 0)
     data["ID"] = 0
     data["item1"] = 1
     data["item2"] = 2
@@ -109,6 +119,7 @@ def test_badPayload():
 def test_skipID():
     print("Running test: Skip ID @",round(time.time() - starttime,2))
     topic = "/team20/debug"
+    data = dict.fromkeys(topics[topic], 0)
     data["ID"] = 0
     data["item1"] = 1
     data["item2"] = 2
@@ -116,6 +127,7 @@ def test_skipID():
     package = json.dumps(data)
     client.publish(topic,package)
     print("Sent",package,"to",topic,"@",round(time.time() - starttime,2))
+    data = dict.fromkeys(topics[topic], 0)
     data["ID"] = 3
     data["item1"] = 1
     data["item2"] = 2
@@ -154,11 +166,12 @@ def display_data():
         if not connected:
             time.sleep(1)
         else:
-            print(pub_stats)
-            print(pub_results)
+            print("Stats:", pub_stats)
+            print("Results:", pub_results)
             time.sleep(10)
     
 def main():
+    global client
     print("Thread: Connection started @",round(time.time() - starttime,2))
     client = mqtt.Client()
     client.on_connect = on_connect
