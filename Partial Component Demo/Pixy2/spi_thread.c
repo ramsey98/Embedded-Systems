@@ -20,6 +20,8 @@ void *spiThread(void *arg0) {
     int success = pixyFsm(&pixyState, &timeIncPixy, &complete, &sendIncPixy);
     dbgOutputLoc(WHILE1);
 
+    spiSetServos(pixyState.rx_buffer, pixyState.tx_buffer, 255, 300);
+
     while(1) {
         received = receiveFromPixyQ1(&timeIncPixy, &complete, &sendIncPixy);
         success = pixyFsm(&pixyState, &timeIncPixy, &complete, &sendIncPixy);
