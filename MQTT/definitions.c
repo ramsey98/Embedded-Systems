@@ -6,6 +6,10 @@
  */
 
 #include "definitions.h"
+#include "uart_term.h"
+#include <stdio.h>
+
+static int value = 0;
 
 void parseValues(Json_Handle objectHandle)
 {
@@ -22,12 +26,20 @@ void parseValues(Json_Handle objectHandle)
         ERROR;
     }
     //send data where needed (queue)
-    dbgUARTNum(item1);
+    value = item1;
 }
 
 void sendValues(Json_Handle objectHandle, MQTTMsg msg, int msgID)
 {
-    int item1 = msg.value;
+    int item1 = 0;
+    if(msg.type == 2)
+    {
+        item1 = value;
+    }
+    else if(msg.type == 3)
+    {
+        item1 = msg.value;
+    }
     if(Json_setValue(objectHandle, "\"ID\"", &msgID, sizeof(msgID)) != 0)
     {
         ERROR;

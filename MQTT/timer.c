@@ -43,7 +43,6 @@ void timerCallback(Timer_Handle myHandle)
     else
     {
         msg.type = 2;
-        msg.value = 10;
     }
     sendMsgToMQTTQ(msg);
     count++;

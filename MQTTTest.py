@@ -20,12 +20,16 @@ topics = {"/team20/stats": ["ID", "Attempts", "Received", "Expected"],
 
 if test_component == "rover":
     topics["/team20/debug"] = ["ID", "item1", "item2", "item3"]
+    topics["/team20/config"] = ["ID", "item1", "item2", "item3"]
 elif test_component == "sensors":
     topics["/team20/debug"] = ["ID", "item1", "item2", "item3"]
+    topics["/team20/config"] = ["ID", "item1", "item2", "item3"]
 elif test_component == "arm":
     topics["/team20/debug"] = ["ID", "item1", "item2", "item3"]
+    topics["/team20/config"] = ["ID", "item1", "item2", "item3"]
 elif test_component == "zumo":
     topics["/team20/debug"] = ["ID", "item1", "item2", "item3"]
+    topics["/team20/config"] = ["ID", "item1"]
 
 pub_results = {topic: {"Successes": 0, "Time": 0} for topic in topics.keys()}
 pub_stats = {"Attempts": 0,
@@ -77,7 +81,7 @@ def on_message(client, data, msg):
 
 def test_rover():
     print("Running test: Rover @",round(time.time() - starttime,2))
-    topic = "/team20/debug"
+    topic = "/team20/config"
     data = dict.fromkeys(topics[topic], 0)
     data["ID"] = 0
     data["item1"] = 1
@@ -89,7 +93,7 @@ def test_rover():
 
 def test_sensors():
     print("Running test: Sensors @",round(time.time() - starttime,2))
-    topic = "/team20/debug"
+    topic = "/team20/config"
     data = dict.fromkeys(topics[topic], 0)
     data["ID"] = 0
     data["item1"] = 1
@@ -101,7 +105,7 @@ def test_sensors():
 
 def test_arm():
     print("Running test: Arm @",round(time.time() - starttime,2))
-    topic = "/team20/debug"
+    topic = "/team20/config"
     data = dict.fromkeys(topics[topic], 0)
     data["ID"] = 0
     data["item1"] = 1
@@ -113,19 +117,17 @@ def test_arm():
 
 def test_zumo():
     print("Running test: Zumo @",round(time.time() - starttime,2))
-    topic = "/team20/debug"
+    topic = "/team20/config"
     data = dict.fromkeys(topics[topic], 0)
     data["ID"] = 0
-    data["item1"] = 1
-    data["item2"] = 2
-    data["item3"] = 3
+    data["item1"] = 5
     package = json.dumps(data)
     client.publish(topic,package)
     print("Sent",package,"to",topic,"@",round(time.time() - starttime,2))
 
 def test_badPayload():
     print("Running test: Bad Payload @",round(time.time() - starttime,2))
-    topic = "/team20/debug"
+    topic = "/team20/config"
     data = {"NULL": 0}
     package = json.dumps(data)
     client.publish(topic,package)
@@ -133,12 +135,10 @@ def test_badPayload():
 
 def test_repeatID():
     print("Running test: Skip ID @",round(time.time() - starttime,2))
-    topic = "/team20/debug"
+    topic = "/team20/config"
     data = dict.fromkeys(topics[topic], 0)
     data["ID"] = 0
     data["item1"] = 1
-    data["item2"] = 2
-    data["item3"] = 3
     package = json.dumps(data)
     client.publish(topic,package)
     print("Sent",package,"to",topic,"@",round(time.time() - starttime,2))
@@ -147,27 +147,23 @@ def test_repeatID():
 
 def test_skipID():
     print("Running test: Skip ID @",round(time.time() - starttime,2))
-    topic = "/team20/debug"
+    topic = "/team20/config"
     data = dict.fromkeys(topics[topic], 0)
     data["ID"] = 0
     data["item1"] = 1
-    data["item2"] = 2
-    data["item3"] = 3
     package = json.dumps(data)
     client.publish(topic,package)
     print("Sent",package,"to",topic,"@",round(time.time() - starttime,2))
     data = dict.fromkeys(topics[topic], 0)
     data["ID"] = 3
     data["item1"] = 1
-    data["item2"] = 2
-    data["item3"] = 3
     package = json.dumps(data)
     client.publish(topic,package)
     print("Sent",package,"to",topic,"@",round(time.time() - starttime,2))
 
 def test_overflowBuf():
     print("Running test: overflowBuf @",round(time.time() - starttime,2))
-    topic = "/team20/debug"
+    topic = "/team20/config"
     data = dict.fromkeys(topics[topic], 0)
     data["ID"] = 0
     for i in range(100):
@@ -199,8 +195,8 @@ def run_tests():
     elif test_component == "zumo":
         test_zumo()
         time.sleep(1)
-    test_badPayload()
-    time.sleep(1)
+    #test_badPayload()
+    #time.sleep(1)
     test_repeatID()
     time.sleep(1)
     test_skipID()

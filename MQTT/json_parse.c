@@ -40,7 +40,7 @@ void json_read(char *payload, int *msgID)
     {
         ERROR;
     }
-    if(Json_parse(objectHandle, JSON_SUB_BUF, strlen(JSON_SUB_BUF)) != 0)
+    if(Json_parse(objectHandle, payload, strlen(payload)) != 0)
     {
         ERROR;
     }
