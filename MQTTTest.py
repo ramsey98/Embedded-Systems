@@ -22,7 +22,7 @@ tests = {"size": False,
          "time": False}
 
 topics = {"/team20/stats": ["ID", "Attempts", "Received", "Missed"],
-          "/team20/errors": ["ID", "Error", "Value"]}
+          "/team20/errors": ["ID", "Type"]}
 
 if test_component == "rover":
     topics["/team20/debug"] = ["ID", "item1", "item2", "item3"]
@@ -41,6 +41,13 @@ pub_results = {topic: {"Successes": 0, "Time": 0} for topic in topics.keys()}
 pub_stats = {"Attempts": 0,
              "Received": 0,
              "Missed": 0}
+ID = {topic: 0 for topic in topics.keys()}
+debugval = 0
+errors = []
+badpayloadval = 1
+overflowval = 2
+missedIDval = 3
+repeatIDval = 4
 
 def on_connect(client, data, flag, rc):
     global connected
@@ -61,14 +68,11 @@ def on_msg_stats(decoded):
         tests["stats"] = True
 
 def on_msg_debug(decoded):
-    pass
+    global debugval
+    debugval = decoded["item1"]
 
 def on_msg_error(decoded):
-    global tests
-    if(decoded["Value"] == 0):
-        tests[decoded["Error"]] = False
-    else:
-        tests[decoded["Error"]] = True
+    errors.append(decoded["Type"])
 
 def on_message(client, data, msg):
     global pub_results, tests
@@ -85,6 +89,7 @@ def on_message(client, data, msg):
             on_msg_debug(decoded)
         elif(topic == "team20/errors"):
             on_msg_error(decoded)
+        ID[topic] = decoded["ID"]
         pub_results[topic]["Successes"] += 1
         pub_results[topic]["Time"] = recvtime 
         print("Success:", topic.split("/")[-1], "@", round(time.time() - starttime,2))
@@ -92,120 +97,148 @@ def on_message(client, data, msg):
         print("Error:", topic.split("/")[-1], "@", round(time.time() - starttime,2))
 
 def test_rover():
+    global ID
     print("Running test: Rover @",round(time.time() - starttime,2))
     topic = "/team20/config"
     data = dict.fromkeys(topics[topic], 0)
-    data["ID"] = 0
+    data["ID"] = ID[topic]
     data["item1"] = 1
     data["item2"] = 2
     data["item3"] = 3
     package = json.dumps(data)
     client.publish(topic,package)
+    ID[topic] += 1
     print("Sent",package,"to",topic,"@",round(time.time() - starttime,2))
 
 def test_sensors():
+    global ID
     print("Running test: Sensors @",round(time.time() - starttime,2))
     topic = "/team20/config"
     data = dict.fromkeys(topics[topic], 0)
-    data["ID"] = 0
+    data["ID"] = ID[topic]
     data["item1"] = 1
     data["item2"] = 2
     data["item3"] = 3
     package = json.dumps(data)
     client.publish(topic,package)
+    ID[topic] += 1
     print("Sent",package,"to",topic,"@",round(time.time() - starttime,2))
 
 def test_arm():
+    global ID
     print("Running test: Arm @",round(time.time() - starttime,2))
     topic = "/team20/config"
     data = dict.fromkeys(topics[topic], 0)
-    data["ID"] = 0
+    data["ID"] = ID[topic]
     data["item1"] = 1
     data["item2"] = 2
     data["item3"] = 3
     package = json.dumps(data)
     client.publish(topic,package)
+    ID[topic] += 1
     print("Sent",package,"to",topic,"@",round(time.time() - starttime,2))
 
 def test_zumo():
+    global ID
     print("Running test: Zumo @",round(time.time() - starttime,2))
     topic = "/team20/config"
     data = dict.fromkeys(topics[topic], 0)
-    data["ID"] = 0
+    data["ID"] = ID[topic]
     data["item1"] = 1
     data["item2"] = 2
     data["item3"] = 3
     package = json.dumps(data)
     client.publish(topic,package)
+    ID[topic] += 1
     print("Sent",package,"to",topic,"@",round(time.time() - starttime,2))
 
 def test_config():
+    global ID, tests
     print("Running test: Config @",round(time.time() - starttime,2))
+    testval = 5
     topic = "/team20/config"
     data = dict.fromkeys(topics[topic], 0)
-    data["ID"] = 0
-    data["item1"] = 5
+    data["ID"] = ID[topic]
+    data["item1"] = testval
     package = json.dumps(data)
     client.publish(topic,package)
+    ID[topic] += 1
     print("Sent",package,"to",topic,"@",round(time.time() - starttime,2))
+    time.sleep(1)
+    if debugval == testval:
+        tests["config"] = True
 
 def test_badPayload():
-    global tests
+    global tests, ID
     print("Running test: Bad Payload @",round(time.time() - starttime,2))
     topic = "/team20/config"
-    data = {"NULL": 0}
+    data = {"ID": ID[topic],
+            "NULL": 0}
     package = json.dumps(data)
     misses = pub_stats["Missed"]
     client.publish(topic,package)
+    ID[topic] += 1
     print("Sent",package,"to",topic,"@",round(time.time() - starttime,2))
     time.sleep(1.5)
-    if(pub_stats["Missed"] == (misses + 1)):
+    if((pub_stats["Missed"] == (misses + 1)) and errors[-1] == badpayloadval):
         tests["badPayload"] = True
 
 def test_repeatID():
+    global ID
     print("Running test: Skip ID @",round(time.time() - starttime,2))
     topic = "/team20/config"
     data = dict.fromkeys(topics[topic], 0)
-    data["ID"] = 0
+    data["ID"] = ID[topic]
     data["item1"] = 1
     package = json.dumps(data)
     client.publish(topic,package)
     print("Sent",package,"to",topic,"@",round(time.time() - starttime,2))
     client.publish(topic,package)
+    ID[topic] += 1
     print("Sent",package,"to",topic,"@",round(time.time() - starttime,2))
+    time.sleep(1)
+    if(errors[-1] == repeatIDval):
+        tests["repeatID"] = True
 
 def test_skipID():
+    global tests, ID
     print("Running test: Skip ID @",round(time.time() - starttime,2))
     topic = "/team20/config"
     data = dict.fromkeys(topics[topic], 0)
-    data["ID"] = 0
+    data["ID"] = ID[topic]
     data["item1"] = 1
     package = json.dumps(data)
     client.publish(topic,package)
+    ID[topic] += 3
     print("Sent",package,"to",topic,"@",round(time.time() - starttime,2))
     data = dict.fromkeys(topics[topic], 0)
-    data["ID"] = 3
+    data["ID"] = ID[topic]
     data["item1"] = 1
     package = json.dumps(data)
     client.publish(topic,package)
+    ID[topic] += 1
     print("Sent",package,"to",topic,"@",round(time.time() - starttime,2))
+    time.sleep(1)
+    if(errors[-1] == skipIDval):
+        tests["skipID"] = True
+        
 
 def test_overflowBuf():
-    global tests
+    global tests, ID
     print("Running test: overflowBuf @",round(time.time() - starttime,2))
     topic = "/team20/config"
     data = dict.fromkeys(topics[topic], 0)
-    data["ID"] = 0
+    data["ID"] = ID[topic]
     for i in range(100):
         data[str(i)] = i
     package = json.dumps(data)
     test_size(package)
     misses = pub_stats["Missed"]
     client.publish(topic,package)
+    ID[topic] += 1
     print("Sent",package,"to",topic,"@",round(time.time() - starttime,2))
     time.sleep(1.5)
-    #check error subscription?
-    if(pub_stats["Missed"] == (misses + 1)):
+    if((pub_stats["Missed"] == (misses + 1)) and errors[-1] == overflowval):
         tests["overflow"] = True
 
 def test_reconnect():

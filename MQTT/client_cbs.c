@@ -182,6 +182,8 @@ void MqttClientCallback(int32_t event,
             {
                 APP_PRINT("ERROR: Payload larger than buffer");
                 json_miss();
+                MQTTMsg msg = {JSON_TYPE_ERROR, JSON_ERROR_OVERFLOW};
+                sendMsgToMQTTQ(msg);
                 return;
             }
 

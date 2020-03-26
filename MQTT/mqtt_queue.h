@@ -17,5 +17,4 @@ void sendMsgToMQTTQ(MQTTMsg msg);
 void receiveFromMQTTQ(MQTTMsg *received);
 void createMQTTQueue();
 
-
 #endif /* MQTT_QUEUE_H_ */
