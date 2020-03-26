@@ -105,46 +105,25 @@ int findDistance(BLOCK_DATA *data) {
     int dx, dy, i;
     int computed = 0;
 
-    for(i=0; i < FOCAL_LENGTH-1; i++) {
-        if(data->xPixels > (focalPixels[i] + focalPixels[i+1])/2) {
+    if(data->xPixels > focalPixels[0]) {
+        computed = 1;
+        int focus = focalPixels[0] * focalDistances[0]/EGG_WIDTH;
+        dx = EGG_WIDTH * focus/data->xPixels;
+    }
+
+    for(i=1; i < FOCAL_LENGTH-1; i++) {
+        if(data->xPixels > (focalPixels[i] + focalPixels[i+1])/2 && data->xPixels < (focalPixels[i] + focalPixels[i-1])/2) {
             computed = 1;
             int focus = focalPixels[i] * focalDistances[i]/EGG_WIDTH;
             dx = EGG_WIDTH * focus/data->xPixels;
         }
     }
 
-    if(!computed) {
+    if(computed == 0) {
         int focus = focalPixels[FOCAL_LENGTH-1] * focalDistances[FOCAL_LENGTH-1]/EGG_WIDTH;
         dx = EGG_WIDTH * focus/data->xPixels;
     }
 
     data->distance = dx;
-
-    /*
-    if(data->xPixels > (FOCAL_PIXELS_30 + FOCAL_PIXELS_50)/2) {
-        dbgUARTVal(30);
-        dx = (EGG_WIDTH * FOCAL_LENGTH_30)/FOCAL_PIXELS_30;
-    } else if(data->xPixels > (FOCAL_PIXELS_50 + FOCAL_PIXELS_70)/2) {
-        dbgUARTVal(50);
-        dx = (EGG_WIDTH * FOCAL_LENGTH_50)/FOCAL_PIXELS_50;
-    } else if(data->xPixels > (FOCAL_PIXELS_70 + FOCAL_PIXELS_90)/2) {
-        dbgUARTVal(70);
-        dx = (EGG_WIDTH * FOCAL_LENGTH_70)/FOCAL_PIXELS_70;
-    } else {
-        dbgUARTVal(90);
-        dx = (EGG_WIDTH * FOCAL_LENGTH_90)/FOCAL_PIXELS_90;
-    }
-
-    if(data->yPixels > (FOCAL_PIXELS_30_Y + FOCAL_PIXELS_50_Y)/2) {
-        dy = (EGG_WIDTH * FOCAL_LENGTH_30_Y)/FOCAL_PIXELS_30_Y;
-    } else if(data->yPixels > (FOCAL_PIXELS_50_Y + FOCAL_PIXELS_70_Y)/2) {
-        dy = (EGG_WIDTH * FOCAL_LENGTH_50_Y)/FOCAL_PIXELS_50_Y;
-    } else if(data->yPixels > (FOCAL_PIXELS_70_Y + FOCAL_PIXELS_90_Y)/2) {
-        dy = (EGG_WIDTH * FOCAL_LENGTH_70_Y)/FOCAL_PIXELS_70_Y;
-    } else {
-        dy = (EGG_WIDTH * FOCAL_LENGTH_90_Y)/FOCAL_PIXELS_90_Y;
-    } */
-
-    //data->distance = (0.9*dx + 0.1*dy);
     return data->distance;
 }
