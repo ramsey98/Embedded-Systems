@@ -9,62 +9,34 @@
 #define JSON_PARSE_H_
 
 #include <ti/utils/json/json.h>
-//#include "mqtt_queue.h"
+#include "definitions.h"
+#include "mqtt_queue.h"
+#include "debug.h"
 
-#define PUBLISH_JSON_BUFFER_SIZE (512)
+#define JSON_DATA_BUFFER_SIZE (512)
+#define JSON_TOPIC_BUFFER_SIZE (256)
 
 #define JSON_STATS      \
 "{"                        \
     "\"ID\": int32,"        \
-    "\"item1\": int32,"    \
-    "\"item2\": int32,"\
-    "\"item3\": int32"\
+    "\"Attempts\": int32,"    \
+    "\"Received\": int32,"\
+    "\"Missed\": int32"\
 "}"
 
-#define JSON_ROVER      \
+#define JSON_STATS_BUF      \
 "{"                        \
-    "\"ID\": int32,"        \
-    "\"item1\": int32,"    \
-    "\"item2\": int32,"\
-    "\"item3\": int32"\
+    "\"ID\": 0,"        \
+    "\"Attempts\": 0,"    \
+    "\"Received\": 0,"\
+    "\"Missed\": 0"\
 "}"
 
-#define JSON_SENSORS      \
-"{"                        \
-    "\"ID\": int32,"        \
-    "\"item1\": int32,"    \
-    "\"item2\": int32,"\
-    "\"item3\": int32"\
-"}"
-
-#define JSON_ARM      \
-"{"                        \
-    "\"ID\": int32,"        \
-    "\"item1\": int32,"    \
-    "\"item2\": int32,"\
-    "\"item3\": int32"\
-"}"
-
-#define JSON_ZUMO      \
-"{"                        \
-    "\"ID\": int32,"        \
-    "\"state\": char,"    \
-    "\"leftmotor\": char,"\
-    "\"rightmotor\": char"\
-"}"
-
-typedef enum
-{
-    JSON_Stats,
-    JSON_Rover,
-    JSON_Sensors,
-    JSON_Arm,
-    JSON_Zumo,
-} MSG_TYPES;
-
-void json_receive(char *payload, MSG_TYPES msgType);
-void json_read(char *payload, char *msgType, const char *keys[4], int *msgID, int *item1, int *item2, int *item3);
-void json_send(char *payload, MSG_TYPES msgType, int item1, int item2, int item3);
-void json_write(char *payload, char *msgType, const char *keys[4], int msgID, int item1, int item2, int item3);
+void json_miss();
+void json_receive(char *payload, char *msgTopic);
+void json_read(char *payload, int *msgID);
+void json_send_stats(char *payload);
+void json_send_debug(char *payload, MQTTMsg msg);
+void json_send(char *publish_topic, char *publish_data, MQTTMsg msg);
 
 #endif /* JSON_PARSE_H_ */

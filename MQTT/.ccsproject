@@ -15,4 +15,5 @@
 	<templateProperties value="id=mqtt_client_CC3220SF_LAUNCHXL_freertos_ccs.projectspec.mqtt_client_CC3220SF_LAUNCHXL_freertos_ccs,buildProfile=release,isHybrid=true"/>
 	<origin value="C:\ti\simplelink_cc32xx_sdk_3_30_01_02\examples\rtos\CC3220SF_LAUNCHXL\demos\mqtt_client\freertos\ccs\mqtt_client_CC3220SF_LAUNCHXL_freertos_ccs.projectspec"/>
 	<filesToOpen value=""/>
+	<isTargetManual value="false"/>
 </projectOptions>
