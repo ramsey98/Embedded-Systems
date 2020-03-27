@@ -43,10 +43,10 @@ pub_stats = {"Attempts": 0,
              "Missed": 0}
 ID = {topic: 0 for topic in topics.keys()}
 debugval = 0
-errors = []
+errors = [0]
 badpayloadval = 1
 overflowval = 2
-missedIDval = 3
+skipIDval = 3
 repeatIDval = 4
 
 def on_connect(client, data, flag, rc):
@@ -185,7 +185,7 @@ def test_badPayload():
 
 def test_repeatID():
     global ID
-    print("Running test: Skip ID @",round(time.time() - starttime,2))
+    print("Running test: Repeat ID @",round(time.time() - starttime,2))
     topic = "/team20/config"
     data = dict.fromkeys(topics[topic], 0)
     data["ID"] = ID[topic]
@@ -248,9 +248,9 @@ def test_reconnect():
     diconnected = False
     duration = time.time()
     while(not diconnected):
-        starttime = time.time()
+        firsttime = time.time()
         lasttime = pub_results["/team20/stats"]["Time"]
-        if(starttime - lasttime > 3):
+        if(firsttime - lasttime > 3):
             diconnected = True
             print("reconnect: Client Disconnected @",round(time.time() - starttime,2))
         if(time.time() - duration > 15):
@@ -280,9 +280,12 @@ def test_stats(decoded):
 def test_time():
     global tests
     print("Running test: time @",round(time.time() - starttime,2))
-    count = pub_results["Success"]
+    topic1 = "/team20/debug"
+    topic2 = "/team20/stats"
+    count1 = pub_results[topic1]["Successes"] + pub_results[topic2]["Successes"]
     time.sleep(1)
-    if(pub_results["Success"] - count >= 10):
+    count2 = pub_results[topic1]["Successes"] + pub_results[topic2]["Successes"]
+    if(count2 - count1 >= 10):
         tests["time"] = True
 
 def run_tests():
@@ -290,7 +293,7 @@ def run_tests():
     delay = 5
     waiting = 0
     while(not connected):
-        time.sleep(2)
+        time.sleep(1)
         print("Waiting for connection:", waiting)
         waiting+=1
     test_config()
