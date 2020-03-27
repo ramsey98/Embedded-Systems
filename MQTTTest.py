@@ -193,11 +193,12 @@ def test_repeatID():
     package = json.dumps(data)
     client.publish(topic,package)
     print("Sent",package,"to",topic,"@",round(time.time() - starttime,2))
+    data["item1"] = 2
     client.publish(topic,package)
     ID[topic] += 1
     print("Sent",package,"to",topic,"@",round(time.time() - starttime,2))
     time.sleep(1)
-    if(errors[-1] == repeatIDval):
+    if(errors[-1] == repeatIDval and debugVal == 1):
         tests["repeatID"] = True
 
 def test_skipID():
@@ -280,42 +281,43 @@ def test_time():
     global tests
     print("Running test: time @",round(time.time() - starttime,2))
     count = pub_results["Success"]
-    time.sleep(10)
-    if(pub_results["Success"] - count > 10):
+    time.sleep(1)
+    if(pub_results["Success"] - count >= 10):
         tests["time"] = True
 
 def run_tests():
     print("Thread: Test started @",round(time.time() - starttime,2))
+    delay = 5
     waiting = 0
     while(not connected):
-        time.sleep(1)
+        time.sleep(2)
         print("Waiting for connection:", waiting)
         waiting+=1
     test_config()
-    time.sleep(1)
-    #test_badPayload()
-    #time.sleep(1)
+    time.sleep(delay)
+    test_badPayload()
+    time.sleep(delay)
     test_repeatID()
-    time.sleep(1)
+    time.sleep(delay)
     test_skipID()
-    time.sleep(1)
+    time.sleep(delay)
     test_overflowBuf()
-    time.sleep(1)
+    time.sleep(delay)
     test_time()
-    time.sleep(1)
+    time.sleep(delay)
     test_reconnect()
-    if test_component == "rover":
-        test_rover()
-        time.sleep(1)
-    elif test_component == "sensors":
-        test_sensors()
-        time.sleep(1)
-    elif test_component == "arm":
-        test_arm()
-        time.sleep(1)
-    elif test_component == "zumo":
-        test_zumo()
-        time.sleep(1)
+##    if test_component == "rover":
+##        test_rover()
+##        time.sleep(delay)
+##    elif test_component == "sensors":
+##        test_sensors()
+##        time.sleep(delay)
+##    elif test_component == "arm":
+##        test_arm()
+##        time.sleep(delay)
+##    elif test_component == "zumo":
+##        test_zumo()
+##        time.sleep(delay)
     print("Completed Tests @",round(time.time() - starttime,2))
     print(tests)
     

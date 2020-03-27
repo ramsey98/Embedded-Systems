@@ -19,15 +19,8 @@ void timerInit()
     timer_params.timerCallback = timerCallback;
     timer = Timer_open(CONFIG_TIMER_0, &timer_params);
 
-    if (timer == NULL)
-    {
-        ERROR;
-    }
-
-    if (Timer_start(timer) == Timer_STATUS_ERROR)
-    {
-        ERROR;
-    }
+    if (timer == NULL) ERROR;
+    if (Timer_start(timer) == Timer_STATUS_ERROR) ERROR;
 }
 
 void timerCallback(Timer_Handle myHandle)

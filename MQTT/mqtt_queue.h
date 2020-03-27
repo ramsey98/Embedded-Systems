@@ -11,7 +11,12 @@
 #include "FreeRTOS.h"
 #include "queue.h"
 #include "debug.h"
-#include "definitions.h"
+
+typedef struct
+{
+    uint8_t type;
+    uint8_t value;
+} MQTTMsg;
 
 void sendMsgToMQTTQ(MQTTMsg msg);
 void receiveFromMQTTQ(MQTTMsg *received);
