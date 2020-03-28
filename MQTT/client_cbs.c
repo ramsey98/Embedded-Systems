@@ -204,11 +204,13 @@ void MqttClientCallback(int32_t event,
             memcpy((void*) (pubBuff + payloadOffset), (const void*) data, dataLen);
             memset((void*) (pubBuff + payloadOffset + dataLen), '\0', 1);
 
+            /*
             APP_PRINT("\n\rMsg Recvd. by client\n\r");
             APP_PRINT("TOPIC: %s\n\r", pubBuff + topicOffset);
             APP_PRINT("PAYLOAD: %s\n\r", pubBuff + payloadOffset);
             APP_PRINT("QOS: %d\n\r", recvMetaData->qos);
-
+            */
+            dbgOutputLoc(MQTT_MSG_RECEIVED);
             if(recvMetaData->retain)
             {
                 APP_PRINT("Retained\n\r");
@@ -218,7 +220,6 @@ void MqttClientCallback(int32_t event,
             {
                 APP_PRINT("Duplicate\n\r");
             }
-
             json_receive(pubBuff + payloadOffset, pubBuff+topicOffset);
             break;
         }
