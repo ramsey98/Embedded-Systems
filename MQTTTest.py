@@ -90,8 +90,8 @@ def on_message(client, data, msg):
             on_msg_error(decoded)
         ID[topic] = decoded["ID"]
         pub_results[topic]["Successes"] += 1
-        pub_results[topic]["Time"] = recvtime 
-        print("Success:", topic.split("/")[-1], "@", round(time.time() - starttime,2))
+        pub_results[topic]["Time"] = rcvtime 
+        #print("Success:", topic.split("/")[-1], "@", round(time.time() - starttime,2))
     else:
         print("Error:", topic.split("/")[-1], "@", round(time.time() - starttime,2))
 
@@ -242,20 +242,22 @@ def test_reconnect():
     diconnected = False
     duration = time.time()
     while(not diconnected):
-        firsttime = time.time()-starttime
-        lasttime = pub_results["/team20/stats"]["Time"]
-        if(firsttime - lasttime > 3):
+        rcvtime = round(time.time() - starttime,2)
+        if(rcvtime - pub_results["/team20/stats"]["Time"] > 3):
             diconnected = True
             print("reconnect: Client Disconnected @",round(time.time() - starttime,2))
+            break
         if(time.time() - duration > 15):
             print("reconnect: disconnect timeout @",round(time.time() - starttime,2))
             break
+    prevtime = pub_results["/team20/stats"]["Time"]
     duration = time.time()
     while(diconnected):
-        if(pub_results["/team20/stats"]["Time"] != lasttime):
+        if(pub_results["/team20/stats"]["Time"] != prevtime):
             disconnected = False
             tests["reconnect"] = True
             print("reconnect: client reconnected @",round(time.time() - starttime,2))
+            break
         if(time.time() - duration > 15):
             print("reconnect: reconnect timeout @",round(time.time() - starttime,2))
             break    
@@ -301,9 +303,9 @@ def run_tests():
     test_overflowBuf()
     time.sleep(delay)
     test_time()
-##    time.sleep(delay)
-##    test_reconnect()
-##    globals()["test_"+test_component]()
+    time.sleep(delay)
+    test_reconnect()
+    globals()["test_"+test_component]()
     print("Completed Tests @",round(time.time() - starttime,2))
     print(tests)
     
@@ -320,8 +322,6 @@ def display_data():
             data["Results"] = pub_results
             package = json.dumps(data)
             client.publish(topic,package)
-            #print("Stats:", pub_stats)
-            #print("Results:", pub_results)
             time.sleep(10)
     
 def main():

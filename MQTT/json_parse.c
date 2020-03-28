@@ -18,7 +18,7 @@ void json_miss()
 void json_receive(char *payload, char *msgTopic)
 {
     Json_Handle templateHandle, objectHandle;
-    static expectedConfigID = 0;
+    static int expectedConfigID = 0;
     int configID = 0;
     uint16_t bufSize;
     received++;
