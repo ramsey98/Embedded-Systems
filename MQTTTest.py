@@ -12,7 +12,6 @@ test_component = "zumo"
 tests = {"size": False,
          "repeatID": False,
          "skipID": False,
-         "component": False,
          "badPayload": False,
          "reconnect": False,
          "json": False,
@@ -26,22 +25,21 @@ topics = {"/team20/stats": ["ID", "Attempts", "Received", "Missed"],
 
 if test_component == "rover":
     topics["/team20/debug"] = ["ID", "item1", "item2", "item3"]
-    topics["/team20/config"] = ["ID", "item1", "item2", "item3"]
 elif test_component == "sensors":
     topics["/team20/debug"] = ["ID", "item1", "item2", "item3"]
-    topics["/team20/config"] = ["ID", "item1", "item2", "item3"]
 elif test_component == "arm":
     topics["/team20/debug"] = ["ID", "item1", "item2", "item3"]
-    topics["/team20/config"] = ["ID", "item1", "item2", "item3"]
 elif test_component == "zumo":
-    topics["/team20/debug"] = ["ID", "item1", "item2", "item3"]
-    topics["/team20/config"] = ["ID", "item1", "item2", "item3"]
+    topics["/team20/debug"] = ["ID", "value"]
+
+test_keys = ["ID", "value"]
 
 pub_results = {topic: {"Successes": 0, "Time": 0} for topic in topics.keys()}
 pub_stats = {"Attempts": 0,
              "Received": 0,
              "Missed": 0}
 ID = {topic: 0 for topic in topics.keys()}
+ID["/team20/config"] = 0
 debugval = 0
 errors = [0]
 badpayloadval = 1
@@ -69,15 +67,16 @@ def on_msg_stats(decoded):
 
 def on_msg_debug(decoded):
     global debugval
-    debugval = decoded["item1"]
+    debugval = decoded["value"]
 
 def on_msg_error(decoded):
+    global errors
     errors.append(decoded["Type"])
 
 def on_message(client, data, msg):
     global pub_results, tests
     rcvtime = round(time.time() - starttime,2)
-    print("Message Received @", recvtime)
+    #print("Message Received @", rcvtime)
     topic = msg.topic
     package = msg.payload.decode()
     decoded = json.loads(package)
@@ -85,9 +84,9 @@ def on_message(client, data, msg):
         tests["json"] = True
         if(topic == "/team20/stats"):
             on_msg_stats(decoded)
-        elif(topic == "team20/debug"):
+        elif(topic == "/team20/debug"):
             on_msg_debug(decoded)
-        elif(topic == "team20/errors"):
+        elif(topic == "/team20/errors"):
             on_msg_error(decoded)
         ID[topic] = decoded["ID"]
         pub_results[topic]["Successes"] += 1
@@ -100,11 +99,9 @@ def test_rover():
     global ID
     print("Running test: Rover @",round(time.time() - starttime,2))
     topic = "/team20/config"
-    data = dict.fromkeys(topics[topic], 0)
+    data = dict.fromkeys(test_keys, 0)
     data["ID"] = ID[topic]
     data["item1"] = 1
-    data["item2"] = 2
-    data["item3"] = 3
     package = json.dumps(data)
     client.publish(topic,package)
     ID[topic] += 1
@@ -114,11 +111,9 @@ def test_sensors():
     global ID
     print("Running test: Sensors @",round(time.time() - starttime,2))
     topic = "/team20/config"
-    data = dict.fromkeys(topics[topic], 0)
+    data = dict.fromkeys(test_keys, 0)
     data["ID"] = ID[topic]
     data["item1"] = 1
-    data["item2"] = 2
-    data["item3"] = 3
     package = json.dumps(data)
     client.publish(topic,package)
     ID[topic] += 1
@@ -128,11 +123,9 @@ def test_arm():
     global ID
     print("Running test: Arm @",round(time.time() - starttime,2))
     topic = "/team20/config"
-    data = dict.fromkeys(topics[topic], 0)
+    data = dict.fromkeys(test_keys, 0)
     data["ID"] = ID[topic]
     data["item1"] = 1
-    data["item2"] = 2
-    data["item3"] = 3
     package = json.dumps(data)
     client.publish(topic,package)
     ID[topic] += 1
@@ -142,11 +135,9 @@ def test_zumo():
     global ID
     print("Running test: Zumo @",round(time.time() - starttime,2))
     topic = "/team20/config"
-    data = dict.fromkeys(topics[topic], 0)
+    data = dict.fromkeys(test_keys, 0)
     data["ID"] = ID[topic]
-    data["item1"] = 1
-    data["item2"] = 2
-    data["item3"] = 3
+    data["value"] = 1
     package = json.dumps(data)
     client.publish(topic,package)
     ID[topic] += 1
@@ -157,9 +148,9 @@ def test_config():
     print("Running test: Config @",round(time.time() - starttime,2))
     testval = 5
     topic = "/team20/config"
-    data = dict.fromkeys(topics[topic], 0)
+    data = dict.fromkeys(test_keys, 0)
     data["ID"] = ID[topic]
-    data["item1"] = testval
+    data["value"] = testval
     package = json.dumps(data)
     client.publish(topic,package)
     ID[topic] += 1
@@ -187,40 +178,43 @@ def test_repeatID():
     global ID
     print("Running test: Repeat ID @",round(time.time() - starttime,2))
     topic = "/team20/config"
-    data = dict.fromkeys(topics[topic], 0)
+    data = dict.fromkeys(test_keys, 0)
     data["ID"] = ID[topic]
-    data["item1"] = 1
+    data["value"] = 1
     package = json.dumps(data)
     client.publish(topic,package)
     print("Sent",package,"to",topic,"@",round(time.time() - starttime,2))
-    data["item1"] = 2
+    data["value"] = 2
     client.publish(topic,package)
     ID[topic] += 1
     print("Sent",package,"to",topic,"@",round(time.time() - starttime,2))
     time.sleep(1)
-    if(errors[-1] == repeatIDval and debugVal == 1):
+    if(errors[-1] == repeatIDval and debugval == 1):
         tests["repeatID"] = True
 
 def test_skipID():
     global tests, ID
     print("Running test: Skip ID @",round(time.time() - starttime,2))
+    misses = pub_stats["Missed"]
+    skipval = 2
     topic = "/team20/config"
-    data = dict.fromkeys(topics[topic], 0)
+    data = dict.fromkeys(test_keys, 0)
     data["ID"] = ID[topic]
-    data["item1"] = 1
+    data["value"] = 1
     package = json.dumps(data)
     client.publish(topic,package)
-    ID[topic] += 3
+    ID[topic] += skipval
+    ID[topic] += 1
     print("Sent",package,"to",topic,"@",round(time.time() - starttime,2))
-    data = dict.fromkeys(topics[topic], 0)
+    data = dict.fromkeys(test_keys, 0)
     data["ID"] = ID[topic]
-    data["item1"] = 1
+    data["value"] = 1
     package = json.dumps(data)
     client.publish(topic,package)
     ID[topic] += 1
     print("Sent",package,"to",topic,"@",round(time.time() - starttime,2))
-    time.sleep(1)
-    if(errors[-1] == skipIDval):
+    time.sleep(1.5)
+    if((pub_stats["Missed"] == (misses + skipval)) and errors[-1] == skipIDval):
         tests["skipID"] = True
         
 
@@ -228,7 +222,7 @@ def test_overflowBuf():
     global tests, ID
     print("Running test: overflowBuf @",round(time.time() - starttime,2))
     topic = "/team20/config"
-    data = dict.fromkeys(topics[topic], 0)
+    data = dict.fromkeys(test_keys, 0)
     data["ID"] = ID[topic]
     for i in range(100):
         data[str(i)] = i
@@ -248,7 +242,7 @@ def test_reconnect():
     diconnected = False
     duration = time.time()
     while(not diconnected):
-        firsttime = time.time()
+        firsttime = time.time()-starttime
         lasttime = pub_results["/team20/stats"]["Time"]
         if(firsttime - lasttime > 3):
             diconnected = True
@@ -283,14 +277,14 @@ def test_time():
     topic1 = "/team20/debug"
     topic2 = "/team20/stats"
     count1 = pub_results[topic1]["Successes"] + pub_results[topic2]["Successes"]
-    time.sleep(1)
+    time.sleep(1.1)
     count2 = pub_results[topic1]["Successes"] + pub_results[topic2]["Successes"]
     if(count2 - count1 >= 10):
         tests["time"] = True
 
 def run_tests():
     print("Thread: Test started @",round(time.time() - starttime,2))
-    delay = 5
+    delay = 1
     waiting = 0
     while(not connected):
         time.sleep(1)
@@ -307,20 +301,9 @@ def run_tests():
     test_overflowBuf()
     time.sleep(delay)
     test_time()
-    time.sleep(delay)
-    test_reconnect()
-##    if test_component == "rover":
-##        test_rover()
-##        time.sleep(delay)
-##    elif test_component == "sensors":
-##        test_sensors()
-##        time.sleep(delay)
-##    elif test_component == "arm":
-##        test_arm()
-##        time.sleep(delay)
-##    elif test_component == "zumo":
-##        test_zumo()
-##        time.sleep(delay)
+##    time.sleep(delay)
+##    test_reconnect()
+##    globals()["test_"+test_component]()
     print("Completed Tests @",round(time.time() - starttime,2))
     print(tests)
     

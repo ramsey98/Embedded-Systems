@@ -46,12 +46,12 @@
 #define JSON_DEBUG      \
 "{"                        \
     "\"ID\": int32,"        \
-    "\"item1\": int32,"    \
+    "\"value\": int32,"    \
 "}"
 #define JSON_DEBUG_BUF      \
 "{"                        \
     "\"ID\": 0,"        \
-    "\"item1\": 0"    \
+    "\"value\": 0"    \
 "}"
 
 #define JSON_ERRORS      \
@@ -71,15 +71,13 @@
 #define JSON_CONFIG      \
 "{"                        \
     "\"ID\": int32,"        \
-    "\"item1\": int32"    \
+    "\"value\": int32"    \
 "}"
 #define JSON_CONFIG_BUF      \
 "{"                        \
     "\"ID\": 0,"        \
-    "\"item1\": 0"    \
+    "\"value\": 0"    \
 "}"
-
-
 
 void json_miss();
 void json_receive(char *payload, char *msgTopic);

@@ -18,7 +18,8 @@ void json_miss()
 void json_receive(char *payload, char *msgTopic)
 {
     Json_Handle templateHandle, objectHandle;
-    static int configID = 0, expectedConfigID = 0;
+    static expectedConfigID = 0;
+    int configID = 0;
     uint16_t bufSize;
     received++;
     if(strcmp(msgTopic, SUBSCRIPTION_TOPIC) == 0)
@@ -54,16 +55,17 @@ void json_receive(char *payload, char *msgTopic)
 void json_read_config(Json_Handle objectHandle)
 {
     uint16_t bufSize;
-    int item1 = 0;
-    bufSize = sizeof(item1);
-    if(Json_getValue(objectHandle, "\"item1\"", &item1, &bufSize) != 0)
+    int value = 0;
+    bufSize = sizeof(value);
+    if(Json_getValue(objectHandle, "\"value\"", &value, &bufSize) != 0)
     {
         MQTTMsg msg = {JSON_TYPE_ERROR, JSON_ERROR_FORMAT};
         sendMsgToMQTTQ(msg);
+        json_miss();
     }
     else
     {
-        debugValue = item1;
+        debugValue = value;
     }
 }
 
@@ -81,10 +83,10 @@ void json_send_stats(Json_Handle objectHandle)
 void json_send_debug(MQTTMsg msg, Json_Handle objectHandle)
 {
     static int debugID = 0;
-    int item1 = debugValue;
+    int value = debugValue;
     if(Json_parse(objectHandle, JSON_DEBUG_BUF, strlen(JSON_DEBUG_BUF)) != 0) ERROR;
     if(Json_setValue(objectHandle, "\"ID\"", &debugID, sizeof(debugID)) != 0) ERROR;
-    if(Json_setValue(objectHandle, "\"item1\"", &item1, sizeof(item1)) != 0) ERROR;
+    if(Json_setValue(objectHandle, "\"value\"", &value, sizeof(value)) != 0) ERROR;
     debugID++;
 }
 
@@ -125,10 +127,7 @@ void json_send(char *publish_topic, char *publish_data, MQTTMsg msg)
         json_send_error(msg, objectHandle);
         strncpy(publish_topic, PUBLISH_TOPIC_2, sizeof(PUBLISH_TOPIC_2));
     }
-    else
-    {
-        ERROR;
-    }
+    else ERROR;
     if(Json_build(objectHandle, publish_data, &buf) != 0) ERROR;
     if(Json_destroyTemplate(templateHandle) != 0) ERROR;
     if(Json_destroyObject(objectHandle) != 0) ERROR;
