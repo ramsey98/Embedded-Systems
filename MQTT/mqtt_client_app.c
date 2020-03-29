@@ -166,16 +166,16 @@ int32_t MqttClient_start();
 /* Connection state: (0) - connected, (negative) - disconnected              */
 int32_t gApConnectionState = -1;
 uint32_t gInitState = 0;
-uint32_t memPtrCounterfree = 0;
+//uint32_t memPtrCounterfree = 0;
 static MQTTClient_Handle gMqttClient;
-MQTTClient_Params MqttClientExmple_params;
+//MQTTClient_Params MqttClientExmple_params;
 
 /* Receive task handle                                                       */
-pthread_t g_rx_task_hndl = (pthread_t) NULL;
-uint32_t gUiConnFlag = 0;
+//pthread_t g_rx_task_hndl = (pthread_t) NULL;
+//uint32_t gUiConnFlag = 0;
 
 /* AP Security Parameters                                                    */
-SlWlanSecParams_t SecurityParams = { 0 };
+//SlWlanSecParams_t SecurityParams = { 0 };
 
 /* Client ID                                                                 */
 /* If ClientId isn't set, the MAC address of the device will be copied into  */
@@ -187,17 +187,17 @@ const char *ClientUsername = "username1";
 const char *ClientPassword = "pwd1";
 
 /* Subscription topics and qos values                                        */
-char *topic[SUBSCRIPTION_TOPIC_COUNT] =
-{ SUBSCRIPTION_TOPIC };
+//char *topic[SUBSCRIPTION_TOPIC_COUNT] =
+//{ SUBSCRIPTION_TOPIC };
 
-unsigned char qos[SUBSCRIPTION_TOPIC_COUNT] =
-{ MQTT_QOS_0 };
+//unsigned char qos[SUBSCRIPTION_TOPIC_COUNT] =
+//{ MQTT_QOS_0 };
 
-pthread_t mqttThread = (pthread_t) NULL;
-pthread_t appThread = (pthread_t) NULL;
+
+//pthread_t appThread = (pthread_t) NULL;
 
 /* Printing new line                                                         */
-char lineBreak[] = "\n\r";
+//char lineBreak[] = "\n\r";
 
 //*****************************************************************************
 //                 Banner VARIABLES
@@ -357,6 +357,8 @@ void * MqttClient(void *pvParameters)
 //*****************************************************************************
 int32_t Mqtt_IF_Connect()
 {
+    SlWlanSecParams_t SecurityParams = { 0 };
+
     int32_t lRetVal;
     char SSID_Remote_Name[32];
     int8_t Str_Length;
@@ -415,6 +417,7 @@ void Mqtt_start()
     pthread_attr_t pAttrs;
     struct sched_param priParam;
     int32_t retc = 0;
+    pthread_t mqttThread = (pthread_t) NULL;
 
     /*Set priority and stack size attributes                                 */
     pthread_attr_init(&pAttrs);
@@ -443,6 +446,14 @@ void Mqtt_start()
 
 int32_t MqttClient_start()
 {
+    char *topic[SUBSCRIPTION_TOPIC_COUNT] =
+    { SUBSCRIPTION_TOPIC };
+    unsigned char qos[SUBSCRIPTION_TOPIC_COUNT] =
+    { MQTT_QOS_0 };
+    uint32_t gUiConnFlag = 0;
+    pthread_t g_rx_task_hndl = (pthread_t) NULL;
+    MQTTClient_Params MqttClientExmple_params;
+
     int32_t lRetVal = -1;
     int32_t iCount = 0;
 
@@ -666,6 +677,7 @@ int32_t SetClientIdNamefromMacAddress()
 int32_t DisplayAppBanner(char* appName,
                          char* appVersion)
 {
+    char lineBreak[] = "\n\r";
     int32_t ret = 0;
     uint8_t macAddress[SL_MAC_ADDR_LEN];
     uint16_t macAddressLen = SL_MAC_ADDR_LEN;

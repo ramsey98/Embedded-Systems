@@ -68,7 +68,7 @@
 //*****************************************************************************
 
 /* Message Queue                                                              */
-extern char *topic[];
+//extern char *topic[];
 struct client_info client_info_table[MAX_CONNECTION];
 
 //*****************************************************************************
@@ -102,7 +102,7 @@ void MqttClientCallback(int32_t event,
                         void *data,
                         uint32_t dataLen)
 {
-    int32_t i = 0;
+    //int32_t i = 0;
 
     switch((MQTTClient_EventCB)event)
     {
@@ -139,11 +139,13 @@ void MqttClientCallback(int32_t event,
             {
                 APP_PRINT("Sub Ack:\n\r");
                 APP_PRINT("Granted QoS Levels are:\n\r");
+                /*
                 for(i = 0; i < dataLen; i++)
                 {
                     APP_PRINT("%s :QoS %d\n\r", topic[i],
                               ((unsigned char*) data)[i]);
                 }
+                */
                 break;
             }
 
