@@ -18,6 +18,7 @@
 #define JSON_ERROR_OVERFLOW (2)
 #define JSON_ERROR_MISSED_ID (3)
 #define JSON_ERROR_REPEAT_ID (4)
+#define JSON_ERROR_NO_ID (5)
 #define JSON_TYPE_STATS (1)
 #define JSON_TYPE_DEBUG (2)
 #define JSON_TYPE_ERROR (3)

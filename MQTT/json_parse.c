@@ -28,24 +28,32 @@ void json_receive(char *payload, char *msgTopic)
         if(Json_createObject(&objectHandle, templateHandle, 0) != 0) ERROR;
         if(Json_parse(objectHandle, payload, strlen(payload)) != 0) ERROR;
         bufSize = sizeof(configID);
-        if(Json_getValue(objectHandle, "\"ID\"", &configID, &bufSize) != 0) ERROR;
-        if(configID > expectedConfigID)
+        if(Json_getValue(objectHandle, "\"ID\"", &configID, &bufSize) != 0)
         {
-            missed += (configID - expectedConfigID);
-            MQTTMsg msg = {JSON_TYPE_ERROR, JSON_ERROR_MISSED_ID};
+            MQTTMsg msg = {JSON_TYPE_ERROR, JSON_ERROR_NO_ID};
             sendMsgToMQTTQ(msg);
-            expectedConfigID = configID + 1;
-            json_read_config(objectHandle);
+            json_miss();
         }
-        else if(configID == expectedConfigID - 1)
+        else
         {
-            MQTTMsg msg = {JSON_TYPE_ERROR, JSON_ERROR_REPEAT_ID};
-            sendMsgToMQTTQ(msg);
-        }
-        else if(configID == expectedConfigID)
-        {
-            expectedConfigID = configID + 1;
-            json_read_config(objectHandle);
+            if(configID > expectedConfigID)
+            {
+                missed += (configID - expectedConfigID);
+                MQTTMsg msg = {JSON_TYPE_ERROR, JSON_ERROR_MISSED_ID};
+                sendMsgToMQTTQ(msg);
+                expectedConfigID = configID + 1;
+                json_read_config(objectHandle);
+            }
+            else if(configID == expectedConfigID - 1)
+            {
+                MQTTMsg msg = {JSON_TYPE_ERROR, JSON_ERROR_REPEAT_ID};
+                sendMsgToMQTTQ(msg);
+            }
+            else if(configID == expectedConfigID)
+            {
+                expectedConfigID = configID + 1;
+                json_read_config(objectHandle);
+            }
         }
         if(Json_destroyTemplate(templateHandle) != 0) ERROR;
         if(Json_destroyObject(objectHandle) != 0) ERROR;

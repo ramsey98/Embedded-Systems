@@ -7,34 +7,27 @@ connected = False
 starttime = time.time()
 IP = "192.168.2.1"
 PORT = 1883
-test_component = "zumo"
 
-tests = {"size": False,
-         "repeatID": False,
-         "skipID": False,
-         "badPayload": False,
-         "reconnect": False,
-         "json": False,
-         "stats": False,
-         "config": False,
-         "overflow": False,
-         "time": False}
+tests = {"size": False, #size of one payload > 256
+         "repeatID": False, #send consecutive jsons of repeat ID to board
+         "skipID": False, #send consecutive jsons skipping several IDs to board
+         "noID": False, #send empty json with no ID to board
+         "badPayload": False, #send json with invalid entries to board
+         "reconnect": False, #disconnect and reconnect board
+         "json": False, #verify msgs from board are json format
+         "stats": False, #verify board is sending stats msgs
+         "config": False, #send configuration value to board on config topic, board returns value on debug topic
+         "overflow": False, #send json to board exceding data buffer (512)
+         "time": False, #verify >10 msgs/sec
+         "receive": False, #verify board receives all of a series of msgs
+         "send": False} #verify all board messages are getting sent
 
 topics = {"/team20/stats": ["ID", "Attempts", "Received", "Missed"],
-          "/team20/errors": ["ID", "Type"]}
-
-if test_component == "rover":
-    topics["/team20/debug"] = ["ID", "item1", "item2", "item3"]
-elif test_component == "sensors":
-    topics["/team20/debug"] = ["ID", "item1", "item2", "item3"]
-elif test_component == "arm":
-    topics["/team20/debug"] = ["ID", "item1", "item2", "item3"]
-elif test_component == "zumo":
-    topics["/team20/debug"] = ["ID", "value"]
-
+          "/team20/errors": ["ID", "Type"],
+          "/team20/debug": ["ID", "value"]}
 test_keys = ["ID", "value"]
 
-pub_results = {topic: {"Successes": 0, "Time": 0} for topic in topics.keys()}
+pub_results = {topic: {"Successes": 0, "Failures": 0, "Time": 0} for topic in topics.keys()}
 pub_stats = {"Attempts": 0,
              "Received": 0,
              "Missed": 0}
@@ -46,6 +39,7 @@ badpayloadval = 1
 overflowval = 2
 skipIDval = 3
 repeatIDval = 4
+noIDval = 5
 
 def on_connect(client, data, flag, rc):
     global connected
@@ -59,7 +53,7 @@ def on_disconnect(client, data, rc):
 
 def on_msg_stats(decoded):
     global pub_stats, tests
-    if test_stats(decoded):
+    if(set(topics["/team20/stats"]).issubset(set(decoded.keys()))):
         pub_stats["Attempts"] = decoded["Attempts"]
         pub_stats["Received"] = decoded["Received"]
         pub_stats["Missed"] = decoded["Missed"]
@@ -88,6 +82,8 @@ def on_message(client, data, msg):
             on_msg_debug(decoded)
         elif(topic == "/team20/errors"):
             on_msg_error(decoded)
+        if(decoded["ID"] != ID[topic] + 1):
+            pub_results[topic]["Failures"] += (decoded["ID"] - ID[topic])
         ID[topic] = decoded["ID"]
         pub_results[topic]["Successes"] += 1
         pub_results[topic]["Time"] = rcvtime 
@@ -95,45 +91,9 @@ def on_message(client, data, msg):
     else:
         print("Error:", topic.split("/")[-1], "@", round(time.time() - starttime,2))
 
-def test_rover():
+def test_component():
     global ID
-    print("Running test: Rover @",round(time.time() - starttime,2))
-    topic = "/team20/config"
-    data = dict.fromkeys(test_keys, 0)
-    data["ID"] = ID[topic]
-    data["item1"] = 1
-    package = json.dumps(data)
-    client.publish(topic,package)
-    ID[topic] += 1
-    print("Sent",package,"to",topic,"@",round(time.time() - starttime,2))
-
-def test_sensors():
-    global ID
-    print("Running test: Sensors @",round(time.time() - starttime,2))
-    topic = "/team20/config"
-    data = dict.fromkeys(test_keys, 0)
-    data["ID"] = ID[topic]
-    data["item1"] = 1
-    package = json.dumps(data)
-    client.publish(topic,package)
-    ID[topic] += 1
-    print("Sent",package,"to",topic,"@",round(time.time() - starttime,2))
-
-def test_arm():
-    global ID
-    print("Running test: Arm @",round(time.time() - starttime,2))
-    topic = "/team20/config"
-    data = dict.fromkeys(test_keys, 0)
-    data["ID"] = ID[topic]
-    data["item1"] = 1
-    package = json.dumps(data)
-    client.publish(topic,package)
-    ID[topic] += 1
-    print("Sent",package,"to",topic,"@",round(time.time() - starttime,2))
-
-def test_zumo():
-    global ID
-    print("Running test: Zumo @",round(time.time() - starttime,2))
+    print("Running test: Component @",round(time.time() - starttime,2))
     topic = "/team20/config"
     data = dict.fromkeys(test_keys, 0)
     data["ID"] = ID[topic]
@@ -175,7 +135,7 @@ def test_badPayload():
         tests["badPayload"] = True
 
 def test_repeatID():
-    global ID
+    global ID, tests
     print("Running test: Repeat ID @",round(time.time() - starttime,2))
     topic = "/team20/config"
     data = dict.fromkeys(test_keys, 0)
@@ -216,6 +176,19 @@ def test_skipID():
     time.sleep(1.5)
     if((pub_stats["Missed"] == (misses + skipval)) and errors[-1] == skipIDval):
         tests["skipID"] = True
+
+def test_noID():
+    global ID, tests
+    print("Running test: no ID @",round(time.time() - starttime,2))
+    topic = "/team20/config"
+    data = {}
+    package = json.dumps(data)
+    misses = pub_stats["Missed"]
+    client.publish(topic,package)
+    print("Sent",package,"to",topic,"@",round(time.time() - starttime,2))
+    time.sleep(1.5)
+    if((pub_stats["Missed"] == (misses + 1)) and errors[-1] == noIDval):
+        tests["noID"] = True
         
 
 def test_overflowBuf():
@@ -240,6 +213,7 @@ def test_reconnect():
     global tests
     print("Running test: reconnect @",round(time.time() - starttime,2))
     diconnected = False
+    timeout = 20
     duration = time.time()
     while(not diconnected):
         rcvtime = round(time.time() - starttime,2)
@@ -247,7 +221,7 @@ def test_reconnect():
             diconnected = True
             print("reconnect: Client Disconnected @",round(time.time() - starttime,2))
             break
-        if(time.time() - duration > 15):
+        if(time.time() - duration > timeout):
             print("reconnect: disconnect timeout @",round(time.time() - starttime,2))
             break
     prevtime = pub_results["/team20/stats"]["Time"]
@@ -258,66 +232,76 @@ def test_reconnect():
             tests["reconnect"] = True
             print("reconnect: client reconnected @",round(time.time() - starttime,2))
             break
-        if(time.time() - duration > 15):
+        if(time.time() - duration > timeout):
             print("reconnect: reconnect timeout @",round(time.time() - starttime,2))
-            break    
+            break
+
+def test_receive():
+    global tests, ID
+    print("Running test: receive @",round(time.time() - starttime,2))
+    topic = "/team20/config"
+    data = dict.fromkeys(test_keys, 0)
+    rcvcount = pub_stats["Received"]
+    msgcount = 25
+    for i in range(msgcount):
+        data["ID"] = ID[topic]
+        package = json.dumps(data)
+        client.publish(topic,package)
+        ID[topic] += 1
+        time.sleep(.01)
+    print("Sent",msgcount,package,"to",topic,"@",round(time.time() - starttime,2))
+    time.sleep(3)
+    if(pub_stats["Received"] == rcvcount + msgcount):
+        tests["receive"] = True
+
+def test_send():
+    global tests, ID
+    print("Running test: send @",round(time.time() - starttime,2))
+    dur = 3
+    count1 = sum(item["Failures"] for item in pub_results.values())
+    time.sleep(dur)
+    count2 = sum(item["Failures"] for item in pub_results.values())
+    if(count1 == count2):
+        tests["send"] = True
+
+def test_time():
+    global tests
+    print("Running test: time @",round(time.time() - starttime,2))
+    count1 = sum(item["Successes"] for item in pub_results.values())
+    time.sleep(1.1)
+    count2 = sum(item["Successes"] for item in pub_results.values())
+    if(count2 - count1 >= 10):
+        tests["time"] = True
 
 def test_size(data):
     global tests
     if(len(data.encode("utf-8")) > 256):
         tests["size"] = True
 
-def test_stats(decoded):
-    if(set(topics["/team20/stats"]).issubset(set(decoded.keys()))):
-        return True
-    else:
-        return False
-
-def test_time():
-    global tests
-    print("Running test: time @",round(time.time() - starttime,2))
-    topic1 = "/team20/debug"
-    topic2 = "/team20/stats"
-    count1 = pub_results[topic1]["Successes"] + pub_results[topic2]["Successes"]
-    time.sleep(1.1)
-    count2 = pub_results[topic1]["Successes"] + pub_results[topic2]["Successes"]
-    if(count2 - count1 >= 10):
-        tests["time"] = True
-
 def run_tests():
-    print("Thread: Test started @",round(time.time() - starttime,2))
+    print("Thread started: run_tests")
     delay = 1
     waiting = 0
     while(not connected):
         time.sleep(1)
         print("Waiting for connection:", waiting)
         waiting+=1
-    test_config()
-    time.sleep(delay)
-    test_badPayload()
-    time.sleep(delay)
-    test_repeatID()
-    time.sleep(delay)
-    test_skipID()
-    time.sleep(delay)
-    test_overflowBuf()
-    time.sleep(delay)
-    test_time()
-    time.sleep(delay)
-    test_reconnect()
-    globals()["test_"+test_component]()
+    run_tests = ["config", "badPayload", "noID", "repeatID", "skipID", "overflowBuf", "time", "receive", "send", "reconnect"]
+    for func in run_tests:
+        globals()["test_"+func]()
+        time.sleep(delay)    
     print("Completed Tests @",round(time.time() - starttime,2))
     print(tests)
     
 def display_data():
-    print("Thread: Output started @",round(time.time() - starttime,2))
+    print("Thread started: display_data")
     topic = "/team20/display"
+    data = {"Stats": 0,
+            "Results": 0}   
     while(True):
         if not connected:
             time.sleep(1)
         else:
-            keys = ["Stats", "Results"]
-            data = dict.fromkeys(keys, 0)
             data["Stats"] = pub_stats
             data["Results"] = pub_results
             package = json.dumps(data)
@@ -326,7 +310,7 @@ def display_data():
     
 def main():
     global client
-    print("Thread: Connection started @",round(time.time() - starttime,2))
+    print("Thread started: main")
     client = mqtt.Client()
     client.on_connect = on_connect
     client.on_disconnect = on_disconnect
