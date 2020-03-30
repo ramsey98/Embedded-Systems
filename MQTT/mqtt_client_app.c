@@ -339,7 +339,7 @@ void * MqttClient(void *pvParameters)
                           strlen((char*)publish_topic),
                           (char*)publish_data,
                           strlen((char*) publish_data),
-                          MQTT_QOS_2 | ((RETAIN_ENABLE) ? MQTT_PUBLISH_RETAIN : 0));
+                          MQTT_QOS_0); // | ((RETAIN_ENABLE) ? MQTT_PUBLISH_RETAIN : 0)
     }
 }
 

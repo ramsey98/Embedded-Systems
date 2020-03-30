@@ -31,8 +31,10 @@ pub_results = {topic: {"Successes": 0, "Failures": 0, "Time": 0} for topic in to
 pub_stats = {"Attempts": 0,
              "Received": 0,
              "Missed": 0}
-ID = {topic: 0 for topic in topics.keys()}
+ID = {topic: False for topic in topics.keys()}
 ID["/team20/config"] = 0
+reset = False
+started = {topic: 0 for topic in topics.keys()}
 debugval = 0
 errors = [0]
 badpayloadval = 1
@@ -68,7 +70,7 @@ def on_msg_error(decoded):
     errors.append(decoded["Type"])
 
 def on_message(client, data, msg):
-    global pub_results, tests
+    global pub_results, tests, reset, started 
     rcvtime = round(time.time() - starttime,2)
     #print("Message Received @", rcvtime)
     topic = msg.topic
@@ -82,8 +84,14 @@ def on_message(client, data, msg):
             on_msg_debug(decoded)
         elif(topic == "/team20/errors"):
             on_msg_error(decoded)
-        if(decoded["ID"] != ID[topic] + 1):
-            pub_results[topic]["Failures"] += (decoded["ID"] - ID[topic])
+        if reset == True:
+            reset = False
+            started = {item: False for item in topics.keys()}
+        if started[topic] == False:
+            started[topic] = True
+        else:
+            if(decoded["ID"] != ID[topic] + 1):
+                pub_results[topic]["Failures"] += (decoded["ID"] - (ID[topic]+1))
         ID[topic] = decoded["ID"]
         pub_results[topic]["Successes"] += 1
         pub_results[topic]["Time"] = rcvtime 
@@ -210,15 +218,16 @@ def test_overflowBuf():
         tests["overflow"] = True
 
 def test_reconnect():
-    global tests
+    global tests, reset
     print("Running test: reconnect @",round(time.time() - starttime,2))
     diconnected = False
-    timeout = 20
+    timeout = 30
     duration = time.time()
     while(not diconnected):
         rcvtime = round(time.time() - starttime,2)
         if(rcvtime - pub_results["/team20/stats"]["Time"] > 3):
             diconnected = True
+            reset = True
             print("reconnect: Client Disconnected @",round(time.time() - starttime,2))
             break
         if(time.time() - duration > timeout):
