@@ -164,7 +164,7 @@ int32_t MqttClient_start();
 //*****************************************************************************
 
 /* Connection state: (0) - connected, (negative) - disconnected              */
-int32_t gApConnectionState = -1;
+//int32_t gApConnectionState = -1;
 uint32_t gInitState = 0;
 //uint32_t memPtrCounterfree = 0;
 static MQTTClient_Handle gMqttClient;
@@ -317,15 +317,12 @@ void * MqttClient(void *pvParameters)
     char publish_topic[JSON_TOPIC_BUFFER_SIZE] = {0};
 
     /*Initializing Client and Subscribing to the Broker.                     */
-    if(gApConnectionState >= 0)
+    lRetVal = MqttClient_start();
+    if(lRetVal == -1)
     {
-        lRetVal = MqttClient_start();
-        if(lRetVal == -1)
-        {
-            UART_PRINT("MQTT Client lib initialization failed\n\r");
-            pthread_exit(0);
-            return(NULL);
-        }
+        UART_PRINT("MQTT Client lib initialization failed\n\r");
+        pthread_exit(0);
+        return(NULL);
     }
 
     timerInit();
@@ -514,59 +511,57 @@ int32_t MqttClient_start()
                        (char*)ClientPassword));
 #endif
     /*Initiate MQTT Connect                                                  */
-    if(gApConnectionState >= 0)
-    {
+
 #if CLEAN_SESSION == false
-        bool clean = CLEAN_SESSION;
-        MQTTClient_set(gMqttClient, MQTTClient_CLEAN_CONNECT, (void *)&clean,
-                       sizeof(bool));
+    bool clean = CLEAN_SESSION;
+    MQTTClient_set(gMqttClient, MQTTClient_CLEAN_CONNECT, (void *)&clean,
+                   sizeof(bool));
 #endif
-        /*The return code of MQTTClient_connect is the ConnACK value that
-           returns from the server */
-        lRetVal = MQTTClient_connect(gMqttClient);
+    /*The return code of MQTTClient_connect is the ConnACK value that
+       returns from the server */
+    lRetVal = MQTTClient_connect(gMqttClient);
 
-        /*negative lRetVal means error,
-           0 means connection successful without session stored by the server,
-           greater than 0 means successful connection with session stored by
-           the server */
-        if(0 > lRetVal)
+    /*negative lRetVal means error,
+       0 means connection successful without session stored by the server,
+       greater than 0 means successful connection with session stored by
+       the server */
+    if(0 > lRetVal)
+    {
+        /*lib initialization failed                                      */
+        UART_PRINT("Connection to broker failed, Error code: %d\n\r",
+                   lRetVal);
+
+        gUiConnFlag = 0;
+    }
+    else
+    {
+        gUiConnFlag = 1;
+    }
+    /*Subscribe to topics when session is not stored by the server       */
+    if((gUiConnFlag == 1) && (0 == lRetVal))
+    {
+        uint8_t subIndex;
+        MQTTClient_SubscribeParams subscriptionInfo[
+            SUBSCRIPTION_TOPIC_COUNT];
+
+        for(subIndex = 0; subIndex < SUBSCRIPTION_TOPIC_COUNT; subIndex++)
         {
-            /*lib initialization failed                                      */
-            UART_PRINT("Connection to broker failed, Error code: %d\n\r",
-                       lRetVal);
+            subscriptionInfo[subIndex].topic = topic[subIndex];
+            subscriptionInfo[subIndex].qos = qos[subIndex];
+        }
 
+        if(MQTTClient_subscribe(gMqttClient, subscriptionInfo,
+                                SUBSCRIPTION_TOPIC_COUNT) < 0)
+        {
+            UART_PRINT("\n\r Subscription Error \n\r");
+            MQTTClient_disconnect(gMqttClient);
             gUiConnFlag = 0;
         }
         else
         {
-            gUiConnFlag = 1;
-        }
-        /*Subscribe to topics when session is not stored by the server       */
-        if((gUiConnFlag == 1) && (0 == lRetVal))
-        {
-            uint8_t subIndex;
-            MQTTClient_SubscribeParams subscriptionInfo[
-                SUBSCRIPTION_TOPIC_COUNT];
-
-            for(subIndex = 0; subIndex < SUBSCRIPTION_TOPIC_COUNT; subIndex++)
+            for(iCount = 0; iCount < SUBSCRIPTION_TOPIC_COUNT; iCount++)
             {
-                subscriptionInfo[subIndex].topic = topic[subIndex];
-                subscriptionInfo[subIndex].qos = qos[subIndex];
-            }
-
-            if(MQTTClient_subscribe(gMqttClient, subscriptionInfo,
-                                    SUBSCRIPTION_TOPIC_COUNT) < 0)
-            {
-                UART_PRINT("\n\r Subscription Error \n\r");
-                MQTTClient_disconnect(gMqttClient);
-                gUiConnFlag = 0;
-            }
-            else
-            {
-                for(iCount = 0; iCount < SUBSCRIPTION_TOPIC_COUNT; iCount++)
-                {
-                    UART_PRINT("Client subscribed on %s\n\r,", topic[iCount]);
-                }
+                UART_PRINT("Client subscribed on %s\n\r,", topic[iCount]);
             }
         }
     }
@@ -742,7 +737,7 @@ void mainThread(void * args)
     pthread_t spawn_thread = (pthread_t) NULL;
     pthread_attr_t pAttrs_spawn;
     struct sched_param priParam;
-    int32_t retc = 0;
+    int32_t retc = 0, gApConnectionState = -1;
     UART_Handle tUartHndl;
 
     /*Initialize SlNetSock layer with CC31xx/CC32xx interface */

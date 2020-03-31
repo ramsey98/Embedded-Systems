@@ -20,7 +20,8 @@ tests = {"size": False, #size of one payload > 256
          "overflow": False, #send json to board exceding data buffer (512)
          "time": False, #verify >10 msgs/sec
          "receive": False, #verify board receives all of a series of msgs
-         "send": False} #verify all board messages are getting sent
+         "send": False, #verify all board messages are getting sent
+         "dos": False} #flood board with msgs, causing it to halt
 
 topics = {"/team20/stats": ["ID", "Attempts", "Received", "Missed"],
           "/team20/errors": ["ID", "Type"],
@@ -42,6 +43,7 @@ overflowval = 2
 skipIDval = 3
 repeatIDval = 4
 noIDval = 5
+dosval = 6
 
 def on_connect(client, data, flag, rc):
     global connected
@@ -263,6 +265,28 @@ def test_receive():
     if(pub_stats["Received"] == rcvcount + msgcount):
         tests["receive"] = True
 
+def test_dos():
+    global tests, ID
+    print("Running test: DOS @",round(time.time() - starttime,2))
+    topic = "/team20/config"
+    data = {}
+    package = json.dumps(data)
+    msgcount = 100
+    for i in range(msgcount):
+        client.publish(topic,package)
+    print("Sent",msgcount,package,"to",topic,"@",round(time.time() - starttime,2))
+    timeout = 30
+    duration = time.time()
+    while(not diconnected):
+        rcvtime = round(time.time() - starttime,2)
+        if(rcvtime - pub_results["/team20/stats"]["Time"] > 3):
+            tests["dos"] = True
+            print("DOS: Client Disconnected @",round(time.time() - starttime,2))
+            break
+        if(time.time() - duration > timeout):
+            print("DOS: disconnect timeout @",round(time.time() - starttime,2))
+            break
+
 def test_send():
     global tests, ID
     print("Running test: send @",round(time.time() - starttime,2))
@@ -295,7 +319,7 @@ def run_tests():
         time.sleep(1)
         print("Waiting for connection:", waiting)
         waiting+=1
-    run_tests = ["config", "badPayload", "noID", "repeatID", "skipID", "overflowBuf", "time", "receive", "send", "reconnect"]
+    run_tests = ["config", "badPayload", "noID", "repeatID", "skipID", "overflowBuf", "time", "receive", "send", "reconnect", "dos"]
     for func in run_tests:
         globals()["test_"+func]()
         time.sleep(delay)    
