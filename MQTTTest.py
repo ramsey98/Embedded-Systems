@@ -281,14 +281,11 @@ def test_dos():
     print("Sent",msgcount,package,"to",topic,"@",round(time.time() - starttime,2))
     timeout = 30
     duration = time.time()
-    disconnected = False
-
     while(not disconnected):
         rcvtime = round(time.time() - starttime,2)
         if(rcvtime - pub_results["/team20/stats"]["Time"] > 3):
             disconnected = True
             tests["dos"] = True
-            disconnected = True
             print("DOS: client disconnected @",round(time.time() - starttime,2))
             break
         if(time.time() - duration > timeout):
