@@ -5,7 +5,7 @@ import threading
 
 connected = False
 starttime = time.time()
-IP = "192.168.2.1"
+IP = "192.168.1.45"
 PORT = 1883
 
 tests = {"size": False, #size of one payload > 256
@@ -230,7 +230,7 @@ def test_reconnect():
         if(rcvtime - pub_results["/team20/stats"]["Time"] > 3):
             diconnected = True
             reset = True
-            print("reconnect: Client Disconnected @",round(time.time() - starttime,2))
+            print("reconnect: client disconnected @",round(time.time() - starttime,2))
             break
         if(time.time() - duration > timeout):
             print("reconnect: disconnect timeout @",round(time.time() - starttime,2))
@@ -253,7 +253,7 @@ def test_receive():
     topic = "/team20/config"
     data = dict.fromkeys(test_keys, 0)
     rcvcount = pub_stats["Received"]
-    msgcount = 25
+    msgcount = 16
     for i in range(msgcount):
         data["ID"] = ID[topic]
         package = json.dumps(data)
@@ -268,12 +268,16 @@ def test_receive():
 def test_dos():
     global tests, ID
     print("Running test: DOS @",round(time.time() - starttime,2))
+    diconnected = False
     topic = "/team20/config"
     data = {}
-    package = json.dumps(data)
-    msgcount = 100
+    msgcount = 1000
     for i in range(msgcount):
+        data["ID"] = ID[topic]
+        data["value"] = i
+        package = json.dumps(data)
         client.publish(topic,package)
+        ID[topic] += 1
     print("Sent",msgcount,package,"to",topic,"@",round(time.time() - starttime,2))
     timeout = 30
     duration = time.time()
@@ -281,7 +285,8 @@ def test_dos():
         rcvtime = round(time.time() - starttime,2)
         if(rcvtime - pub_results["/team20/stats"]["Time"] > 3):
             tests["dos"] = True
-            print("DOS: Client Disconnected @",round(time.time() - starttime,2))
+            disconnected = True
+            print("DOS: client disconnected @",round(time.time() - starttime,2))
             break
         if(time.time() - duration > timeout):
             print("DOS: disconnect timeout @",round(time.time() - starttime,2))

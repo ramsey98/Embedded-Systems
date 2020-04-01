@@ -74,6 +74,7 @@ void json_read_config(Json_Handle objectHandle)
     else
     {
         //for final milestone, send value where needed (queues)
+        sendMsgToDebugQ(value);
         debugValue = value;
     }
 }

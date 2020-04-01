@@ -81,6 +81,7 @@
 #include "debug.h"
 #include "json_parse.h"
 #include "mqtt_queue.h"
+#include "debug_queue.h"
 #include "timer.h"
 //*****************************************************************************
 //                          LOCAL DEFINES
@@ -110,8 +111,8 @@
 
 /* Defining Broker IP address and port Number                                */
 //#define SERVER_ADDRESS           "messagesight.demos.ibm.com"
-#define SERVER_ADDRESS           "192.168.2.1"
-#define SERVER_IP_ADDRESS        "192.168.2.1"
+#define SERVER_ADDRESS           "192.168.1.45"
+#define SERVER_IP_ADDRESS        "192.168.1.45"
 #define PORT_NUMBER              1883
 #define SECURED_PORT_NUMBER      8883
 #define LOOPBACK_PORT            1882
@@ -165,7 +166,7 @@ int32_t MqttClient_start();
 
 /* Connection state: (0) - connected, (negative) - disconnected              */
 //int32_t gApConnectionState = -1;
-uint32_t gInitState = 0;
+//uint32_t gInitState = 0;
 //uint32_t memPtrCounterfree = 0;
 static MQTTClient_Handle gMqttClient;
 //MQTTClient_Params MqttClientExmple_params;
@@ -340,6 +341,22 @@ void * MqttClient(void *pvParameters)
     }
 }
 
+void * debugThread(void *pvParameters)
+{
+    int i;
+    int j;
+    for(;;)
+    {
+        int msg;
+        j = 0;
+        receiveFromDebugQ(&msg);
+        for(i = 0; i < 1000; i++)
+        {
+            j++;
+        }
+    }
+}
+
 //*****************************************************************************
 //
 //! This function connect the MQTT device to an AP with the SSID which was
@@ -425,7 +442,7 @@ void Mqtt_start()
 
     if(retc != 0)
     {
-        gInitState &= ~MQTT_INIT_STATE;
+        //gInitState &= ~MQTT_INIT_STATE;
         UART_PRINT("MQTT thread create fail\n\r");
         return;
     }
@@ -433,12 +450,38 @@ void Mqtt_start()
     retc = pthread_create(&mqttThread, &pAttrs, MqttClient, (void *) &threadArg);
     if(retc != 0)
     {
-        gInitState &= ~MQTT_INIT_STATE;
+        //gInitState &= ~MQTT_INIT_STATE;
         UART_PRINT("MQTT thread create fail\n\r");
         return;
     }
 
-    gInitState &= ~MQTT_INIT_STATE;
+    pthread_attr_t attrs;
+    pthread_t debug_thread;
+    pthread_attr_init(&attrs);
+    int detachState;
+    detachState = PTHREAD_CREATE_DETACHED;
+    retc = pthread_attr_setdetachstate(&attrs, detachState);
+    if (retc != 0)
+    {
+        ERROR;
+    }
+
+    retc |= pthread_attr_setstacksize(&attrs, TASKSTACKSIZE);
+    if (retc != 0)
+    {
+        ERROR;
+    }
+
+    priParam.sched_priority = 1;
+    pthread_attr_setschedparam(&attrs, &priParam);
+    retc = pthread_create(&debug_thread, &attrs, debugThread, NULL);
+    if (retc != 0)
+    {
+        UART_PRINT("Debug thread create fail\n\r");
+        ERROR;
+    }
+
+    //gInitState &= ~MQTT_INIT_STATE;
 }
 
 int32_t MqttClient_start()
@@ -463,7 +506,7 @@ int32_t MqttClient_start()
     MqttClientExmple_params.mqttMode31 = MQTT_3_1;
     MqttClientExmple_params.blockingSend = true;
 
-    gInitState |= CLIENT_INIT_STATE;
+    //gInitState |= CLIENT_INIT_STATE;
 
     /*Initialize MQTT client lib                                             */
     gMqttClient = MQTTClient_create(MqttClientCallback,
@@ -471,7 +514,7 @@ int32_t MqttClient_start()
     if(gMqttClient == NULL)
     {
         /*lib initialization failed                                          */
-        gInitState &= ~CLIENT_INIT_STATE;
+        //gInitState &= ~CLIENT_INIT_STATE;
         return(-1);
     }
 
@@ -488,7 +531,7 @@ int32_t MqttClient_start()
     if(lRetVal != 0)
     {
         UART_PRINT("Client Thread Create Failed failed\n\r");
-        gInitState &= ~CLIENT_INIT_STATE;
+        //gInitState &= ~CLIENT_INIT_STATE;
         return(-1);
     }
 #ifdef SECURE_CLIENT
@@ -566,7 +609,7 @@ int32_t MqttClient_start()
         }
     }
 
-    gInitState &= ~CLIENT_INIT_STATE;
+    //gInitState &= ~CLIENT_INIT_STATE;
 
     return(0);
 }
@@ -761,6 +804,7 @@ void mainThread(void * args)
     dbgUARTInit(tUartHndl);
     dbgGPIOInit();
     createMQTTQueue();
+    createDebugQueue();
 
     /*Create the sl_Task                                                     */
     pthread_attr_init(&pAttrs_spawn);
@@ -801,12 +845,12 @@ void mainThread(void * args)
         ERROR;
     }
 
-    gInitState = 0;
+    //gInitState = 0;
 
     /*Connect to AP                                                      */
     gApConnectionState = Mqtt_IF_Connect();
 
-    gInitState |= MQTT_INIT_STATE;
+    //gInitState |= MQTT_INIT_STATE;
     /*Run MQTT Main Thread (it will open the Client and Server)          */
     if (gApConnectionState >= 0)
     {
