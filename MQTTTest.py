@@ -5,7 +5,7 @@ import threading
 
 connected = False
 starttime = time.time()
-IP = "192.168.1.45"
+IP = "192.168.1.40"
 PORT = 1883
 
 tests = {"size": False, #size of one payload > 256

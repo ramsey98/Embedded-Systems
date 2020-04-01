@@ -111,8 +111,8 @@
 
 /* Defining Broker IP address and port Number                                */
 //#define SERVER_ADDRESS           "messagesight.demos.ibm.com"
-#define SERVER_ADDRESS           "192.168.1.45"
-#define SERVER_IP_ADDRESS        "192.168.1.45"
+#define SERVER_ADDRESS           "192.168.1.40"
+#define SERVER_IP_ADDRESS        "192.168.1.40"
 #define PORT_NUMBER              1883
 #define SECURED_PORT_NUMBER      8883
 #define LOOPBACK_PORT            1882
