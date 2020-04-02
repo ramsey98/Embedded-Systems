@@ -37,7 +37,7 @@ void timerCallback(Timer_Handle myHandle)
     {
         msg.type = 2;
     }
-    sendMsgToMQTTQ(msg);
+    sendMsgToMQTTQFromISR(msg);
     count++;
     dbgOutputLoc(LEAVE_ISR_TIMER);
 }

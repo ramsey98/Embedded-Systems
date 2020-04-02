@@ -10,9 +10,11 @@
 static int attempts = 0, received = 0, missed = 0;
 static int debugValue = 0;
 
-void json_miss()
+void json_miss(int count, int type)
 {
-    missed++;
+    MQTTMsg msg = {JSON_TYPE_ERROR, type};
+    sendMsgToMQTTQFromISR(msg);
+    missed+=count;
 }
 
 void json_receive(char *payload, char *msgTopic)
@@ -30,24 +32,19 @@ void json_receive(char *payload, char *msgTopic)
         bufSize = sizeof(configID);
         if(Json_getValue(objectHandle, "\"ID\"", &configID, &bufSize) != 0)
         {
-            MQTTMsg msg = {JSON_TYPE_ERROR, JSON_ERROR_NO_ID};
-            sendMsgToMQTTQ(msg);
-            json_miss();
+            json_miss(1, JSON_ERROR_NO_ID);
         }
         else
         {
             if(configID > expectedConfigID)
             {
-                missed += (configID - expectedConfigID);
-                MQTTMsg msg = {JSON_TYPE_ERROR, JSON_ERROR_MISSED_ID};
-                sendMsgToMQTTQ(msg);
+                json_miss(configID - expectedConfigID, JSON_ERROR_MISSED_ID);
                 expectedConfigID = configID + 1;
                 json_read_config(objectHandle);
             }
             else if(configID == expectedConfigID - 1)
             {
-                MQTTMsg msg = {JSON_TYPE_ERROR, JSON_ERROR_REPEAT_ID};
-                sendMsgToMQTTQ(msg);
+                json_miss(1, JSON_ERROR_REPEAT_ID);
             }
             else if(configID == expectedConfigID)
             {
@@ -67,9 +64,7 @@ void json_read_config(Json_Handle objectHandle)
     bufSize = sizeof(value);
     if(Json_getValue(objectHandle, "\"value\"", &value, &bufSize) != 0)
     {
-        MQTTMsg msg = {JSON_TYPE_ERROR, JSON_ERROR_FORMAT};
-        sendMsgToMQTTQ(msg);
-        json_miss();
+        json_miss(1, JSON_ERROR_FORMAT);
     }
     else
     {

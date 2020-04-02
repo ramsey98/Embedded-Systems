@@ -20,10 +20,7 @@ void motorsUARTInit()
     uartParams.baudRate = 38400;
     uartParams.readEcho = UART_ECHO_OFF;
     motors_uart = UART_open(CONFIG_UART_0, &uartParams);
-    if (motors_uart == NULL)
-    {
-        ERROR;
-    }
+    if (motors_uart == NULL) ERROR;
     sendMsgToUARTTxQ(INIT_CONTROLLER, EMPTY);
 }
 

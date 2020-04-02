@@ -33,10 +33,7 @@ void adcInit()
     ADC_Params adc_params;
     ADC_Params_init(&adc_params);
     adc = ADC_open(CONFIG_ADC_0, &adc_params);
-    if (adc == NULL)
-    {
-        ERROR;
-    }
+    if (adc == NULL) ERROR;
 }
 
 void pollSensor()
@@ -53,10 +50,7 @@ void pollSensor()
         {
             sendSensorMsgToQ(result);
         }
-        else
-        {
-            ERROR;
-        }
+        else ERROR;
     }
 }
 

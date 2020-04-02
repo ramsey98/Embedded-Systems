@@ -81,7 +81,7 @@
     "\"value\": 0"    \
 "}"
 
-void json_miss();
+void json_miss(int count, int type);
 void json_receive(char *payload, char *msgTopic);
 void json_read_config(Json_Handle objectHandle);
 void json_send_stats(Json_Handle objectHandle);

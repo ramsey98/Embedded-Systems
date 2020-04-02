@@ -16,6 +16,14 @@ void createMQTTQueue()
 
 void sendMsgToMQTTQ(MQTTMsg msg)
 {
+    dbgOutputLoc(BEFORE_SEND_QUEUE);
+    BaseType_t success = xQueueSend(xQueue, (void *) &msg, pdFALSE);
+    if(success == pdFALSE) ERROR;
+    dbgOutputLoc(AFTER_SEND_QUEUE);
+}
+
+void sendMsgToMQTTQFromISR(MQTTMsg msg)
+{
     dbgOutputLoc(BEFORE_SEND_QUEUE_ISR_TIMER);
     BaseType_t success = xQueueSendFromISR(xQueue, (void *) &msg, pdFALSE);
     if(success == pdFALSE) ERROR;

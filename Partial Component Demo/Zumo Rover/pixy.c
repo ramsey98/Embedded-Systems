@@ -30,10 +30,7 @@ void SPICallback(SPI_Handle handle, SPI_Transaction *trans)
         value = value | rxBuffer[1];
         sendMsgToPixyQ(value);
     }
-    else if(trans->status == SPI_TRANSFER_FAILED)
-    {
-        ERROR;
-    }
+    else if(trans->status == SPI_TRANSFER_FAILED) ERROR;
 
 }
 
@@ -46,10 +43,7 @@ void pixy_init()
     spiParams.bitRate = 2000000;
     spiParams.transferCallbackFxn = SPICallback;
     masterSpi = SPI_open(CONFIG_SPI_0, &spiParams);
-    if (masterSpi == NULL)
-    {
-        ERROR;
-    }
+    if (masterSpi == NULL) ERROR;
 }
 
 void pixy_transfer()
@@ -60,10 +54,7 @@ void pixy_transfer()
     transaction.txBuf = (void *) txBuffer;
     transaction.rxBuf = (void *) rxBuffer;
     transferOK = SPI_transfer(masterSpi, &transaction);
-    if(~transferOK)
-    {
-        ERROR;
-    }
+    if(~transferOK) ERROR;
 }
 
 void *pixyThread(void *arg0)
