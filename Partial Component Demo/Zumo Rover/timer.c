@@ -34,9 +34,10 @@ void timerCallback(Timer_Handle myHandle)
 {
     dbgOutputLoc(ENTER_ISR_TIMER);
     //pollSensor();
+    //sendMsgToPixyQ(TIMEINCPIXY);
     if(count == 4)
     {
-        //pixy_transfer();
+        //sendMsgToPixyQ(SENDINCPIXY);
         sendMsgToPIDQ(TIMER, 0);
         count = 0;
     }

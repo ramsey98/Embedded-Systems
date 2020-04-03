@@ -38,7 +38,8 @@ void captureInit()
     capture0 = Capture_open(CONFIG_CAPTURE_0, &captureParams);
     capture1 = Capture_open(CONFIG_CAPTURE_1, &captureParams);
     if (capture0 == NULL | capture1 == NULL) ERROR;
-    if (Capture_start(capture0) == Capture_STATUS_ERROR | Capture_start(capture1) == Capture_STATUS_ERROR) ERROR;
+    if (Capture_start(capture0) == Capture_STATUS_ERROR) ERROR;
+    if (Capture_start(capture1) == Capture_STATUS_ERROR) ERROR;
 }
 
 void captureCallback(Capture_Handle handle, uint32_t interval)

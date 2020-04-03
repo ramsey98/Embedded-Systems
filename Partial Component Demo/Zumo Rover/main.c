@@ -47,25 +47,19 @@ void *mainThread(void *arg0)
     pthread_attr_init(&attrs);
     detachState = PTHREAD_CREATE_DETACHED;
     if(pthread_attr_setdetachstate(&attrs, detachState) != 0) ERROR;
-
     if(pthread_attr_setstacksize(&attrs, THREADSTACKSIZE) != 0) ERROR;
 
     priParam.sched_priority = 1;
     pthread_attr_setschedparam(&attrs, &priParam);
 
     //if(pthread_create(&sensor, &attrs, sensorThread, NULL) != 0) ERROR;
-
     //if(pthread_create(&pixy, &attrs, pixyThread, NULL) != 0) ERROR;
-
     if(pthread_create(&PID, &attrs, PIDThread, NULL) != 0) ERROR;
-
     if(pthread_create(&UARTTx, &attrs, UARTTxThread, NULL) != 0) ERROR;
-
     if(pthread_create(&UARTDebug, &attrs, UARTDebugThread, NULL) != 0) ERROR;
-
     //if(pthread_create(&mqtt, &attrs, MQTTThread, NULL) != 0) ERROR;
-
     if(pthread_create(&test, &attrs, testThread, NULL) != 0) ERROR;
+
     return(NULL);
 }
 

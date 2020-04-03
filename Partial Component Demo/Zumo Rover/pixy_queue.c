@@ -14,22 +14,22 @@ void createPixyQueue()
     if(xQueue == NULL) ERROR;
 }
 
-void sendMsgToPixyQ(uint32_t value)
+void sendMsgToPixyQ(uint8_t type)
 {
     dbgOutputLoc(BEFORE_SEND_QUEUE_ISR_TIMER);
-    uint8_t msg = value;
+    uint8_t msg = type;
     BaseType_t success = xQueueSendFromISR(xQueue, (void *) &msg, pdFALSE);
     if(success == pdFALSE) ERROR;
     dbgOutputLoc(AFTER_SEND_QUEUE_ISR_TIMER);
 }
 
-void receiveFromPixyQ(uint32_t * value)
+void receiveFromPixyQ(uint8_t *type)
 {
     dbgOutputLoc(BEFORE_RECEIVE_QUEUE);
     uint8_t received;
     BaseType_t success = xQueueReceive(xQueue, &received, portMAX_DELAY);
     if(success == pdFALSE) ERROR;
-    *value = received;
+    *type = received;
     dbgOutputLoc(AFTER_RECEIVE_QUEUE);
 }
 

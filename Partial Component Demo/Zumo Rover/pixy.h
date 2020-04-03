@@ -11,15 +11,14 @@
 #include <ti/drivers/SPI.h>
 #include "debug.h"
 #include "pixy_queue.h"
+#include "pixy_state.h"
 #include "PID_queue.h"
-
-#define TXBUFFER (8)
-#define RXBUFFER (32)
 
 void pixy_init();
 void SPICallback(SPI_Handle handle, SPI_Transaction *trans);
-void pixy_transfer();
+void setTxBuffer(uint8_t *tx_buffer, uint8_t *tx_msg, unsigned tx_length, unsigned msg_length);
+void initBuffers(uint8_t *rx_buffer, uint8_t *tx_buffer);
+void pixy_transfer(uint8_t *rx_buffer, uint8_t *tx_buffer);
 void *pixyThread(void *arg0);
-
 
 #endif /* PIXY_H_ */
