@@ -54,7 +54,7 @@
 #define MQTT_INIT_STATE          (0x04)
 
 #define APPLICATION_VERSION      "1.1.1"
-#define APPLICATION_NAME         "MQTT client"
+#define APPLICATION_NAME         "Zumo Rover"
 
 #define SLNET_IF_WIFI_PRIO       (5)
 

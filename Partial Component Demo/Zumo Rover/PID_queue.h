@@ -8,8 +8,8 @@
 #ifndef PID_QUEUE_H_
 #define PID_QUEUE_H_
 
+#include <debug_queue.h>
 #include "debug.h"
-#include "UARTDebug_queue.h"
 #include "queue.h"
 
 #define LEFTCAP 1

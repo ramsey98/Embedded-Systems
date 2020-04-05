@@ -10,7 +10,7 @@
 
 #include <ti/utils/json/json.h>
 #include "mqtt_queue.h"
-#include "debug_queue.h"
+#include "config.h"
 #include "debug.h"
 
 #define JSON_DATA_BUFFER_SIZE (512)

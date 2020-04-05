@@ -25,12 +25,15 @@ void timerCallback(Timer_Handle myHandle)
 {
     static int count = 0;
     dbgOutputLoc(ENTER_ISR_TIMER);
-    //pollSensor();
     //sendMsgToPixyQ(TIMEINCPIXY);
     if(count % 20 == 0)
     {
         //sendMsgToPixyQ(SENDINCPIXY);
         sendMsgToPIDQ(TIMER, EMPTY);
+    }
+    if(count % 2 == 0)
+    {
+        //pollSensor();
     }
     MQTTMsg msg = {0, 0};
     if(count % 20 == 0)
@@ -41,6 +44,7 @@ void timerCallback(Timer_Handle myHandle)
     if(count % 10 == 0)
     {
         msg.type = JSON_TYPE_DEBUG;
+        msg.value = 0;
         sendMsgToMQTTQFromISR(msg);
     }
     if(count == 100)

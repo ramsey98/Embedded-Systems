@@ -15,6 +15,8 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
+#define STRLEN 5
+
 #define DBG_HALT (0)
 #define ENTER_TASK (1)
 #define WHILE1 (2)

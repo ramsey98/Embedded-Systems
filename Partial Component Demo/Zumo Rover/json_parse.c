@@ -8,7 +8,6 @@
 #include "json_parse.h"
 
 static int attempts = 0, received = 0, missed = 0;
-static int debugValue = 0;
 
 void json_miss(int count, int type)
 {
@@ -68,9 +67,7 @@ void json_read_config(Json_Handle objectHandle)
     }
     else
     {
-        //for final milestone, send value where needed (queues)
         sendMsgToDebugQ(value);
-        debugValue = value;
     }
 }
 
@@ -90,7 +87,7 @@ void json_send_debug(MQTTMsg msg, Json_Handle objectHandle)
 {
     dbgOutputLoc(ENTER_SEND_DEBUG);
     static int debugID = 0;
-    int value = debugValue;
+    int value = msg.value;
     if(Json_parse(objectHandle, JSON_DEBUG_BUF, strlen(JSON_DEBUG_BUF)) != 0) ERROR;
     if(Json_setValue(objectHandle, "\"ID\"", &debugID, sizeof(debugID)) != 0) ERROR;
     if(Json_setValue(objectHandle, "\"value\"", &value, sizeof(value)) != 0) ERROR;

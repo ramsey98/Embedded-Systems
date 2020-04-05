@@ -45,16 +45,9 @@ void dbgUARTStr(const char * uartOut)
 
 void dbgUARTNum(int outVal)
 {
-    char str[3];
-    if (outVal > 255)
-    {
-        sprintf(str, "%d", outVal);
-        dbgUARTStr(str);
-    }
-    else
-    {
-        dbgUARTVal(outVal);
-    }
+    char str[STRLEN];
+    sprintf(str, "%d", outVal);
+    dbgUARTStr(str);
 }
 
 void dbgOutputLoc(unsigned int outLoc)

@@ -17,12 +17,12 @@ const lookupTable sensorLookup[DICTLEN] = {{840000,12},
                                            {460000,24},
                                            {420000,26},
                                            {400000,28},
-                                           {370000,30}};
+                                           {370000,30},
+                                           {100,0}};
 
 void *sensorThread(void *arg0)
 {
     dbgOutputLoc(ENTER_TASK);
-    adcInit();
     SENSOR_DATA curState;
     curState.state = Sensor_Init;
     uint16_t sensorVal = 0;
@@ -37,7 +37,6 @@ void *sensorThread(void *arg0)
 
 void adcInit()
 {
-    ADC_init();
     ADC_Params adc_params;
     ADC_Params_init(&adc_params);
     adc = ADC_open(CONFIG_ADC_0, &adc_params);

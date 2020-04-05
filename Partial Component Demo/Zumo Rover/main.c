@@ -6,6 +6,7 @@
  */
 //#include "mqtt_client_app.h"
 
+#include <motors.h>
 #include "debug.h"
 #include "pixy.h"
 #include "capture.h"
@@ -13,9 +14,8 @@
 #include "test.h"
 #include "timer.h"
 #include "PID.h"
-#include "UARTDebug_queue.h"
 #include "uart_term.h"
-#include "debug_queue.h"
+#include "config.h"
 #include <pthread.h>
 
 extern void runMQTT();
@@ -24,7 +24,7 @@ extern void runMQTT();
 
 void *mainThread(void *arg0)
 {
-    pthread_t UARTTx, PID, UARTDebug;//pixy, sensor, test;
+    pthread_t UARTTx, PID, UARTDebug, config;//pixy, sensor, test;
     pthread_attr_t attrs;
     struct sched_param  priParam;
     int detachState;
@@ -51,6 +51,7 @@ void *mainThread(void *arg0)
     captureInit();
     motorsUARTInit();
     //timerInit();
+    //adcInit();
     //pixy_init();
 
     pthread_attr_init(&attrs);
@@ -64,6 +65,7 @@ void *mainThread(void *arg0)
     //if(pthread_create(&sensor, &attrs, sensorThread, NULL) != 0) ERROR;
     //if(pthread_create(&pixy, &attrs, pixyThread, NULL) != 0) ERROR;
     if(pthread_create(&PID, &attrs, PIDThread, NULL) != 0) ERROR;
+    if(pthread_create(&config, &attrs, configThread, NULL) != 0) ERROR;
     if(pthread_create(&UARTTx, &attrs, UARTTxThread, NULL) != 0) ERROR;
     if(pthread_create(&UARTDebug, &attrs, UARTDebugThread, NULL) != 0) ERROR;
     //if(pthread_create(&test, &attrs, testThread, NULL) != 0) ERROR;

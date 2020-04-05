@@ -7,23 +7,6 @@
 
 #include "PID.h"
 
-static UART_Handle motors_uart;
-
-void motorsUARTInit()
-{
-    UART_Params uartParams;
-    UART_Params_init(&uartParams);
-    uartParams.writeMode = UART_MODE_BLOCKING;
-    uartParams.writeDataMode = UART_DATA_BINARY;
-    uartParams.readDataMode = UART_DATA_BINARY;
-    uartParams.readReturnMode = UART_RETURN_FULL;
-    uartParams.baudRate = 38400;
-    uartParams.readEcho = UART_ECHO_OFF;
-    motors_uart = UART_open(CONFIG_UART_1, &uartParams);
-    if (motors_uart == NULL) ERROR;
-    sendMsgToUARTTxQ(INIT_CONTROLLER, EMPTY);
-}
-
 void updateMotors(MOTORS_DATA motorsState)
 {
     if(motorsState.paused == 0)
@@ -189,7 +172,6 @@ void *PIDThread(void *arg0)
                 if(rightCount != getRightCount()) ERROR;
                 clearCounts();
                 updateMotors(motorsState);
-                sendMsgToUARTDebugQ(TIMER, value);
                 sendMsgToUARTDebugQ(LEFTCAP, motorsState.realLeftSpeed);
                 sendMsgToUARTDebugQ(RIGHTCAP, motorsState.realRightSpeed);
                 sendMsgToUARTDebugQ(LEFTCOUNT, leftCount);
@@ -216,28 +198,6 @@ void *PIDThread(void *arg0)
                 updateValues(&motorsState, type, value);
                 break;
             }
-        }
-    }
-}
-
-void *UARTTxThread(void *arg0)
-{
-    dbgOutputLoc(ENTER_TASK);
-    uint8_t byte1;
-    uint16_t value;
-    dbgOutputLoc(WHILE1);
-    while(1)
-    {
-        receiveFromUARTTxQ(&value);
-        byte1 = value & 0xFF;
-        if(byte1 == 0)
-        {
-            byte1 = value >> 8;
-            UART_write(motors_uart, &byte1, sizeof(byte1));
-        }
-        else
-        {
-            UART_write(motors_uart, &value, sizeof(value));
         }
     }
 }
