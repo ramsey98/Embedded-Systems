@@ -14,7 +14,13 @@
 #include "sensor_queue.h"
 #include "sensor_state.h"
 
-#define DICTLEN (100)
+#define DICTLEN (10)
+
+typedef struct
+{
+    int val;
+    int dist
+} lookupTable;
 
 void *sensorThread(void *arg0);
 void adcInit();

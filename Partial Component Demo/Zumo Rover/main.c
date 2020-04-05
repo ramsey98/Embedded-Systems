@@ -5,6 +5,7 @@
  *      Author: Holden Ramsey
  */
 //#include "mqtt_client_app.h"
+
 #include "debug.h"
 #include "pixy.h"
 #include "capture.h"
@@ -13,13 +14,17 @@
 #include "timer.h"
 #include "PID.h"
 #include "UARTDebug_queue.h"
+#include "uart_term.h"
+#include "debug_queue.h"
 #include <pthread.h>
+
+extern void runMQTT();
 
 #define THREADSTACKSIZE (1024)
 
 void *mainThread(void *arg0)
 {
-    pthread_t UARTTx, PID, test, UARTDebug;//, mqtt; //pixy, sensor;
+    pthread_t UARTTx, PID, UARTDebug;//pixy, sensor, test;
     pthread_attr_t attrs;
     struct sched_param  priParam;
     int detachState;
@@ -31,17 +36,21 @@ void *mainThread(void *arg0)
     GPIO_init();
     UART_init();
 
-    //createSensorQueue();
-    //createPixyQueue();
+    createSensorQueue();
+    createPixyQueue();
     createPIDQueue();
     createUARTTxQueue();
     createUARTDebugQueue();
-    //createMQTTQueue();
+    createMQTTQueue();
+    createDebugQueue();
 
-    dbgUARTInit();
+    UART_Handle tUartHndl = InitTerm();
+
     dbgGPIOInit();
+    dbgUARTInit(tUartHndl);
     captureInit();
-    timerInit();
+    motorsUARTInit();
+    //timerInit();
     //pixy_init();
 
     pthread_attr_init(&attrs);
@@ -57,9 +66,8 @@ void *mainThread(void *arg0)
     if(pthread_create(&PID, &attrs, PIDThread, NULL) != 0) ERROR;
     if(pthread_create(&UARTTx, &attrs, UARTTxThread, NULL) != 0) ERROR;
     if(pthread_create(&UARTDebug, &attrs, UARTDebugThread, NULL) != 0) ERROR;
-    //if(pthread_create(&mqtt, &attrs, MQTTThread, NULL) != 0) ERROR;
-    if(pthread_create(&test, &attrs, testThread, NULL) != 0) ERROR;
-
+    //if(pthread_create(&test, &attrs, testThread, NULL) != 0) ERROR;
+    runMQTT();
     return(NULL);
 }
 

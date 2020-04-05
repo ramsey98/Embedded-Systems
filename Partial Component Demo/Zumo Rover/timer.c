@@ -1,12 +1,12 @@
 /*
  * timer.c
  *
- *  Created on: Feb 25, 2020
+ *  Created on: Mar 16, 2020
  *      Author: Holden Ramsey
  */
+
 #include "timer.h"
 
-static int count;
 void timerInit()
 {
     Timer_Handle timer;
@@ -16,33 +16,37 @@ void timerInit()
     timer_params.periodUnits = Timer_PERIOD_US;
     timer_params.timerMode = Timer_CONTINUOUS_CALLBACK;
     timer_params.timerCallback = timerCallback;
-    count = 0;
-
     timer = Timer_open(CONFIG_TIMER_0, &timer_params);
-    if (timer == NULL)
-    {
-        ERROR;
-    }
-
-    if (Timer_start(timer) == Timer_STATUS_ERROR)
-    {
-        ERROR;
-    }
+    if (timer == NULL) ERROR;
+    if (Timer_start(timer) == Timer_STATUS_ERROR) ERROR;
 }
 
 void timerCallback(Timer_Handle myHandle)
 {
+    static int count = 0;
     dbgOutputLoc(ENTER_ISR_TIMER);
     //pollSensor();
     //sendMsgToPixyQ(TIMEINCPIXY);
-    if(count == 4)
+    if(count % 20 == 0)
     {
         //sendMsgToPixyQ(SENDINCPIXY);
-        sendMsgToPIDQ(TIMER, 0);
+        sendMsgToPIDQ(TIMER, EMPTY);
+    }
+    MQTTMsg msg = {0, 0};
+    if(count % 20 == 0)
+    {
+        msg.type = JSON_TYPE_STATS;
+        sendMsgToMQTTQFromISR(msg);
+    }
+    if(count % 10 == 0)
+    {
+        msg.type = JSON_TYPE_DEBUG;
+        sendMsgToMQTTQFromISR(msg);
+    }
+    if(count == 100)
+    {
         count = 0;
     }
     count++;
     dbgOutputLoc(LEAVE_ISR_TIMER);
 }
-
-

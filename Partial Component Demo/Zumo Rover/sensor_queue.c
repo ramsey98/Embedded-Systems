@@ -16,11 +16,11 @@ void createSensorQueue()
 
 void sendSensorMsgToQ(uint16_t mmDist)
 {
-    dbgOutputLoc(BEFORE_SEND_QUEUE_ISR_TIMER2);
+    dbgOutputLoc(BEFORE_SEND_QUEUE);
     uint16_t msg = mmDist;
     BaseType_t success = xQueueSendFromISR(xQueue, (void *) &msg, pdFALSE);
     if(success == pdFALSE) ERROR;
-    dbgOutputLoc(AFTER_SEND_QUEUE_ISR_TIMER2);
+    dbgOutputLoc(AFTER_SEND_QUEUE);
 }
 
 void receiveFromSensorQ(uint16_t * sensorVal)

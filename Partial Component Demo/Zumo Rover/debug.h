@@ -15,25 +15,27 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
-#define DBG_HALT (0x00)
-#define ENTER_TASK (0x01)
-#define WHILE1 (0x02)
-#define BEFORE_SEND_QUEUE (0x03)
-#define AFTER_SEND_QUEUE (0x04)
-#define BEFORE_RECEIVE_QUEUE (0x05)
-#define AFTER_RECEIVE_QUEUE (0x06)
-#define ENTER_ISR_TIMER (0x07)
-#define LEAVE_ISR_TIMER (0x08)
-#define BEFORE_SEND_QUEUE_ISR_TIMER (0x09)
-#define AFTER_SEND_QUEUE_ISR_TIMER (0x10)
-#define BEFORE_SEND_QUEUE_ISR_TIMER2 (0x15)
-#define AFTER_SEND_QUEUE_ISR_TIMER2 (0x16)
+#define DBG_HALT (0)
+#define ENTER_TASK (1)
+#define WHILE1 (2)
+#define BEFORE_SEND_QUEUE (3)
+#define AFTER_SEND_QUEUE (4)
+#define BEFORE_RECEIVE_QUEUE (5)
+#define AFTER_RECEIVE_QUEUE (6)
+#define ENTER_ISR_TIMER (7)
+#define LEAVE_ISR_TIMER (8)
+#define BEFORE_SEND_QUEUE_ISR_TIMER (9)
+#define AFTER_SEND_QUEUE_ISR_TIMER (10)
+#define MQTT_MSG_RECEIVED (11)
+#define ENTER_SEND_STATS (12)
+#define ENTER_SEND_DEBUG (13)
+#define ENTER_SEND_ERROR (14)
 
 #define DBG_ERROR_LED_TIME (250000)
 #define ERROR halt(__LINE__, __func__);
 
 void dbgGPIOInit();
-void dbgUARTInit();
+void dbgUARTInit(UART_Handle uartHandle);
 void dbgUARTVal(unsigned char outVal);
 void dbgUARTStr(const char* uartOut);
 void dbgUARTNum(int outVal);

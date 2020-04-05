@@ -19,7 +19,7 @@ void motorsUARTInit()
     uartParams.readReturnMode = UART_RETURN_FULL;
     uartParams.baudRate = 38400;
     uartParams.readEcho = UART_ECHO_OFF;
-    motors_uart = UART_open(CONFIG_UART_0, &uartParams);
+    motors_uart = UART_open(CONFIG_UART_1, &uartParams);
     if (motors_uart == NULL) ERROR;
     sendMsgToUARTTxQ(INIT_CONTROLLER, EMPTY);
 }
@@ -168,7 +168,6 @@ void updateValues(MOTORS_DATA *motorsState, uint32_t type, uint32_t value)
 void *PIDThread(void *arg0)
 {
     dbgOutputLoc(ENTER_TASK);
-    motorsUARTInit();
     int leftCount = 0, rightCount = 0;
     uint32_t type = 0, value = 0;
     MOTORS_DATA motorsState;
@@ -186,10 +185,8 @@ void *PIDThread(void *arg0)
         {
             case TIMER:
             {
-                if(leftCount != getLeftCount() | rightCount != getRightCount())
-                {
-                    ERROR;
-                }
+                if(leftCount != getLeftCount()) ERROR;
+                if(rightCount != getRightCount()) ERROR;
                 clearCounts();
                 updateMotors(motorsState);
                 sendMsgToUARTDebugQ(TIMER, value);

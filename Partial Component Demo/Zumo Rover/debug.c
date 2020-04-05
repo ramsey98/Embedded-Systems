@@ -10,19 +10,9 @@
 #include <ti/drivers/dpl/HwiP.h>
 static UART_Handle uart;
 
-void dbgUARTInit()
+void dbgUARTInit(UART_Handle uartHandle)
 {
-    UART_Params uartParams;
-    UART_Params_init(&uartParams);
-    uartParams.writeMode = UART_MODE_BLOCKING;
-    uartParams.writeDataMode = UART_DATA_BINARY;
-    uartParams.baudRate = 38400;
-    uartParams.readEcho = UART_ECHO_OFF;
-    uart = UART_open(CONFIG_UART_1, &uartParams);
-    if (uart == NULL)
-    {
-        ERROR;
-    }
+    uart = uartHandle;
 }
 
 void dbgGPIOInit()
@@ -37,7 +27,6 @@ void dbgGPIOInit()
     GPIO_setConfig(CONFIG_GPIO_6, GPIO_CFG_OUT_STD | GPIO_CFG_OUT_LOW);
     GPIO_setConfig(CONFIG_GPIO_7, GPIO_CFG_OUT_STD | GPIO_CFG_OUT_LOW);
     GPIO_setConfig(CONFIG_LED_0_GPIO, GPIO_CFG_OUT_STD | GPIO_CFG_OUT_LOW);
-    GPIO_setConfig(CONFIG_LED_1_GPIO, GPIO_CFG_OUT_STD | GPIO_CFG_OUT_LOW);
 }
 
 void dbgUARTVal(unsigned char outVal)
@@ -113,10 +102,7 @@ void dbgOutputLoc(unsigned int outLoc)
 
         GPIO_toggle(CONFIG_GPIO_7);
     }
-    else
-    {
-        ERROR;
-    }
+    else ERROR;
 }
 
 void halt(int line, const char* func)
