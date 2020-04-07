@@ -13,7 +13,7 @@ void createDistanceQueue()
     xQueueDistance = xQueueCreate(16, sizeof(DISTANCE_DATA));
     if(xQueueDistance == NULL)
     {
-        halt();
+        ERROR;
     }
 }
 

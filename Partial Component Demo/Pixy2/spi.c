@@ -30,7 +30,7 @@ void spiInit()
     handle = SPI_open(CONFIG_SPI_0, &params);
 
     if (!handle) {
-        halt();
+        ERROR;
     }
 }
 

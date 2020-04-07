@@ -15,7 +15,7 @@ void timer75Callback(Timer_Handle myHandle)
     int ret = sendPollMsgToPixyQ1();
 
     if(ret < 0) {
-        halt();
+        ERROR;
     }
     /*
     uint16_t adcValue;
@@ -60,7 +60,7 @@ void adcInit()
     adc = ADC_open(CONFIG_ADC_0, &adc_params);
     if (adc == NULL)
     {
-        halt();
+        ERROR;
     }
 }
 
@@ -77,12 +77,12 @@ void timerTwoInit()
     timer1 = Timer_open(CONFIG_TIMER_1, &timer_params);
     if (timer1 == NULL)
     {
-        halt();
+        ERROR;
     }
 
     if (Timer_start(timer1) == Timer_STATUS_ERROR)
     {
-        halt();
+        ERROR;
     }
 
 }

@@ -13,7 +13,7 @@ void createPixyQueue()
     xQueuePixy = xQueueCreate(16, sizeof(uint64_t));
     if(xQueuePixy == NULL)
     {
-        halt();
+        ERROR;
     }
 }
 

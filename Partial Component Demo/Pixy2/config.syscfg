@@ -24,6 +24,7 @@ var ADC1 = ADC.addInstance();
 var Timer2 = Timer.addInstance();
 var SPI = scripting.addModule("/ti/drivers/SPI");
 var SPI1 = SPI.addInstance();
+var GPIO10 = GPIO.addInstance();
 // name - Select the RTOS being used
 RTOS.name = "FreeRTOS";
 // Name - The C/C++ identifier used in applications as the index parameter passed to Timer runtime APIs
@@ -108,6 +109,12 @@ SPI1.$name = "CONFIG_SPI_0";
 SPI1.mode = "Four Pin SS Active Low";
 // Name
 SPI1.spi.$name = "MySPI1";
+// Name - The C/C++ identifier used in applications as the index parameter passed to GPIO runtime APIs
+GPIO10.$name = "CONFIG_LED_1_GPIO";
+// Mode - Select the GPIO mode
+GPIO10.mode = "Output";
+// Assign pin
+GPIO10.gpioPin.$assign = "boosterpack.5"; // P61
 // Suggest solution
 Timer1.timer.$suggestSolution = "Timer1";
 // Suggest solution

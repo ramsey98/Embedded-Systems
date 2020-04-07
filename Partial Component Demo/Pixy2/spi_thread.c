@@ -27,7 +27,7 @@ void *spiThread(void *arg0) {
         success = pixyFsm(&pixyState, &timeIncPixy, &complete, &sendIncPixy);
         if(success == -1 || received == -1)
         {
-            halt();
+            ERROR;
         }
     }
 }

@@ -7,22 +7,12 @@
 #include "debug.h"
 #include <string.h>
 #include <stdio.h>
+#include <ti/drivers/dpl/HwiP.h>
 static UART_Handle uart;
 
-void dbgUARTInit()
+void dbgUARTInit(UART_Handle uartHandle)
 {
-    UART_init();
-    UART_Params uartParams;
-    UART_Params_init(&uartParams);
-    uartParams.writeMode = UART_MODE_BLOCKING;
-    uartParams.writeDataMode = UART_DATA_BINARY;
-    uartParams.baudRate = 115200;
-    uartParams.readEcho = UART_ECHO_OFF;
-    uart = UART_open(CONFIG_UART_0, &uartParams);
-    if (uart == NULL)
-    {
-        halt();
-    }
+    uart = uartHandle;
 }
 
 void dbgGPIOInit()
@@ -37,7 +27,7 @@ void dbgGPIOInit()
     GPIO_setConfig(CONFIG_GPIO_6, GPIO_CFG_OUT_STD | GPIO_CFG_OUT_LOW);
     GPIO_setConfig(CONFIG_GPIO_7, GPIO_CFG_OUT_STD | GPIO_CFG_OUT_LOW);
     GPIO_setConfig(CONFIG_LED_0_GPIO, GPIO_CFG_OUT_STD | GPIO_CFG_OUT_LOW);
-    GPIO_write(CONFIG_GPIO_7, CONFIG_GPIO_LED_OFF);
+    GPIO_setConfig(CONFIG_LED_1_GPIO, GPIO_CFG_OUT_STD | GPIO_CFG_OUT_LOW);
 }
 
 void dbgUARTVal(unsigned char outVal)
@@ -45,7 +35,7 @@ void dbgUARTVal(unsigned char outVal)
     UART_write(uart, &outVal, sizeof(outVal));
 }
 
-void dbgUARTStr(char * uartOut)
+void dbgUARTStr(const char * uartOut)
 {
     int i;
     for(i = 0; i < strlen(uartOut); i++)
@@ -68,24 +58,10 @@ void dbgUARTNum(int outVal)
     }
 }
 
-void dbgUARTNumAsChars(int outVal)
-{
-    if(outVal < 10) {
-        dbgUARTVal(outVal + '0');
-    } else if(outVal < 100) {
-        char str[2];
-        sprintf(str, "%d", outVal);
-        dbgUARTStr(str);
-    } else {
-        char str[3];
-        sprintf(str, "%d", outVal);
-        dbgUARTStr(str);
-    }
-}
-
 void dbgOutputLoc(unsigned int outLoc)
 {
-    GPIO_write(CONFIG_GPIO_7, CONFIG_GPIO_LED_ON);
+    GPIO_write(CONFIG_GPIO_7, CONFIG_GPIO_LED_OFF);
+    GPIO_toggle(CONFIG_GPIO_7); //when GPIO_7 is high, bits are being switched
     GPIO_write(CONFIG_GPIO_6, CONFIG_GPIO_LED_OFF);
     GPIO_write(CONFIG_GPIO_5, CONFIG_GPIO_LED_OFF);
     GPIO_write(CONFIG_GPIO_4, CONFIG_GPIO_LED_OFF);
@@ -125,32 +101,46 @@ void dbgOutputLoc(unsigned int outLoc)
             GPIO_write(CONFIG_GPIO_0, CONFIG_GPIO_LED_ON);
         }
 
+        GPIO_toggle(CONFIG_GPIO_7);
     }
     else
     {
-        halt();
+        ERROR;
     }
-
-    GPIO_write(CONFIG_GPIO_7, CONFIG_GPIO_LED_OFF);
 }
 
-void halt() //call dgbOutputLoc, param: location of error
+void halt(int line, const char* func)
 {
     GPIO_write(CONFIG_LED_0_GPIO, CONFIG_GPIO_LED_ON);
+    dbgUARTStr("Error in func: ");
+    dbgUARTStr(func);
+    dbgUARTStr(" at line #: ");
+    dbgUARTNum(line);
+    HwiP_disable();
     vTaskSuspendAll();
-    taskENTER_CRITICAL();
-    taskDISABLE_INTERRUPTS();
-
-    //while loop changing GPIO config
     int timerCount = 0;
-    while(1) {
-
+    while(1)
+    {
         timerCount++;
-
-        if (timerCount > DBG_ERROR_LED_TIME) {
+        if (timerCount > DBG_ERROR_LED_TIME)
+        {
             timerCount = 0;
             GPIO_toggle(CONFIG_LED_0_GPIO);
         }
+    }
+}
 
+void dbgUARTNumAsChars(int outVal)
+{
+    if(outVal < 10) {
+        dbgUARTVal(outVal + '0');
+    } else if(outVal < 100) {
+        char str[2];
+        sprintf(str, "%d", outVal);
+        dbgUARTStr(str);
+    } else {
+        char str[3];
+        sprintf(str, "%d", outVal);
+        dbgUARTStr(str);
     }
 }

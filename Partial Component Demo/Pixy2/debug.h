@@ -44,15 +44,15 @@
 #define AFTER_SEND_QUEUE_DISTANCE 26
 
 #define DBG_ERROR_LED_TIME (250000)
-
+#define ERROR halt(__LINE__, __func__);
 
 void dbgGPIOInit();
-void dbgUARTInit();
+void dbgUARTInit(UART_Handle uartHandle);
 void dbgUARTVal(unsigned char outVal);
-void dbgUARTStr(char * uartOut);
+void dbgUARTStr(const char* uartOut);
 void dbgUARTNum(int outVal);
 void dbgUARTNumAsChars(int outVal);
 void dbgOutputLoc(unsigned int outVal);
-void halt();
+void halt(int line, const char* func);
 
 #endif /* DEBUG_H_ */

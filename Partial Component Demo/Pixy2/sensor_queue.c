@@ -13,7 +13,7 @@ void createSensorQueue()
     xQueueSensor = xQueueCreate(16, sizeof(uint64_t));
     if(xQueueSensor == NULL)
     {
-        halt();
+        ERROR;
     }
 }
 

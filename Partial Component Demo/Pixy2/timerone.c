@@ -17,7 +17,7 @@ void timerSecondCallback(Timer_Handle myHandle)
     int ret2 = sendTimeMsgToPixyQ1(time);
 
     if(ret2 < 0) {
-        halt();
+        ERROR;
     }
 
     dbgOutputLoc(LEAVE_ISR_TIMER1);
@@ -35,12 +35,12 @@ void timerOneInit()
     timer0 = Timer_open(CONFIG_TIMER_0, &timer_params);
     if (timer0 == 0)
     {
-        halt();
+        ERROR;
     }
 
     if (Timer_start(timer0) == Timer_STATUS_ERROR)
     {
-        halt();
+        ERROR;
     }
 
 }

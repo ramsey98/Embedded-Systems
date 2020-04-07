@@ -16,6 +16,7 @@
 #include "spi_thread.h"
 #include "distance_thread.h"
 #include <pthread.h>
+#include "uart_term.h"
 
 #define THREADSTACKSIZE (1024)
 
@@ -26,6 +27,7 @@ void *mainThread(void *arg0)
     struct sched_param  priParam;
     int retc;
     int detachState;
+    UART_Handle tUartHndl;
 
     ADC_init();
     SPI_init();
@@ -35,7 +37,6 @@ void *mainThread(void *arg0)
 
     timerOneInit();
     timerTwoInit();
-    dbgUARTInit();
     dbgGPIOInit();
     adcInit();
     spiInit();
@@ -43,19 +44,25 @@ void *mainThread(void *arg0)
     createDistanceQueue();
     dbgOutputLoc(ENTER_TASK);
 
+    /*Configure the UART                                                     */
+    tUartHndl = InitTerm();
+    /*remove uart receive from LPDS dependency                               */
+    UART_control(tUartHndl, UART_CMD_RXDISABLE, NULL);
+    dbgUARTInit(tUartHndl);
+
     pthread_attr_init(&attrs);
     detachState = PTHREAD_CREATE_DETACHED;
 
     retc = pthread_attr_setdetachstate(&attrs, detachState);
     if (retc != 0)
     {
-        halt();
+        ERROR;
     }
 
     retc |= pthread_attr_setstacksize(&attrs, THREADSTACKSIZE);
     if (retc != 0)
     {
-        halt();
+        ERROR;
     }
 
     priParam.sched_priority = 1;
@@ -64,13 +71,13 @@ void *mainThread(void *arg0)
     retc = pthread_create(&spi, &attrs, spiThread, NULL);
     if (retc != 0)
     {
-        halt();
+        ERROR;
     }
 
     retc = pthread_create(&distance, &attrs, distanceThread, NULL);
     if (retc != 0)
     {
-        halt();
+        ERROR;
     }
 
     return (NULL);

@@ -59,7 +59,7 @@ void *distanceThread(void *arg0) {
         success = findDistances(&data, &transfer);
         if(success == -1 || received == -1)
         {
-            halt();
+            ERROR;
         }
 
     }
@@ -95,10 +95,10 @@ int findDistances(DISTANCE_DATA *data, int * transfer) {
                 dbgUARTStr("xPixels:");
                 dbgUARTNumAsChars(data->blocks[i].xPixels);
                 dbgUARTStr("yPixels:");
-                dbgUARTNumAsChars(data->blocks[i].yPixels); */
+                dbgUARTNumAsChars(data->blocks[i].yPixels);
                 dbgUARTStr(", distance:");
                 findDistance(&(data->blocks[i]));
-                dbgUARTNumAsChars(data->blocks[i].distance);
+                dbgUARTNumAsChars(data->blocks[i].distance);*/
 
                 if(i < data->blockCount/CONNECTED_PACKET_LENGTH - 1)
                     dbgUARTStr("} ");
