@@ -8,29 +8,29 @@
 #ifndef PID_QUEUE_H_
 #define PID_QUEUE_H_
 
+#include <debug_queue.h>
 #include "debug.h"
-#include "UARTDebug_queue.h"
 #include "queue.h"
 
-#define MOTORSFMASK (0xFF)
-#define LEFTCAP (0x00000001)
-#define RIGHTCAP (0x00000002)
-#define TIMER (0x00000003)
-#define SENSOR (0x00000004)
-#define PIXY (0x00000005)
-#define TURNLEFT (0x00000006)
-#define TURNRIGHT (0x00000007)
-#define REVERSE (0x00000008)
-#define FORWARD (0x00000009)
-#define ACCEL (0x0000000A)
-#define DECEL (0x0000000B)
-#define PAUSE (0x0000000C)
-#define RESUME (0x0000000D)
-#define LEFTCOUNT (0x0000000E)
-#define RIGHTCOUNT (0x0000000F)
+#define LEFTCAP 1
+#define RIGHTCAP 2
+#define TIMER 3
+#define SENSOR 4
+#define PIXY 5
+#define TURNLEFT 6
+#define TURNRIGHT 7
+#define REVERSE 8
+#define FORWARD 9
+#define ACCEL 10
+#define DECEL 11
+#define PAUSE 12
+#define RESUME 13
+#define LEFTCOUNT 14
+#define RIGHTCOUNT 15
 
 #define PIDSHIFT (32)
 
+void sendMsgToPIDQFromISR(uint32_t type, uint32_t value);
 void sendMsgToPIDQ(uint32_t type, uint32_t value);
 void receiveFromPIDQ(uint32_t * type, uint32_t * value);
 void createPIDQueue();

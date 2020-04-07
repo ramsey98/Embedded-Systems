@@ -5,8 +5,8 @@
  *      Author: Holden Ramsey
  */
 
-#ifndef UARTTX_QUEUE_H_
-#define UARTTX_QUEUE_H_
+#ifndef MOTORS_H_
+#define MOTORS_H_
 
 #include "debug.h"
 #include "queue.h"
@@ -40,8 +40,10 @@
 #define M1_REVERSE (0x8C) //motor speed
 #define M1_REVERSE_8BIT (0x8D) //speed+128
 
+void motorsUARTInit();
+void *UARTTxThread(void *arg0);
 void sendMsgToUARTTxQ(uint8_t byte1, uint8_t byte2);
 void receiveFromUARTTxQ(uint16_t * value);
 void createUARTTxQueue();
 
-#endif /* UARTTX_QUEUE_H_ */
+#endif /* MOTORS_H_ */

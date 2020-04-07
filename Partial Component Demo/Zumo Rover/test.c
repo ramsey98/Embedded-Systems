@@ -12,11 +12,66 @@ void *testThread(void *arg0)
     test_num num = test1;
     while(1)
     {
-        tests(&num);
+        //pixytests(&num);
+        motortests(&num);
     }
 }
 
-void tests(test_num* num)
+void pixytests(test_num* num)
+{
+    switch (*num)
+    {
+        case test1:
+            sendMsgToPixyQ(PIXY_VERSION);
+            sleep(1);
+            sendMsgToPixyQ(PIXY_PAN);
+            sleep(1);
+            sendMsgToPixyQ(PIXY_COLOR);
+            sleep(1);
+            *num = test2;
+            break;
+        default:
+            break;
+    }
+}
+
+void sensortests(test_num* num)
+{
+    switch (*num)
+    {
+        case test1:
+            *num = test2;
+            break;
+        default:
+            break;
+    }
+}
+
+void pidtests(test_num* num)
+{
+    switch (*num)
+    {
+        case test1:
+            *num = test2;
+            break;
+        default:
+            break;
+    }
+}
+
+void mqtttests(test_num* num)
+{
+    switch (*num)
+    {
+        case test1:
+            *num = test2;
+            break;
+        default:
+            break;
+    }
+}
+
+void motortests(test_num* num)
 {
     switch (*num)
     {
@@ -140,12 +195,12 @@ void tests(test_num* num)
         *num = end;
         break;
     case end:
-        GPIO_write(CONFIG_LED_1_GPIO, CONFIG_GPIO_LED_ON);
+        //GPIO_write(CONFIG_LED_1_GPIO, CONFIG_GPIO_LED_ON);
         break;
     default:
         break;
     }
     sleep(10);
-    GPIO_toggle(CONFIG_LED_1_GPIO);
+    //GPIO_toggle(CONFIG_LED_1_GPIO);
 }
 

@@ -28,7 +28,6 @@ var UART2 = UART.addInstance();
 var SPI = scripting.addModule("/ti/drivers/SPI");
 var SPI1 = SPI.addInstance();
 var SimpleLinkWifi = scripting.addModule("/ti/drivers/net/wifi/SimpleLinkWifi");
-var LED2 = LED.addInstance();
 // name - Select the RTOS being used
 RTOS.name = "FreeRTOS";
 // Name - The C/C++ identifier used in applications as the index parameter passed to Timer runtime APIs
@@ -115,14 +114,6 @@ SPI1.$name = "CONFIG_SPI_0";
 SPI1.mode = "Four Pin SS Active Low";
 // Name
 SPI1.spi.$name = "MySPI1";
-// Name - The C/C++ identifier used in applications as the index parameter passed to LED runtime APIs
-LED2.$name = "CONFIG_LED_1";
-// Use Hardware - Select the hardware to use, or 'None' to use available header pins
-LED2.$hardware = system.deviceData.board.components.LED_GREEN;
-// Mode - Select the GPIO mode
-LED2.gpioPin.mode = "Output";
-// Callback Function - The name of the callback function called when this GPIO pin triggers an interrupt, or 'NULL' if it's specified at runtime
-LED2.gpioPin.callbackFunction = "";
 // Suggest solution
 Timer1.timer.$suggestSolution = "Timer3";
 // Suggest solution
@@ -173,5 +164,3 @@ SPI1.spi.ssPin.$suggestSolution = "8";
 SPI1.spi.dmaRxChannel.$suggestSolution = "UDMA_CH30";
 // Suggest solution
 SPI1.spi.dmaTxChannel.$suggestSolution = "UDMA_CH31";
-// Suggest solution
-LED2.gpioPin.gpioPin.$suggestSolution = "2";

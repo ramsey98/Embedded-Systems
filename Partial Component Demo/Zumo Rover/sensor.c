@@ -8,56 +8,52 @@
 #include "sensor.h"
 
 static ADC_Handle adc;
-static int sensorValuesLookup[DICTLEN] = {0};
-static int sensorDistLookup[DICTLEN] = {0};
+const lookupTable sensorLookup[DICTLEN] = {{840000,12},
+                                           {770000,14},
+                                           {670000,16},
+                                           {600000,18},
+                                           {530000,20},
+                                           {500000,22},
+                                           {460000,24},
+                                           {420000,26},
+                                           {400000,28},
+                                           {370000,30},
+                                           {100,0}};
 
 void *sensorThread(void *arg0)
 {
     dbgOutputLoc(ENTER_TASK);
-    adcInit();
-    SENSOR_DATA curState;
-    curState.state = Sensor_Init;
     uint16_t sensorVal = 0;
-    sensor_fsm(&curState, sensorVal);
+    static int total = 0, count = 0, avg = 0;
     dbgOutputLoc(WHILE1);
     while(1)
     {
         receiveFromSensorQ(&sensorVal);
-        sensor_fsm(&curState, sensorVal);
+        total+=sensorVal;
+        count++;
+        if(count == 5)
+        {
+            avg = total/count;
+            sendMsgToPIDQ(SENSOR, avg);
+        }
     }
 }
 
 void adcInit()
 {
-    ADC_init();
     ADC_Params adc_params;
     ADC_Params_init(&adc_params);
     adc = ADC_open(CONFIG_ADC_0, &adc_params);
-    if (adc == NULL)
-    {
-        ERROR;
-    }
+    if (adc == NULL) ERROR;
 }
 
 void pollSensor()
 {
-    int result = 0;
     uint16_t adcValue;
-    uint32_t adcValueMicroVolt;
-    int_fast16_t res = ADC_convert(adc, &adcValue);
-    if (res == ADC_STATUS_SUCCESS)
-    {
-        adcValueMicroVolt = ADC_convertRawToMicroVolts(adc, adcValue);
-        result = conversion(adcValueMicroVolt);
-        if (result != -1)
-        {
-            sendSensorMsgToQ(result);
-        }
-        else
-        {
-            ERROR;
-        }
-    }
+    if(ADC_convert(adc, &adcValue) != ADC_STATUS_SUCCESS) ERROR;
+    uint32_t adcValueMicroVolt = ADC_convertRawToMicroVolts(adc, adcValue);
+    int result = conversion(adcValueMicroVolt);
+    sendSensorMsgToQ(result);
 }
 
 int conversion(uint32_t sensorVal)
@@ -65,12 +61,13 @@ int conversion(uint32_t sensorVal)
     int i, sensorConv = 0;
     for(i = 0; i < DICTLEN; i++)
     {
-        if(sensorVal < sensorValuesLookup[i])
+        if(sensorVal > sensorLookup[i].val)
         {
-            sensorConv = sensorDistLookup[i];
+            sensorConv = sensorLookup[i].dist;
             break;
         }
     }
+    if(sensorConv == 0) ERROR;
     return sensorConv;
 }
 

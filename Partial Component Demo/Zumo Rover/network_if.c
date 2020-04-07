@@ -57,7 +57,6 @@
 /* Common interface includes                                                 */
 #include "network_if.h"
 #include "uart_term.h"
-#include "debug.h"
 
 //*****************************************************************************
 //                          LOCAL DEFINES
@@ -605,6 +604,7 @@ long Network_IF_ConnectAP(char *pcSsid,
         UART_PRINT("Empty SSID, Could not connect\n\r");
         return(-1);
     }
+
     /* Check and loop until AP connection successful, else ask new AP SSID   */
     while(!(IS_CONNECTED(g_ulStatus)) || !(IS_IP_ACQUIRED(g_ulStatus)))
     {
@@ -742,11 +742,13 @@ long Network_IF_IpConfigGet(unsigned long *pulIP,
     long lRetVal = -1;
     unsigned short len = sizeof(SlNetCfgIpV4Args_t);
     SlNetCfgIpV4Args_t ipV4 = { 0 };
+
     /* get network configuration                                             */
     lRetVal =
         sl_NetCfgGet(SL_NETCFG_IPV4_STA_ADDR_MODE, &usDHCP, &len,
                      (unsigned char *) &ipV4);
     ASSERT_ON_ERROR(lRetVal);
+
     *pulIP = ipV4.Ip;
     *pulSubnetMask = ipV4.IpMask;
     *pulDefaultGateway = ipV4.IpGateway;

@@ -12,14 +12,19 @@
 #include <ti/drivers/ADC.h>
 #include "debug.h"
 #include "sensor_queue.h"
-#include "sensor_state.h"
+#include "PID_queue.h"
 
-#define DICTLEN (100)
+#define DICTLEN (11)
+
+typedef struct
+{
+    int val;
+    int dist;
+} lookupTable;
 
 void *sensorThread(void *arg0);
 void adcInit();
 void pollSensor();
 int conversion(uint32_t sensorVal);
-
 
 #endif /* SENSOR_H_ */

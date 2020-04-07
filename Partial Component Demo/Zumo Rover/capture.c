@@ -9,7 +9,7 @@
 
 volatile uint32_t curInterval;
 static Capture_Handle capture0, capture1;
-static int leftCount, rightCount;
+static int leftCount = 0, rightCount = 0;
 
 void clearCounts()
 {
@@ -34,20 +34,12 @@ void captureInit()
     captureParams.mode = Capture_RISING_EDGE; //detect two rising edges
     captureParams.periodUnit = Capture_PERIOD_US; //microseconds
     captureParams.callbackFxn = captureCallback;
-
     capture0 = Capture_open(CONFIG_CAPTURE_0, &captureParams);
     capture1 = Capture_open(CONFIG_CAPTURE_1, &captureParams);
-    if (capture0 == NULL | capture1 == NULL)
-    {
-        ERROR;
-    }
-
-    leftCount = 0;
-    rightCount = 0;
-    if (Capture_start(capture0) == Capture_STATUS_ERROR | Capture_start(capture1) == Capture_STATUS_ERROR)
-    {
-        ERROR;
-    }
+    if (capture0 == NULL) ERROR;
+    if (capture1 == NULL) ERROR;
+    if (Capture_start(capture0) == Capture_STATUS_ERROR) ERROR;
+    if (Capture_start(capture1) == Capture_STATUS_ERROR) ERROR;
 }
 
 void captureCallback(Capture_Handle handle, uint32_t interval)
@@ -63,8 +55,5 @@ void captureCallback(Capture_Handle handle, uint32_t interval)
         sendMsgToPIDQ(RIGHTCAP, curInterval);
         rightCount++;
     }
-    else
-    {
-        ERROR;
-    }
+    else ERROR;
 }

@@ -48,9 +48,6 @@ extern "C"
 #include <ti/net/mqtt/mqttserver.h>
 #include <ti/net/mqtt/mqttclient.h>
 
-#include <mqtt_client.h>
-#include "PID_queue.h"
-
 //*****************************************************************************
 // Macros
 //*****************************************************************************

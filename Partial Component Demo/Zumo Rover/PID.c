@@ -7,26 +7,6 @@
 
 #include "PID.h"
 
-static UART_Handle motors_uart;
-
-void motorsUARTInit()
-{
-    UART_Params uartParams;
-    UART_Params_init(&uartParams);
-    uartParams.writeMode = UART_MODE_BLOCKING;
-    uartParams.writeDataMode = UART_DATA_BINARY;
-    uartParams.readDataMode = UART_DATA_BINARY;
-    uartParams.readReturnMode = UART_RETURN_FULL;
-    uartParams.baudRate = 38400;
-    uartParams.readEcho = UART_ECHO_OFF;
-    motors_uart = UART_open(CONFIG_UART_0, &uartParams);
-    if (motors_uart == NULL)
-    {
-        ERROR;
-    }
-    sendMsgToUARTTxQ(INIT_CONTROLLER, EMPTY);
-}
-
 void updateMotors(MOTORS_DATA motorsState)
 {
     if(motorsState.paused == 0)
@@ -168,82 +148,77 @@ void updateValues(MOTORS_DATA *motorsState, uint32_t type, uint32_t value)
     }
 }
 
-void *PIDThread(void *arg0)
+void PIDEvent(MOTORS_DATA *motorsState, uint32_t type, uint32_t value)
 {
-    dbgOutputLoc(ENTER_TASK);
-    motorsUARTInit();
-    int leftCount = 0, rightCount = 0;
-    uint32_t type = 0, value = 0;
-    MOTORS_DATA motorsState;
-    motorsState.setLeftSpeed = 0;
-    motorsState.setRightSpeed = 0;
-    motorsState.realLeftSpeed = 0;
-    motorsState.realRightSpeed = 0;
-    motorsState.leftDir = 0;
-    motorsState.rightDir = 0;
-    motorsState.paused = 0;
-    while(1)
+    static int leftCount = 0, rightCount = 0;
+    switch(type)
     {
-        receiveFromPIDQ(&type, &value);
-        switch(type)
+        case TIMER:
         {
-            case TIMER:
+            if(leftCount != getLeftCount()) ERROR;
+            if(rightCount != getRightCount()) ERROR;
+            clearCounts();
+            updateMotors(*motorsState);
+            sendMsgToUARTDebugQ(LEFTCAP, motorsState->realLeftSpeed);
+            sendMsgToUARTDebugQ(RIGHTCAP, motorsState->realRightSpeed);
+            sendMsgToUARTDebugQ(LEFTCOUNT, leftCount);
+            sendMsgToUARTDebugQ(RIGHTCOUNT, rightCount);
+            leftCount = 0;
+            rightCount = 0;
+            break;
+        }
+        case LEFTCAP:
+        {
+            //1.6ms is full speed, need to measure min speed
+            motorsState->realLeftSpeed = value;
+            leftCount++;
+            break;
+        }
+        case RIGHTCAP:
+        {
+            motorsState->realRightSpeed = value;
+            rightCount++;
+            break;
+        }
+        case SENSOR:
+        {
+            if(value > 65)
             {
-                if(leftCount != getLeftCount() | rightCount != getRightCount())
-                {
-                    ERROR;
-                }
-                clearCounts();
-                updateMotors(motorsState);
-                sendMsgToUARTDebugQ(TIMER, value);
-                sendMsgToUARTDebugQ(LEFTCAP, motorsState.realLeftSpeed);
-                sendMsgToUARTDebugQ(RIGHTCAP, motorsState.realRightSpeed);
-                sendMsgToUARTDebugQ(LEFTCOUNT, leftCount);
-                sendMsgToUARTDebugQ(RIGHTCOUNT, rightCount);
-                leftCount = 0;
-                rightCount = 0;
-                break;
+                updateValues(motorsState, ACCEL, value - 65);
             }
-            case LEFTCAP:
+            else if(value < 55)
             {
-                //1.6ms is full speed, need to measure min speed
-                motorsState.realLeftSpeed = value;
-                leftCount++;
-                break;
+                updateValues(motorsState, DECEL, 55 - value);
             }
-            case RIGHTCAP:
-            {
-                motorsState.realRightSpeed = value;
-                rightCount++;
-                break;
-            }
-            default:
-            {
-                updateValues(&motorsState, type, value);
-                break;
-            }
+        }
+        case PIXY:
+        {
+            //updateValue(motorsState, TURNLEFT, 60);
+            //updateValue(motorsState, TURNRIGHT, 60);
+        }
+        default:
+        {
+            updateValues(motorsState, type, value);
+            break;
         }
     }
 }
 
-void *UARTTxThread(void *arg0)
+void *PIDThread(void *arg0)
 {
     dbgOutputLoc(ENTER_TASK);
-    uint8_t byte1;
-    uint16_t value;
+    uint32_t type = 0, value = 0;
+    MOTORS_DATA motorsState = {.setLeftSpeed = 0,
+                               .setRightSpeed = 0,
+                               .realLeftSpeed = 0,
+                               .realRightSpeed = 0,
+                               .leftDir = 0,
+                               .rightDir = 0,
+                               .paused = 0};
     dbgOutputLoc(WHILE1);
     while(1)
     {
-        receiveFromUARTTxQ(&value);
-        byte1 = value & 0xFF;
-        if(byte1 == 0)
-        {
-            byte1 = value >> 8;
-            UART_write(motors_uart, &byte1, sizeof(byte1));
-        }
-        else
-        {
-            UART_write(motors_uart, &value, sizeof(value));
-        }
+        receiveFromPIDQ(&type, &value);
+        PIDEvent(&motorsState, type, value);
     }
 }

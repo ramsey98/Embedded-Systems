@@ -9,8 +9,10 @@
 #define TEST_H_
 
 #include <PID.h>
+#include "sensor.h"
+#include "pixy.h"
+#include "mqtt_client.h"
 #include "debug.h"
-#include "mqtt_queue.h"
 #include <unistd.h>
 
 typedef enum
@@ -30,6 +32,10 @@ typedef enum
 } test_num;
 
 void *testThread(void *arg0);
-void tests(test_num* num);
+void motortests(test_num* num);
+void pixytests(test_num* num);
+void sensortests(test_num* num);
+void pidtests(test_num* num);
+void mqtttests(test_num* num);
 
 #endif /* TEST_H_ */

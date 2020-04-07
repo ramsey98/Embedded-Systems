@@ -19,6 +19,7 @@ typedef struct
 } MQTTMsg;
 
 void sendMsgToMQTTQ(MQTTMsg msg);
+void sendMsgToMQTTQFromISR(MQTTMsg msg);
 void receiveFromMQTTQ(MQTTMsg *received);
 void createMQTTQueue();
 

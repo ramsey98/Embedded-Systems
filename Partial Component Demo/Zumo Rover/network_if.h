@@ -59,11 +59,11 @@ extern "C"
 /* is executed.                                                               */
 
 /* AP SSID                                                                    */
-#define SSID_NAME               "embedded_mqtt"
+#define SSID_NAME               "Ramsey"
 /* Security type (OPEN or WEP or WPA)                                         */
 #define SECURITY_TYPE           SL_WLAN_SEC_TYPE_WPA_WPA2
 /* Password of the secured AP                                                 */
-#define SECURITY_KEY            "Team20"
+#define SECURITY_KEY            "4345253464"
 
 #define SSID_AP_MODE            "<ap-ssid>"
 #define SEC_TYPE_AP_MODE        SL_WLAN_SEC_TYPE_OPEN

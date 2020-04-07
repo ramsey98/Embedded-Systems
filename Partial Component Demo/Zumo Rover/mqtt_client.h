@@ -1,8 +1,8 @@
 /*
  * mqtt_client.h
  *
- *  Created on: Feb 19, 2020
- *      Author: Holden Ramsey
+ *  Created on: Apr 4, 2020
+ *      Author: Jon Glaser
  */
 
 #ifndef MQTT_CLIENT_H_
@@ -11,12 +11,11 @@
 /* Standard includes                                                         */
 #include <stdlib.h>
 #include <pthread.h>
-#include <mqueue.h>
-#include <time.h>
+//#include <mqueue.h>
+//#include <time.h>
 #include <unistd.h>
 
 /* TI-Driver includes                                                        */
-#include <ti/drivers/GPIO.h>
 #include <ti/drivers/SPI.h>
 
 /* Simplelink includes                                                       */
@@ -38,10 +37,10 @@
 /* Application includes                                                      */
 #include "client_cbs.h"
 
-// Embedded includes
 #include "debug.h"
-#include "mqtt_queue.h"
 #include "json_parse.h"
+#include "mqtt_queue.h"
+#include "timer.h"
 //*****************************************************************************
 //                          LOCAL DEFINES
 //*****************************************************************************
@@ -55,7 +54,7 @@
 #define MQTT_INIT_STATE          (0x04)
 
 #define APPLICATION_VERSION      "1.1.1"
-#define APPLICATION_NAME         "Embedded MQTT Client"
+#define APPLICATION_NAME         "Zumo Rover"
 
 #define SLNET_IF_WIFI_PRIO       (5)
 
@@ -70,8 +69,8 @@
 
 /* Defining Broker IP address and port Number                                */
 //#define SERVER_ADDRESS           "messagesight.demos.ibm.com"
-#define SERVER_ADDRESS           "192.168.2.1"
-#define SERVER_IP_ADDRESS        "192.168.2.1"
+#define SERVER_ADDRESS           "192.168.1.45"
+#define SERVER_IP_ADDRESS        "192.168.1.45"
 #define PORT_NUMBER              1883
 #define SECURED_PORT_NUMBER      8883
 #define LOOPBACK_PORT            1882
@@ -81,19 +80,6 @@
 
 /* Retain Flag. Used in publish message.                                     */
 #define RETAIN_ENABLE            1
-
-/* Defining Number of subscription topics                                    */
-#define SUBSCRIPTION_TOPIC_COUNT 1
-
-/* Defining Subscription Topic Values                                        */
-#define SUBSCRIPTION_TOPIC0      "/team20/tri_state"
-
-/* Defining Publish Topic Values                                             */
-#define PUBLISH_TOPIC_BUFFER_SIZE (40)
-#define PUBLISH_TOPIC_COUNT (3)
-#define PUBLISH_TOPIC0           "/team20/zumo_state"
-#define PUBLISH_TOPIC1           "/team20/zumo_leftmotor"
-#define PUBLISH_TOPIC2           "/team20/zumo_rightmotor"
 
 /* Spawn task priority and Task and Thread Stack Size                        */
 #define TASKSTACKSIZE            2048
@@ -123,19 +109,15 @@
 /* Expiration value for the timer that is being used to toggle the Led.      */
 #define TIMER_EXPIRATION_VALUE   100 * 1000000
 
-#define CLIENTID_SIZE (13)
-#define PUBLISH_PAYLOAD_SIZE (400)
 //*****************************************************************************
 //                      LOCAL FUNCTION PROTOTYPES
 //*****************************************************************************
-void TimerPeriodicIntHandler(sigval val);
-void LedTimerConfigNStart();
-void LedTimerDeinitStop();
-void DisplayBanner(char * AppName);
-void *MqttClient(void *pvParameters);
+static void DisplayBanner(char * AppName);
+void * MqttClient(void *pvParameters);
 void Mqtt_start();
 int32_t Mqtt_IF_Connect();
 int32_t MqttClient_start();
-void *commThread(void * args);
+
+
 
 #endif /* MQTT_CLIENT_H_ */

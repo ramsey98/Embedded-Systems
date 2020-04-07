@@ -71,7 +71,6 @@ static UART_Handle uartHandle;
 UART_Handle InitTerm(void)
 {
     UART_Params uartParams;
-
     UART_Params_init(&uartParams);
 
     uartParams.writeDataMode = UART_DATA_BINARY;
@@ -83,6 +82,7 @@ UART_Handle InitTerm(void)
     uartHandle = UART_open(CONFIG_UART_0, &uartParams);
     /* remove uart receive from LPDS dependency */
     UART_control(uartHandle, UART_CMD_RXDISABLE, NULL);
+
     return(uartHandle);
 }
 

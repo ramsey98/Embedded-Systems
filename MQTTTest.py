@@ -268,7 +268,7 @@ def test_receive():
 def test_dos():
     global tests, ID
     print("Running test: DOS @",round(time.time() - starttime,2))
-    diconnected = False
+    disconnected = False
     topic = "/team20/config"
     data = {}
     msgcount = 1000

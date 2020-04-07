@@ -48,12 +48,12 @@
 
 /* Application includes                                                      */
 #include "client_cbs.h"
-
+#include "json_parse.h"
+#include "debug.h"
 
 //*****************************************************************************
 //                          LOCAL DEFINES
 //*****************************************************************************
-#define PUBLISH_BUFFER_SIZE     (1024)
 #define APP_PRINT               Report
 
 #define OS_WAIT_FOREVER         (0xFFFFFFFF)
@@ -66,8 +66,15 @@
 //*****************************************************************************
 //                 GLOBAL VARIABLES
 //*****************************************************************************
-extern char *topic[];
+
+/* Message Queue                                                              */
+//extern char *topic[];
 struct client_info client_info_table[MAX_CONNECTION];
+
+//*****************************************************************************
+//                 Queue external function
+//*****************************************************************************
+//extern int32_t MQTT_SendMsgToQueue(struct msgQueue *queueElement);
 
 //****************************************************************************
 //                      CLIENT CALLBACKS
@@ -95,9 +102,8 @@ void MqttClientCallback(int32_t event,
                         void *data,
                         uint32_t dataLen)
 {
-    int32_t i = 0;
-    uint8_t msgType = 0, state = 0;
-    int ret = 0;
+    //int32_t i = 0;
+
     switch((MQTTClient_EventCB)event)
     {
         case MQTTClient_OPERATION_CB_EVENT:
@@ -120,6 +126,7 @@ void MqttClientCallback(int32_t event,
                 }
                 break;
             }
+
             case MQTTCLIENT_OPERATION_EVT_PUBACK:
             {
                 char *PubAck = (char *) data;
@@ -127,18 +134,21 @@ void MqttClientCallback(int32_t event,
                 APP_PRINT("%s\n\r", PubAck);
                 break;
             }
+
             case MQTTCLIENT_OPERATION_SUBACK:
             {
                 APP_PRINT("Sub Ack:\n\r");
                 APP_PRINT("Granted QoS Levels are:\n\r");
+                /*
                 for(i = 0; i < dataLen; i++)
                 {
-                    APP_PRINT("QoS %d\n\r", ((unsigned char*) data)[i]);
                     APP_PRINT("%s :QoS %d\n\r", topic[i],
                               ((unsigned char*) data)[i]);
                 }
+                */
                 break;
             }
+
             case MQTTCLIENT_OPERATION_UNSUBACK:
             {
                 char *UnSub = (char *) data;
@@ -146,6 +156,7 @@ void MqttClientCallback(int32_t event,
                 APP_PRINT("%s\n\r", UnSub);
                 break;
             }
+
             default:
                 break;
             }
@@ -158,10 +169,9 @@ void MqttClientCallback(int32_t event,
             uint32_t bufSizeReqd = 0;
             uint32_t topicOffset;
             uint32_t payloadOffset;
-
             struct publishMsgHeader msgHead;
 
-            static char pubBuff [PUBLISH_BUFFER_SIZE] = {0};
+            static char pubBuff[JSON_DATA_BUFFER_SIZE] = {0};
 
             topicOffset = sizeof(struct publishMsgHeader);
             payloadOffset = sizeof(struct publishMsgHeader) +
@@ -170,10 +180,10 @@ void MqttClientCallback(int32_t event,
             bufSizeReqd += sizeof(struct publishMsgHeader);
             bufSizeReqd += recvMetaData->topLen + 1;
             bufSizeReqd += dataLen + 1;
-
-            if(bufSizeReqd > PUBLISH_BUFFER_SIZE)
+            if(bufSizeReqd > JSON_DATA_BUFFER_SIZE)
             {
-                APP_PRINT("Payload larger than buffer size\n\r");
+                json_miss(1, JSON_ERROR_OVERFLOW);
+                return;
             }
 
             msgHead.topicLen = recvMetaData->topLen;
@@ -193,12 +203,13 @@ void MqttClientCallback(int32_t event,
             memcpy((void*) (pubBuff + payloadOffset), (const void*) data, dataLen);
             memset((void*) (pubBuff + payloadOffset + dataLen), '\0', 1);
 
-            APP_PRINT("Reqd: %d", bufSizeReqd);
+            /*
             APP_PRINT("\n\rMsg Recvd. by client\n\r");
             APP_PRINT("TOPIC: %s\n\r", pubBuff + topicOffset);
             APP_PRINT("PAYLOAD: %s\n\r", pubBuff + payloadOffset);
             APP_PRINT("QOS: %d\n\r", recvMetaData->qos);
-
+            */
+            dbgOutputLoc(MQTT_MSG_RECEIVED);
             if(recvMetaData->retain)
             {
                 APP_PRINT("Retained\n\r");
@@ -208,35 +219,13 @@ void MqttClientCallback(int32_t event,
             {
                 APP_PRINT("Duplicate\n\r");
             }
-
-            if(!strncmp(pubBuff+topicOffset, SUBSCRIPTION_TOPIC0, strlen(SUBSCRIPTION_TOPIC0)))
-            {
-                ret = json_read(pubBuff + payloadOffset, &msgType, &state);
-                if(ret == -1)
-                {
-                    ERROR;
-                }
-                if(recvMetaData->retain)
-                {
-                    //process trirover state here
-                    if(msgType == MQTT_STATE)
-                    {
-                        if(state == 0)//moving
-                        {
-                            sendMsgToPIDQ(RESUME, 0);
-                        }
-                        else if(state == 1)//loading
-                        {
-                            sendMsgToPIDQ(PAUSE, 0);
-                        }
-                    }
-                }
-            }
+            json_receive(pubBuff + payloadOffset, pubBuff+topicOffset);
             break;
         }
         case MQTTClient_DISCONNECT_CB_EVENT:
         {
             APP_PRINT("BRIDGE DISCONNECTION\n\r");
+            ERROR;
             break;
         }
     }

@@ -1,28 +1,30 @@
 /*
- * mqtt_queue.c
+ * config.c
  *
- *  Created on: Feb 18, 2020
+ *  Created on: Apr 5, 2020
  *      Author: Holden Ramsey
  */
 
-#include "MQTT_queue.h"
+#include "config.h"
+
 static QueueHandle_t xQueue = NULL;
 
-void createMQTTQueue()
+void * configThread(void *arg0)
 {
-    xQueue = xQueueCreate(16, sizeof(MQTTMsg));
+    int msg;
+    while(1)
+    {
+        receiveFromDebugQ(&msg);
+    }
+}
+
+void createDebugQueue()
+{
+    xQueue = xQueueCreate(16, sizeof(int));
     if(xQueue == NULL) ERROR;
 }
 
-void sendMsgToMQTTQ(MQTTMsg msg)
-{
-    dbgOutputLoc(BEFORE_SEND_QUEUE);
-    BaseType_t success = xQueueSend(xQueue, (void *) &msg, pdFALSE);
-    if(success == pdFALSE) ERROR;
-    dbgOutputLoc(AFTER_SEND_QUEUE);
-}
-
-void sendMsgToMQTTQFromISR(MQTTMsg msg)
+void sendMsgToDebugQ(int msg)
 {
     dbgOutputLoc(BEFORE_SEND_QUEUE_ISR_TIMER);
     BaseType_t success = xQueueSendFromISR(xQueue, (void *) &msg, pdFALSE);
@@ -30,10 +32,10 @@ void sendMsgToMQTTQFromISR(MQTTMsg msg)
     dbgOutputLoc(AFTER_SEND_QUEUE_ISR_TIMER);
 }
 
-void receiveFromMQTTQ(MQTTMsg *received)
+void receiveFromDebugQ(int *received)
 {
     dbgOutputLoc(BEFORE_RECEIVE_QUEUE);
-    MQTTMsg temp;
+    int temp;
     BaseType_t success = xQueueReceive(xQueue, &temp, portMAX_DELAY);
     if(success == pdFALSE) ERROR;
     *received = temp;
