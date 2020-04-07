@@ -68,6 +68,21 @@ void dbgUARTNum(int outVal)
     }
 }
 
+void dbgUARTNumAsChars(int outVal)
+{
+    if(outVal < 10) {
+        dbgUARTVal(outVal + '0');
+    } else if(outVal < 100) {
+        char str[2];
+        sprintf(str, "%d", outVal);
+        dbgUARTStr(str);
+    } else {
+        char str[3];
+        sprintf(str, "%d", outVal);
+        dbgUARTStr(str);
+    }
+}
+
 void dbgOutputLoc(unsigned int outLoc)
 {
     GPIO_write(CONFIG_GPIO_7, CONFIG_GPIO_LED_ON);

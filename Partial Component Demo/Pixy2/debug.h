@@ -51,6 +51,7 @@ void dbgUARTInit();
 void dbgUARTVal(unsigned char outVal);
 void dbgUARTStr(char * uartOut);
 void dbgUARTNum(int outVal);
+void dbgUARTNumAsChars(int outVal);
 void dbgOutputLoc(unsigned int outVal);
 void halt();
 

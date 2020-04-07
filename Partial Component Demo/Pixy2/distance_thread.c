@@ -72,37 +72,48 @@ int findDistances(DISTANCE_DATA *data, int * transfer) {
 
     if(*transfer > 0){
         *transfer = 0;
+        dbgUARTStr("{ ");
         for(i=0; i < data->blockCount/CONNECTED_PACKET_LENGTH; i++) {
 
-            dbgUARTStr("c:");
-            if(data->blocks[i].colorCode == 1) {
-                dbgUARTStr("r");
-            } else if(data->blocks[i].colorCode == 2) {
-                dbgUARTStr("g");
-            } else if(data->blocks[i].colorCode == 3) {
-                dbgUARTStr("y");
-            } else {
-                dbgUARTStr("?");
+            if(data->blocks[i].xPos > 10) {     //ensuring a proper size
+                dbgUARTStr("{color:");
+                if(data->blocks[i].colorCode == 1) {
+                    dbgUARTStr("r ");
+                } else if(data->blocks[i].colorCode == 2) {
+                    dbgUARTStr("g ");
+                } else if(data->blocks[i].colorCode == 3) {
+                    dbgUARTStr("y ");
+                } else {
+                    dbgUARTStr("?");
+                }
+
+                /*
+                dbgUARTStr("xPos:");
+                dbgUARTNumAsChars(data->blocks[i].xPos);
+                dbgUARTStr("yPos:");
+                dbgUARTNumAsChars(data->blocks[i].yPos);
+                dbgUARTStr("xPixels:");
+                dbgUARTNumAsChars(data->blocks[i].xPixels);
+                dbgUARTStr("yPixels:");
+                dbgUARTNumAsChars(data->blocks[i].yPixels); */
+                dbgUARTStr(", distance:");
+                findDistance(&(data->blocks[i]));
+                dbgUARTNumAsChars(data->blocks[i].distance);
+
+                if(i < data->blockCount/CONNECTED_PACKET_LENGTH - 1)
+                    dbgUARTStr("} ");
+                else
+                    dbgUARTStr("}");
             }
-            dbgUARTStr("x:");
-            dbgUARTVal(data->blocks[i].xPos);
-            dbgUARTStr("y:");
-            dbgUARTVal(data->blocks[i].yPos);
-            dbgUARTStr("xP:");
-            dbgUARTVal(data->blocks[i].xPixels);
-            dbgUARTStr("yP:");
-            dbgUARTVal(data->blocks[i].yPixels);
-            dbgUARTStr("d:");
-            findDistance(&(data->blocks[i]));
-            dbgUARTVal(data->blocks[i].distance);
         }
+        dbgUARTStr("} ");
     }
 
     return success;
 }
 
 int findDistance(BLOCK_DATA *data) {
-    int dx, dy, i;
+    int dx, i;
     int computed = 0;
 
     if(data->xPixels > focalPixels[0]) {

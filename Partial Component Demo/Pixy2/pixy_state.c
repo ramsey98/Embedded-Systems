@@ -76,7 +76,7 @@ int pixyFsm(PIXY_DATA *curState, int *timeInc, int *complete, int *sendInc) {
            }
            break;
 
-       case PixyPan:
+       case PixyPan:    //currently skipped
            if(*timeInc % 30 == 0 && *timeInc <= 150 && *timeInc > 0) { //every 4.5 seconds
 
                int pan_pos = *timeInc / 30;
@@ -126,11 +126,6 @@ int pixyFsm(PIXY_DATA *curState, int *timeInc, int *complete, int *sendInc) {
        }
        case PixyWaitingForBlocks:
        {
-           /*
-           dbgUARTStr("Blocks:");
-           dbgUARTVal(curState->rx_buffer[CONNECTED_LENGTH_LOC]);
-           dbgUARTStr("Objects:");
-           dbgUARTVal(curState->blockCount/CONNECTED_PACKET_LENGTH);*/
            if(curState->blockCount > 0) {
 
                int loc = CONNECTED_LENGTH_LOC + 2;
