@@ -109,6 +109,24 @@ void dbgOutputLoc(unsigned int outLoc)
     }
 }
 
+void dbgUARTNumAsChars(int outVal)
+{
+    char digit;
+
+    if(outVal > 100) {
+        digit = (outVal / 100) % 10;
+        dbgUARTVal(digit + '0');
+    }
+
+    if(outVal > 10) {
+        digit = (outVal / 10) % 10;
+        dbgUARTVal(digit + '0');
+    }
+
+    digit = outVal % 10;
+    dbgUARTVal(digit + '0');
+}
+
 void halt(int line, const char* func)
 {
     GPIO_write(CONFIG_LED_0_GPIO, CONFIG_GPIO_LED_ON);
@@ -127,20 +145,5 @@ void halt(int line, const char* func)
             timerCount = 0;
             GPIO_toggle(CONFIG_LED_0_GPIO);
         }
-    }
-}
-
-void dbgUARTNumAsChars(int outVal)
-{
-    if(outVal < 10) {
-        dbgUARTVal(outVal + '0');
-    } else if(outVal < 100) {
-        char str[2];
-        sprintf(str, "%d", outVal);
-        dbgUARTStr(str);
-    } else {
-        char str[3];
-        sprintf(str, "%d", outVal);
-        dbgUARTStr(str);
     }
 }

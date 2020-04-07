@@ -69,6 +69,7 @@ void *distanceThread(void *arg0) {
 int findDistances(DISTANCE_DATA *data, int * transfer) {
     int success = 0;
     int i;
+    int first = 1;
 
     if(*transfer > 0){
         *transfer = 0;
@@ -76,7 +77,14 @@ int findDistances(DISTANCE_DATA *data, int * transfer) {
         for(i=0; i < data->blockCount/CONNECTED_PACKET_LENGTH; i++) {
 
             if(data->blocks[i].xPos > 10) {     //ensuring a proper size
-                dbgUARTStr("{color:");
+
+                if(first) {
+                    first = 0;
+                    dbgUARTStr("{ ");
+                } else {
+                    dbgUARTStr(" {");
+                }
+                dbgUARTStr("color:");
                 if(data->blocks[i].colorCode == 1) {
                     dbgUARTStr("r ");
                 } else if(data->blocks[i].colorCode == 2) {
@@ -87,6 +95,8 @@ int findDistances(DISTANCE_DATA *data, int * transfer) {
                     dbgUARTStr("?");
                 }
 
+                findDistance(&(data->blocks[i]));
+
                 /*
                 dbgUARTStr("xPos:");
                 dbgUARTNumAsChars(data->blocks[i].xPos);
@@ -95,13 +105,12 @@ int findDistances(DISTANCE_DATA *data, int * transfer) {
                 dbgUARTStr("xPixels:");
                 dbgUARTNumAsChars(data->blocks[i].xPixels);
                 dbgUARTStr("yPixels:");
-                dbgUARTNumAsChars(data->blocks[i].yPixels);
+                dbgUARTNumAsChars(data->blocks[i].yPixels);*/
                 dbgUARTStr(", distance:");
-                findDistance(&(data->blocks[i]));
-                dbgUARTNumAsChars(data->blocks[i].distance);*/
+                dbgUARTNumAsChars(data->blocks[i].distance);
 
                 if(i < data->blockCount/CONNECTED_PACKET_LENGTH - 1)
-                    dbgUARTStr("} ");
+                    dbgUARTStr("}");
                 else
                     dbgUARTStr("}");
             }
