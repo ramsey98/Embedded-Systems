@@ -109,18 +109,25 @@ void dbgOutputLoc(unsigned int outLoc)
     }
 }
 
+int powerFunction(int base, int exponent)
+{
+    int result=1, e;
+    for(e = exponent; e>0; e--)
+    {
+        result = result * base;
+    }
+    return result;
+}
+
 void dbgUARTNumAsChars(int outVal)
 {
-    char digit;
+    char digit, i;
 
-    if(outVal > 100) {
-        digit = (outVal / 100) % 10;
-        dbgUARTVal(digit + '0');
-    }
-
-    if(outVal > 10) {
-        digit = (outVal / 10) % 10;
-        dbgUARTVal(digit + '0');
+    for(i = 5; i > 0; i--) {
+        if(outVal >= powerFunction(10, i)) {
+            digit = (outVal / powerFunction(10, i)) % 10;
+            dbgUARTVal(digit + '0');
+        }
     }
 
     digit = outVal % 10;
