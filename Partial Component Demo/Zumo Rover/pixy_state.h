@@ -9,6 +9,7 @@
 #define PIXY_STATE_H_
 
 #include "debug.h"
+#include "debug_queue.h"
 #include <string.h>
 
 #define MAX_BLOCKS (10)
@@ -44,7 +45,6 @@ typedef enum
     PixyInit,
     PixyWaitingToSend,
     PixyWaitingForTransfer,
-    PixyWaitingForBlockCount,
     PixyWaitingForBlocks
 } PIXY_STATES;
 
@@ -60,6 +60,7 @@ typedef struct
 } PIXY_DATA;
 
 void pixy_fsm(PIXY_DATA *curState, uint8_t *type);
-
+void processColor(PIXY_DATA *curState);
+void processVersion(PIXY_DATA *curState);
 
 #endif /* PIXY_STATE_H_ */

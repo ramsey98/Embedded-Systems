@@ -38,6 +38,9 @@ void *UARTDebugThread(void *arg0)
                 dbgUARTStr("Right Count:");
                 dbgUARTNum(value);
                 break;
+            case PIXY:
+                dbgUARTStr("Blocks:");
+                dbgUARTNum(value);
             default:
                 dbgUARTStr("Invalid Debug");
                 break;

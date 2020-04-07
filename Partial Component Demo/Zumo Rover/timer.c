@@ -30,16 +30,19 @@ void timerCallback(Timer_Handle myHandle)
     {
         //pollSensor();
     }
+    if(count % 5 == 0)
+    {
+        //sendMsgToPixyQFromISR(PIXY_COLOR);
+    }
     if(count % 10 == 0)
     {
+        sendMsgToPIDQFromISR(TIMER, EMPTY);
         msg.type = JSON_TYPE_DEBUG;
         msg.value = 0;
         sendMsgToMQTTQFromISR(msg);
     }
     if(count % 20 == 0)
     {
-        //sendMsgToPixyQFromISR(PIXY_COLOR);
-        sendMsgToPIDQFromISR(TIMER, EMPTY);
         msg.type = JSON_TYPE_STATS;
         sendMsgToMQTTQFromISR(msg);
     }

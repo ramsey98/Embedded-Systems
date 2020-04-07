@@ -59,7 +59,7 @@ void setTxBuffer(uint8_t *tx_buffer, uint8_t *tx_msg, unsigned tx_length, unsign
     int i;
     for(i=0; i < tx_length; i++)
     {
-        if(tx_msg[i] < msg_length)
+        if(i < msg_length)
         {
             tx_buffer[i] = tx_msg[i];
         }
@@ -91,12 +91,10 @@ void pixyGetVersion(uint8_t *rx_buffer, uint8_t *tx_buffer)
 
 void pixySetServos(uint8_t *rx_buffer, uint8_t *tx_buffer, uint16_t panX, uint16_t panY)
 {
-
     uint8_t msg4 = (panX >> 8);
     uint8_t msg5 = panX;
     uint8_t msg6 = (panY >> 8);
     uint8_t msg7 = panY;
-
     uint8_t txMsgServos[SPI_TX_MSG_SERVOS] = {
                                                      0xae,  // first byte of no_checksum_sync (little endian -> least-significant byte first)
                                                      0xc1,  // second byte of no_checksum_sync
@@ -140,7 +138,7 @@ void pixyGetConnectedBlocks(uint8_t *rx_buffer, uint8_t *tx_buffer)
                                                        0xff,
                                                        0xff,
                                                     };
-    //memset(rx_buffer, 0, SPI_MSG_LENGTH);
+    memset(rx_buffer, 0, SPI_MSG_LENGTH);
     setTxBuffer(tx_buffer, txMsgConnected, SPI_MSG_LENGTH, SPI_TX_MSG_CONNECTED);
     pixy_transfer(rx_buffer, tx_buffer);
 }

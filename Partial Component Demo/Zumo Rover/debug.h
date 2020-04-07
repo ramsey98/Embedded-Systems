@@ -32,6 +32,8 @@
 #define ENTER_SEND_STATS (12)
 #define ENTER_SEND_DEBUG (13)
 #define ENTER_SEND_ERROR (14)
+#define ENTER_PIXY_FSM 15
+#define LEAVE_PIXY_FSM 16
 
 #define DBG_ERROR_LED_TIME (250000)
 #define ERROR halt(__LINE__, __func__);
