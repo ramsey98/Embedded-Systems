@@ -148,56 +148,77 @@ void updateValues(MOTORS_DATA *motorsState, uint32_t type, uint32_t value)
     }
 }
 
+void PIDEvent(MOTORS_DATA *motorsState, uint32_t type, uint32_t value)
+{
+    static int leftCount = 0, rightCount = 0;
+    switch(type)
+    {
+        case TIMER:
+        {
+            if(leftCount != getLeftCount()) ERROR;
+            if(rightCount != getRightCount()) ERROR;
+            clearCounts();
+            updateMotors(*motorsState);
+            sendMsgToUARTDebugQ(LEFTCAP, motorsState->realLeftSpeed);
+            sendMsgToUARTDebugQ(RIGHTCAP, motorsState->realRightSpeed);
+            sendMsgToUARTDebugQ(LEFTCOUNT, leftCount);
+            sendMsgToUARTDebugQ(RIGHTCOUNT, rightCount);
+            leftCount = 0;
+            rightCount = 0;
+            break;
+        }
+        case LEFTCAP:
+        {
+            //1.6ms is full speed, need to measure min speed
+            motorsState->realLeftSpeed = value;
+            leftCount++;
+            break;
+        }
+        case RIGHTCAP:
+        {
+            motorsState->realRightSpeed = value;
+            rightCount++;
+            break;
+        }
+        case SENSOR:
+        {
+            if(value > 65)
+            {
+                updateValues(motorsState, ACCEL, value - 65);
+            }
+            else if(value < 55)
+            {
+                updateValues(motorsState, DECEL, 55 - value);
+            }
+        }
+        case PIXY:
+        {
+            //updateValue(motorsState, TURNLEFT, 60);
+            //updateValue(motorsState, TURNRIGHT, 60);
+        }
+        default:
+        {
+            updateValues(motorsState, type, value);
+            break;
+        }
+    }
+}
+
 void *PIDThread(void *arg0)
 {
     dbgOutputLoc(ENTER_TASK);
-    int leftCount = 0, rightCount = 0;
     uint32_t type = 0, value = 0;
-    MOTORS_DATA motorsState;
-    motorsState.setLeftSpeed = 0;
-    motorsState.setRightSpeed = 0;
-    motorsState.realLeftSpeed = 0;
-    motorsState.realRightSpeed = 0;
-    motorsState.leftDir = 0;
-    motorsState.rightDir = 0;
-    motorsState.paused = 0;
+    MOTORS_DATA motorsState = {.setLeftSpeed = 0,
+                               .setRightSpeed = 0,
+                               .realLeftSpeed = 0,
+                               .realRightSpeed = 0,
+                               .leftDir = 0,
+                               .rightDir = 0,
+                               .paused = 0};
+    dbgOutputLoc(WHILE1);
     while(1)
     {
         receiveFromPIDQ(&type, &value);
-        switch(type)
-        {
-            case TIMER:
-            {
-                if(leftCount != getLeftCount()) ERROR;
-                if(rightCount != getRightCount()) ERROR;
-                clearCounts();
-                updateMotors(motorsState);
-                sendMsgToUARTDebugQ(LEFTCAP, motorsState.realLeftSpeed);
-                sendMsgToUARTDebugQ(RIGHTCAP, motorsState.realRightSpeed);
-                sendMsgToUARTDebugQ(LEFTCOUNT, leftCount);
-                sendMsgToUARTDebugQ(RIGHTCOUNT, rightCount);
-                leftCount = 0;
-                rightCount = 0;
-                break;
-            }
-            case LEFTCAP:
-            {
-                //1.6ms is full speed, need to measure min speed
-                motorsState.realLeftSpeed = value;
-                leftCount++;
-                break;
-            }
-            case RIGHTCAP:
-            {
-                motorsState.realRightSpeed = value;
-                rightCount++;
-                break;
-            }
-            default:
-            {
-                updateValues(&motorsState, type, value);
-                break;
-            }
-        }
+        PIDEvent(&motorsState, type, value);
     }
 }

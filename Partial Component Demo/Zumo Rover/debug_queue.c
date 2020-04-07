@@ -20,39 +20,27 @@ void *UARTDebugThread(void *arg0)
         switch(type)
         {
             case LEFTCAP:
-            {
                 dbgUARTStr("Left Motor:");
                 dbgUARTNum(value);
                 break;
-            }
             case RIGHTCAP:
-            {
                 dbgUARTStr("Right Motor:");
                 dbgUARTNum(value);
                 break;
-            }
             case TIMER:
-            {
                 dbgUARTStr("Timer");
                 break;
-            }
             case LEFTCOUNT:
-            {
                 dbgUARTStr("Left Count:");
                 dbgUARTNum(value);
                 break;
-            }
             case RIGHTCOUNT:
-            {
                 dbgUARTStr("Right Count:");
                 dbgUARTNum(value);
                 break;
-            }
             default:
-            {
                 dbgUARTStr("Invalid Debug");
                 break;
-            }
         }
         dbgUARTStr(lineBreak);
     }

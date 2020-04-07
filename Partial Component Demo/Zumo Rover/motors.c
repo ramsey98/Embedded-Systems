@@ -35,7 +35,7 @@ void *UARTTxThread(void *arg0)
     {
         receiveFromUARTTxQ(&value);
         byte1 = value;
-        if(byte1 == 0)
+        if(byte1 == EMPTY)
         {
             byte1 = value >> 8;
             UART_write(motors_uart, &byte1, sizeof(byte1));

@@ -7,32 +7,19 @@
 
 #include "pixy_state.h"
 
-void initDistanceData(DISTANCE_DATA *d, PIXY_DATA *p)
-{
-    int j;
-    d->blockCount = p->blockCount;
-    for(j=0; j < d->blockCount/CONNECTED_PACKET_LENGTH; j++)
-    {
-        d->blocks[j] = p->blocks[j];
-    }
-}
+extern void pixyGetVersion(uint8_t *rx_buffer, uint8_t *tx_buffer);
+extern void pixySetServos(uint8_t *rx_buffer, uint8_t *tx_buffer, uint16_t panX, uint16_t panY);
+extern void pixySetColor(uint8_t *rx_buffer, uint8_t *tx_buffer, uint8_t r, uint8_t g, uint8_t b);
+extern void pixyGetConnectedBlocks(uint8_t *rx_buffer, uint8_t *tx_buffer);
 
 void pixy_fsm(PIXY_DATA *curState, uint8_t *type)
 {
    //dbgOutputLoc(SPI_ENTER_FSM);
-   int i;
-   curState->curTime += 1;
-   if(*type == SENDINCPIXY)
-   {
-       //DISTANCE_DATA toSend;
-       //initDistanceData(&toSend, curState);
-       //sendBlockMsgToDistanceQ1(&toSend);
-   }
+   int i, loc;
+   uint16_t panX = 1, panY = 1;
    switch (curState->state)
    {
        case PixyInit:
-       {
-           curState->curTime = 0;
            curState->blockCount = 0;
            curState->xPan = 0;
            curState->yPan = 0;
@@ -49,74 +36,51 @@ void pixy_fsm(PIXY_DATA *curState, uint8_t *type)
                 curState->blocks[i].age = 0;
                 curState->blocks[i].distance = 0;
            }
-           curState->state = PixySendVersion;
+           curState->state = PixyWaitingToSend;
            break;
-       }
-       case PixySendVersion:
-            if (*type == TIMEINCPIXY)
-            {
-                //dbgOutputLoc(SPI_SEND_VERSION_PACKET);
-                pixyGetVersionPacket(curState->rx_buffer, curState->tx_buffer);
-                curState->state = PixyWaitingForVersion;
-            }
-           break;
-       case PixyWaitingForVersion:
-           if(*type == COMPLETEPIXY)
+       case PixyWaitingToSend:
+           if(*type == PIXY_VERSION)
            {
-               //dbgOutputLoc(SPI_RECEIVE_VERSION_PACKET);
-               curState->state = PixyWaitingForTime1;//PixyPan;
+               pixyGetVersion(curState->rx_buffer, curState->tx_buffer);
+               curState->state = PixyWaitingForTransfer;
            }
-           break;
-       case PixyPan:
-           if(*type == TIMEINCPIXY)
-           { //every 4.5 seconds
-               int pan_pos = 1/30;//??????????*timeInc / 30;
-               //dbgOutputLoc(SPI_SET_SERVO);
-               int panX = (55+ 100*(pan_pos-1));
-               //dbgUARTNum(panX);
-               int panY = 255;
+           else if(*type == PIXY_PAN)
+           {
                pixySetServos(curState->rx_buffer, curState->tx_buffer, panX, panY);
-               curState->state = PixyWaitingForTime1;
+               curState->state = PixyWaitingForTransfer;
            }
-           break;
-
-       case PixyWaitingForTime1:
-       {
-           if(*type == TIMEINCPIXY) //should be >3
+           else if(*type == PIXY_COLOR)
            {
-               //dbgOutputLoc(SPI_SEND_CONNECTED_PACKET);
                pixyGetConnectedBlocks(curState->rx_buffer, curState->tx_buffer);
                curState->state = PixyWaitingForBlockCount;
            }
            break;
-       }
-       case PixyWaitingForBlockCount:
-       {
-           if(*type == COMPLETEPIXY)
+       case PixyWaitingForTransfer:
+           if(*type == PIXY_COMPLETE)
            {
-               //dbgOutputLoc(SPI_RECEIVE_CONNECTED_PACKET);
-               if(curState->rx_buffer[CONNECTED_LENGTH_LOC-1] != 33)
-               {
-                   curState->state = PixyWaitingForTime1;
-               }
-               else
+               curState->state = PixyWaitingForBlockCount;
+           }
+           break;
+       case PixyWaitingForBlockCount:
+           if(*type == PIXY_COMPLETE)
+           {
+               if(curState->rx_buffer[CONNECTED_LENGTH_LOC-1] == 33)
                {
                    curState->blockCount = curState->rx_buffer[CONNECTED_LENGTH_LOC];
                    curState->state = PixyWaitingForBlocks;
                }
+               else ERROR;
            }
            break;
-       }
        case PixyWaitingForBlocks:
-       {
            /*
            dbgUARTStr("Blocks:");
-           dbgUARTVal(curState->rx_buffer[CONNECTED_LENGTH_LOC]);
+           dbgUARTNum(curState->rx_buffer[CONNECTED_LENGTH_LOC]);
            dbgUARTStr("Objects:");
-           dbgUARTVal(curState->blockCount/CONNECTED_PACKET_LENGTH);*/
+           dbgUARTNum(curState->blockCount/CONNECTED_PACKET_LENGTH);*/
            if(curState->blockCount > 0)
            {
-               int loc = CONNECTED_LENGTH_LOC + 2;
+               loc = CONNECTED_LENGTH_LOC + 2;
                for(i = 0; i < curState->blockCount/CONNECTED_PACKET_LENGTH; i++)
                {
                    curState->blocks[i].colorCode = curState->rx_buffer[loc+1];
@@ -131,14 +95,10 @@ void pixy_fsm(PIXY_DATA *curState, uint8_t *type)
                }
            }
            //dbgUARTStr((char *)curState->rx_buffer);
-           curState->state = PixyWaitingForTime1;
+           curState->state = PixyWaitingToSend;
            break;
-       }
        default:
-       {
            ERROR;
-           break;
-       }
    }
    //dbgOutputLoc(SPI_EXIT_FSM);
 }

@@ -12,7 +12,7 @@
 #include <ti/drivers/ADC.h>
 #include "debug.h"
 #include "sensor_queue.h"
-#include "sensor_state.h"
+#include "PID_queue.h"
 
 #define DICTLEN (11)
 

@@ -111,28 +111,29 @@ void json_send(char *publish_topic, char *publish_data, MQTTMsg msg)
     uint16_t buf = JSON_DATA_BUFFER_SIZE;
     attempts++;
     memset(publish_data, 0, JSON_DATA_BUFFER_SIZE);
-    if(msg.type == JSON_TYPE_STATS)
+    switch(msg.type)
     {
-        if(Json_createTemplate(&templateHandle, JSON_STATS, strlen(JSON_STATS)) != 0) ERROR;
-        if(Json_createObject(&objectHandle, templateHandle, 0) != 0) ERROR;
-        json_send_stats(objectHandle);
-        strncpy(publish_topic, PUBLISH_TOPIC_0, sizeof(PUBLISH_TOPIC_0));
+        case JSON_TYPE_STATS:
+            if(Json_createTemplate(&templateHandle, JSON_STATS, strlen(JSON_STATS)) != 0) ERROR;
+            if(Json_createObject(&objectHandle, templateHandle, 0) != 0) ERROR;
+            json_send_stats(objectHandle);
+            strncpy(publish_topic, PUBLISH_TOPIC_0, sizeof(PUBLISH_TOPIC_0));
+            break;
+        case JSON_TYPE_DEBUG:
+            if(Json_createTemplate(&templateHandle, JSON_DEBUG, strlen(JSON_DEBUG)) != 0) ERROR;
+            if(Json_createObject(&objectHandle, templateHandle, 0) != 0) ERROR;
+            json_send_debug(msg, objectHandle);
+            strncpy(publish_topic, PUBLISH_TOPIC_1, sizeof(PUBLISH_TOPIC_1));
+            break;
+        case JSON_TYPE_ERROR:
+            if(Json_createTemplate(&templateHandle, JSON_ERRORS, strlen(JSON_ERRORS)) != 0) ERROR;
+            if(Json_createObject(&objectHandle, templateHandle, 0) != 0) ERROR;
+            json_send_error(msg, objectHandle);
+            strncpy(publish_topic, PUBLISH_TOPIC_2, sizeof(PUBLISH_TOPIC_2));
+            break;
+        default:
+            ERROR;
     }
-    else if(msg.type == JSON_TYPE_DEBUG)
-    {
-        if(Json_createTemplate(&templateHandle, JSON_DEBUG, strlen(JSON_DEBUG)) != 0) ERROR;
-        if(Json_createObject(&objectHandle, templateHandle, 0) != 0) ERROR;
-        json_send_debug(msg, objectHandle);
-        strncpy(publish_topic, PUBLISH_TOPIC_1, sizeof(PUBLISH_TOPIC_1));
-    }
-    else if(msg.type == JSON_TYPE_ERROR)
-    {
-        if(Json_createTemplate(&templateHandle, JSON_ERRORS, strlen(JSON_ERRORS)) != 0) ERROR;
-        if(Json_createObject(&objectHandle, templateHandle, 0) != 0) ERROR;
-        json_send_error(msg, objectHandle);
-        strncpy(publish_topic, PUBLISH_TOPIC_2, sizeof(PUBLISH_TOPIC_2));
-    }
-    else ERROR;
     if(Json_build(objectHandle, publish_data, &buf) != 0) ERROR;
     if(Json_destroyTemplate(templateHandle) != 0) ERROR;
     if(Json_destroyObject(objectHandle) != 0) ERROR;

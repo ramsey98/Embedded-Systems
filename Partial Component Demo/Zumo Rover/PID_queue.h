@@ -30,6 +30,7 @@
 
 #define PIDSHIFT (32)
 
+void sendMsgToPIDQFromISR(uint32_t type, uint32_t value);
 void sendMsgToPIDQ(uint32_t type, uint32_t value);
 void receiveFromPIDQ(uint32_t * type, uint32_t * value);
 void createPIDQueue();

@@ -17,7 +17,6 @@ void dbgUARTInit(UART_Handle uartHandle)
 
 void dbgGPIOInit()
 {
-    GPIO_init();
     GPIO_setConfig(CONFIG_GPIO_0, GPIO_CFG_OUT_STD | GPIO_CFG_OUT_LOW);
     GPIO_setConfig(CONFIG_GPIO_1, GPIO_CFG_OUT_STD | GPIO_CFG_OUT_LOW);
     GPIO_setConfig(CONFIG_GPIO_2, GPIO_CFG_OUT_STD | GPIO_CFG_OUT_LOW);
@@ -61,7 +60,6 @@ void dbgOutputLoc(unsigned int outLoc)
     GPIO_write(CONFIG_GPIO_2, CONFIG_GPIO_LED_OFF);
     GPIO_write(CONFIG_GPIO_1, CONFIG_GPIO_LED_OFF);
     GPIO_write(CONFIG_GPIO_0, CONFIG_GPIO_LED_OFF);
-
     if (outLoc <= 127)
     {
         if (outLoc & 0b01000000)

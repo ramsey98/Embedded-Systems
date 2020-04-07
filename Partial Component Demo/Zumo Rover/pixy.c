@@ -13,10 +13,9 @@ void SPICallback(SPI_Handle handle, SPI_Transaction *trans)
 {
     if(trans->status == SPI_TRANSFER_COMPLETED)
     {
-        sendMsgToPixyQ(COMPLETEPIXY);
+        sendMsgToPixyQFromISR(PIXY_COMPLETE);
     }
     else if(trans->status == SPI_TRANSFER_FAILED) ERROR;
-
 }
 
 void pixy_init()
@@ -52,16 +51,6 @@ void *pixyThread(void *arg0)
     {
         receiveFromPixyQ(&type);
         pixy_fsm(&pixyState, &type);
-        /*
-        if(value == toLeft)
-        {
-            sendMsgToPIDQ(TURNLEFT, 25);
-        }
-        else if(value == toRight)
-        {
-            sendMsgToPIDQ(TURNRIGHT, 25);
-        }
-        */
     }
 }
 
@@ -70,7 +59,7 @@ void setTxBuffer(uint8_t *tx_buffer, uint8_t *tx_msg, unsigned tx_length, unsign
     int i;
     for(i=0; i < tx_length; i++)
     {
-        if(i < msg_length)
+        if(tx_msg[i] < msg_length)
         {
             tx_buffer[i] = tx_msg[i];
         }
@@ -87,7 +76,7 @@ void initBuffers(uint8_t *rx_buffer, uint8_t *tx_buffer)
     memset(tx_buffer, 0, SPI_MSG_LENGTH);
 }
 
-void pixyGetVersionPacket(uint8_t *rx_buffer, uint8_t *tx_buffer)
+void pixyGetVersion(uint8_t *rx_buffer, uint8_t *tx_buffer)
 {
     uint8_t txMsgVersion[SPI_TX_MSG_VERSION] = {
                                                      0xae,  // first byte of no_checksum_sync (little endian -> least-significant byte first)
@@ -100,13 +89,13 @@ void pixyGetVersionPacket(uint8_t *rx_buffer, uint8_t *tx_buffer)
     pixy_transfer(rx_buffer, tx_buffer);
 }
 
-void pixySetServos(uint8_t *rx_buffer, uint8_t *tx_buffer, int panX, int panY)
+void pixySetServos(uint8_t *rx_buffer, uint8_t *tx_buffer, uint16_t panX, uint16_t panY)
 {
 
-    uint8_t msg4 = (uint8_t)(panX >> 8);
-    uint8_t msg5 = (uint8_t)(panX & 0xff);
-    uint8_t msg6 = (uint8_t)(panY >> 8);
-    uint8_t msg7 = (uint8_t)(panY & 0xff);
+    uint8_t msg4 = (panX >> 8);
+    uint8_t msg5 = panX;
+    uint8_t msg6 = (panY >> 8);
+    uint8_t msg7 = panY;
 
     uint8_t txMsgServos[SPI_TX_MSG_SERVOS] = {
                                                      0xae,  // first byte of no_checksum_sync (little endian -> least-significant byte first)
@@ -124,7 +113,7 @@ void pixySetServos(uint8_t *rx_buffer, uint8_t *tx_buffer, int panX, int panY)
     pixy_transfer(rx_buffer, tx_buffer);
 }
 
-void pixySetColorPacket(uint8_t *rx_buffer, uint8_t *tx_buffer, uint8_t r, uint8_t g, uint8_t b)
+void pixySetColor(uint8_t *rx_buffer, uint8_t *tx_buffer, uint8_t r, uint8_t g, uint8_t b)
 {
     uint8_t txMsgColor[SPI_TX_MSG_COLOR] = {
                                                      0xae,  // first byte of no_checksum_sync (little endian -> least-significant byte first)

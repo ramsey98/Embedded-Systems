@@ -12,6 +12,7 @@
 #include "queue.h"
 
 void sendMsgToPixyQ(uint8_t type);
+void sendMsgToPixyQFromISR(uint8_t type);
 void receiveFromPixyQ(uint8_t *type);
 void createPixyQueue();
 

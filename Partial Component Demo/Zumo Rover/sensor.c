@@ -23,15 +23,19 @@ const lookupTable sensorLookup[DICTLEN] = {{840000,12},
 void *sensorThread(void *arg0)
 {
     dbgOutputLoc(ENTER_TASK);
-    SENSOR_DATA curState;
-    curState.state = Sensor_Init;
     uint16_t sensorVal = 0;
-    sensor_fsm(&curState, sensorVal);
+    static int total = 0, count = 0, avg = 0;
     dbgOutputLoc(WHILE1);
     while(1)
     {
         receiveFromSensorQ(&sensorVal);
-        sensor_fsm(&curState, sensorVal);
+        total+=sensorVal;
+        count++;
+        if(count == 5)
+        {
+            avg = total/count;
+            sendMsgToPIDQ(SENSOR, avg);
+        }
     }
 }
 
