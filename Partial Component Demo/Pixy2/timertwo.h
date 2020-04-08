@@ -24,7 +24,6 @@ void timer100MSCallback(Timer_Handle myHandle);
 void timer100MSInit();
 
 //ADC function
-int conversion(uint32_t sensorVal);
 void adcInit();
 
 #endif /* TIMERTWO_H_ */

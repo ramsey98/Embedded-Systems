@@ -20,6 +20,7 @@ void timer100MSCallback(Timer_Handle myHandle)
         ERROR;
     }
 
+    /*
     MQTTMsg msg = {0, 0};
     if(count == 10)
     {
@@ -52,22 +53,6 @@ void timer100MSCallback(Timer_Handle myHandle)
     } */
 
     dbgOutputLoc(LEAVE_ISR_TIMER2);
-}
-
-int conversion(uint32_t sensorVal)
-{
-    //convert to mm here
-    int sensorConv = sensorVal/1000;
-
-    int result;
-    if (sensorConv>1300)
-        result = 10;
-    else if (sensorConv < 200)
-        result = 80;
-    else
-        return sensorConv;
-
-    return result;
 }
 
 void adcInit()

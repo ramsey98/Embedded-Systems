@@ -18,7 +18,7 @@
 #include <pthread.h>
 #include "uart_term.h"
 
-extern void runMQTT();
+//extern void runMQTT();
 
 #define THREADSTACKSIZE (1024)
 
@@ -82,7 +82,7 @@ void *mainThread(void *arg0)
         ERROR;
     }
 
-    runMQTT();
+    //runMQTT();
     return (NULL);
 
 }
