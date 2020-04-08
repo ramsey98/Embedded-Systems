@@ -6,11 +6,13 @@
  */
 
 #include "pixy.h"
+#include "debug_queue.h"
 
 static SPI_Handle masterSpi;
 
 void SPICallback(SPI_Handle handle, SPI_Transaction *trans)
 {
+    sendMsgToUARTDebugQ(PIXY, 1);
     if(trans->status == SPI_TRANSFER_COMPLETED)
     {
         sendMsgToPixyQFromISR(PIXY_COMPLETE);
@@ -18,7 +20,7 @@ void SPICallback(SPI_Handle handle, SPI_Transaction *trans)
     else if(trans->status == SPI_TRANSFER_FAILED) ERROR;
 }
 
-void pixy_init()
+void pixyInit()
 {
     SPI_Params spiParams;
     SPI_Params_init(&spiParams);
@@ -33,10 +35,10 @@ void pixy_init()
 void pixy_transfer(uint8_t *rx_buffer, uint8_t *tx_buffer)
 {
     SPI_Transaction transaction;
-    transaction.count = sizeof(tx_buffer);
+    transaction.count = SPI_MSG_LENGTH;
     transaction.txBuf = (void *) tx_buffer;
     transaction.rxBuf = (void *) rx_buffer;
-    if(!SPI_transfer(masterSpi, &transaction)) ERROR;
+    if(SPI_transfer(masterSpi, &transaction) == 0) ERROR;
 }
 
 void *pixyThread(void *arg0)
@@ -45,12 +47,14 @@ void *pixyThread(void *arg0)
     uint8_t type = 0;
     PIXY_DATA pixyState;
     pixyState.state = PixyInit;
+    initBuffers(pixyState.rx_buffer, pixyState.tx_buffer);
     pixy_fsm(&pixyState, &type);
     dbgOutputLoc(WHILE1);
     while(1)
     {
+        sendMsgToUARTDebugQ(PIXY, 2);
         receiveFromPixyQ(&type);
-        pixy_fsm(&pixyState, &type);
+        //pixy_fsm(&pixyState, &type);
     }
 }
 

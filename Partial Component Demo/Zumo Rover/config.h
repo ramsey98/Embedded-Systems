@@ -12,8 +12,8 @@
 #include "queue.h"
 
 void * configThread(void *arg0);
-void sendMsgToDebugQ(int msg);
-void receiveFromDebugQ(int *received);
-void createDebugQueue();
+void sendMsgToConfigQ(int msg);
+void receiveFromConfigQ(int *received);
+void createConfigQueue();
 
 #endif /* CONFIG_H_ */

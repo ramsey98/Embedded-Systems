@@ -67,7 +67,7 @@ void json_read_config(Json_Handle objectHandle)
     }
     else
     {
-        sendMsgToDebugQ(value);
+        sendMsgToConfigQ(value);
     }
 }
 

@@ -14,17 +14,17 @@ void * configThread(void *arg0)
     int msg;
     while(1)
     {
-        receiveFromDebugQ(&msg);
+        receiveFromConfigQ(&msg);
     }
 }
 
-void createDebugQueue()
+void createConfigQueue()
 {
     xQueue = xQueueCreate(16, sizeof(int));
     if(xQueue == NULL) ERROR;
 }
 
-void sendMsgToDebugQ(int msg)
+void sendMsgToConfigQ(int msg)
 {
     dbgOutputLoc(BEFORE_SEND_QUEUE_ISR_TIMER);
     BaseType_t success = xQueueSendFromISR(xQueue, (void *) &msg, pdFALSE);
@@ -32,7 +32,7 @@ void sendMsgToDebugQ(int msg)
     dbgOutputLoc(AFTER_SEND_QUEUE_ISR_TIMER);
 }
 
-void receiveFromDebugQ(int *received)
+void receiveFromConfigQ(int *received)
 {
     dbgOutputLoc(BEFORE_RECEIVE_QUEUE);
     int temp;

@@ -14,6 +14,7 @@
 
 #define UARTSHIFT (32)
 void sendMsgToUARTDebugQ(uint32_t type, uint32_t value);
+void sendMsgToUARTDebugQFromISR(uint32_t type, uint32_t value);
 void receiveFromUARTDebugQ(uint32_t * type, uint32_t * value);
 void createUARTDebugQueue();
 void *UARTDebugThread(void *arg0);

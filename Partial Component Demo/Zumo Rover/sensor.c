@@ -6,19 +6,25 @@
  */
 
 #include "sensor.h"
+#include "mqtt_queue.h"
+#include "json_parse.h"
 
 static ADC_Handle adc;
-const lookupTable sensorLookup[DICTLEN] = {{840000,12},
-                                           {770000,14},
-                                           {670000,16},
-                                           {600000,18},
-                                           {530000,20},
-                                           {500000,22},
-                                           {460000,24},
-                                           {420000,26},
-                                           {400000,28},
-                                           {370000,30},
-                                           {100,0}};
+const lookupTable sensorLookup[DICTLEN] = {{880000,4},
+                                           {750000,6},
+                                           {500000,8},
+                                           {400000,10},
+                                           {350000,12},
+                                           {290000,14},
+                                           {220000,16},
+                                           {200000,18},
+                                           {180000,20},
+                                           {170000,22},
+                                           {150000,24},
+                                           {140000,26},
+                                           {130000,28},
+                                           {125000,30},
+                                           {000100,0}};
 
 void *sensorThread(void *arg0)
 {
@@ -34,7 +40,11 @@ void *sensorThread(void *arg0)
         if(count == 5)
         {
             avg = total/count;
-            sendMsgToPIDQ(SENSOR, avg);
+            total = 0;
+            count = 0;
+            //sendMsgToPIDQ(SENSOR, avg);
+            MQTTMsg msg = {.type = JSON_TYPE_DEBUG, .value = avg};
+            sendMsgToMQTTQ(msg);
         }
     }
 }
@@ -59,6 +69,7 @@ void pollSensor()
 int conversion(uint32_t sensorVal)
 {
     int i, sensorConv = 0;
+    sendMsgToUARTDebugQFromISR(SENSOR, sensorVal);
     for(i = 0; i < DICTLEN; i++)
     {
         if(sensorVal > sensorLookup[i].val)
@@ -67,7 +78,8 @@ int conversion(uint32_t sensorVal)
             break;
         }
     }
-    if(sensorConv == 0) ERROR;
+    //sendMsgToUARTDebugQFromISR(SENSOR, sensorConv);
+    //if(sensorConv == 0) ERROR;
     return sensorConv;
 }
 

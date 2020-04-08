@@ -14,7 +14,14 @@ extern void pixyGetConnectedBlocks(uint8_t *rx_buffer, uint8_t *tx_buffer);
 
 void processVersion(PIXY_DATA *curState)
 {
-
+    UART_PRINT("V");
+    uint8_t version = 0;
+    if(curState->rx_buffer[15+2] == 15)
+    {
+        version = curState->rx_buffer[15+8];
+    }
+    MQTTMsg msg = {JSON_TYPE_DEBUG, version};
+    sendMsgToMQTTQ(msg);
 }
 
 void processColor(PIXY_DATA *curState)
@@ -47,7 +54,7 @@ void pixy_fsm(PIXY_DATA *curState, uint8_t *type)
 {
     dbgOutputLoc(ENTER_PIXY_FSM);
     int i;
-    static uint8_t prevType;
+    static uint8_t prevType = 0;
     uint16_t panX = 1, panY = 1;
     switch (curState->state)
     {
@@ -74,6 +81,7 @@ void pixy_fsm(PIXY_DATA *curState, uint8_t *type)
             switch(*type)
             {
                 case PIXY_VERSION:
+                    sendMsgToUARTDebugQ(PIXY, 2);
                     pixyGetVersion(curState->rx_buffer, curState->tx_buffer);
                     break;
                 case PIXY_PAN:
@@ -91,6 +99,7 @@ void pixy_fsm(PIXY_DATA *curState, uint8_t *type)
         case PixyWaitingForTransfer:
             if(*type == PIXY_COMPLETE)
             {
+                sendMsgToUARTDebugQ(PIXY, 3);
                 switch(prevType)
                 {
                     case PIXY_VERSION:
