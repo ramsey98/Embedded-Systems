@@ -51,6 +51,7 @@ void dbgUARTInit(UART_Handle uartHandle);
 void dbgUARTVal(unsigned char outVal);
 void dbgUARTStr(const char* uartOut);
 void dbgUARTNum(int outVal);
+int powerFunction(int base, int exponent);
 void dbgUARTNumAsChars(int outVal);
 void dbgOutputLoc(unsigned int outVal);
 void halt(int line, const char* func);

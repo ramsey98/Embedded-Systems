@@ -109,10 +109,7 @@ int findDistances(DISTANCE_DATA *data, int * transfer) {
                 dbgUARTStr(", distance:");
                 dbgUARTNumAsChars(data->blocks[i].distance);
 
-                if(i < data->blockCount/CONNECTED_PACKET_LENGTH - 1)
-                    dbgUARTStr("}");
-                else
-                    dbgUARTStr("}");
+                dbgUARTStr("}");
             }
         }
         dbgUARTStr("} ");
