@@ -112,7 +112,7 @@ int findDistances(DISTANCE_DATA *data, int * transfer) {
                 dbgUARTStr("}");
             }
         }
-        dbgUARTStr("} ");
+        dbgUARTStr("}\n\r");
     }
 
     return success;

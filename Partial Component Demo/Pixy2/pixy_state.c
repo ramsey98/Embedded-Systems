@@ -21,14 +21,18 @@ int pixyFsm(PIXY_DATA *curState, int *timeInc, int *complete, int *sendInc) {
    dbgOutputLoc(SPI_ENTER_FSM);
    int success = 0;
    int i;
+   static int valid_data = 0;
    if(*sendInc > 0) {
-       curState->curTime += *sendInc;
        *sendInc = 0;
-
-       DISTANCE_DATA toSend;
-       initDistanceData(&toSend, curState);
-       sendBlockMsgToDistanceQ1(&toSend);
-
+       if(valid_data > 0) {
+           curState->curTime += *sendInc;
+           DISTANCE_DATA toSend;
+           initDistanceData(&toSend, curState);
+           sendBlockMsgToDistanceQ1(&toSend);
+           valid_data = 0;
+       } else {
+           dbgUARTStr("No response from Pixy.\n\r");
+       }
    }
 
    switch (curState->state)
@@ -120,6 +124,7 @@ int pixyFsm(PIXY_DATA *curState, int *timeInc, int *complete, int *sendInc) {
                } else {
                    curState->blockCount = curState->rx_buffer[CONNECTED_LENGTH_LOC];
                    curState->state = PixyWaitingForBlocks;
+                   valid_data = 1;
                }
            }
            break;
