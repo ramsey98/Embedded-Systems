@@ -14,7 +14,7 @@
 #include "pixy_state.h"
 #include "PID_queue.h"
 
-void pixy_init();
+void pixyInit();
 void SPICallback(SPI_Handle handle, SPI_Transaction *trans);
 void setTxBuffer(uint8_t *tx_buffer, uint8_t *tx_msg, unsigned tx_length, unsigned msg_length);
 void initBuffers(uint8_t *rx_buffer, uint8_t *tx_buffer);

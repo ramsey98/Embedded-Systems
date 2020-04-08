@@ -16,11 +16,11 @@ void createPixyQueue()
 
 void sendMsgToPixyQ(uint8_t type)
 {
-    dbgOutputLoc(BEFORE_SEND_QUEUE_ISR_TIMER);
+    dbgOutputLoc(BEFORE_SEND_QUEUE);
     uint8_t msg = type;
     BaseType_t success = xQueueSend(xQueue, (void *) &msg, pdFALSE);
     if(success == pdFALSE) ERROR;
-    dbgOutputLoc(AFTER_SEND_QUEUE_ISR_TIMER);
+    dbgOutputLoc(AFTER_SEND_QUEUE);
 }
 
 void sendMsgToPixyQFromISR(uint8_t type)

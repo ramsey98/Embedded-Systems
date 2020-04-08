@@ -182,19 +182,23 @@ void PIDEvent(MOTORS_DATA *motorsState, uint32_t type, uint32_t value)
         }
         case SENSOR:
         {
-            if(value > 65)
+            if(value > 26)
             {
-                updateValues(motorsState, ACCEL, value - 65);
+                sendMsgToUARTDebugQ(PID_SENSOR, ACCEL);
+                //updateValues(motorsState, ACCEL, value - 65);
             }
-            else if(value < 55)
+            else if(value < 22)
             {
-                updateValues(motorsState, DECEL, 55 - value);
+                sendMsgToUARTDebugQ(PID_SENSOR, DECEL);
+                //updateValues(motorsState, DECEL, 55 - value);
             }
+            break;
         }
         case PIXY:
         {
             //updateValue(motorsState, TURNLEFT, 60);
             //updateValue(motorsState, TURNRIGHT, 60);
+            break;
         }
         default:
         {

@@ -118,6 +118,4 @@ void Mqtt_start();
 int32_t Mqtt_IF_Connect();
 int32_t MqttClient_start();
 
-
-
 #endif /* MQTT_CLIENT_H_ */

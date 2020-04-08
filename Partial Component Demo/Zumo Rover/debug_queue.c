@@ -38,9 +38,25 @@ void *UARTDebugThread(void *arg0)
                 dbgUARTStr("Right Count:");
                 dbgUARTNum(value);
                 break;
+            case PID_SENSOR:
+                dbgUARTStr("PID Sensor:");
+                if(value == ACCEL)
+                {
+                    dbgUARTStr("ACCEL");
+                }
+                else if(value == DECEL)
+                {
+                    dbgUARTStr("DECEL");
+                }
+                break;
+            case SENSOR:
+                dbgUARTStr("Sensor:");
+                dbgUARTNum(value);
+                break;
             case PIXY:
                 dbgUARTStr("Blocks:");
                 dbgUARTNum(value);
+                break;
             default:
                 dbgUARTStr("Invalid Debug");
                 break;
@@ -61,6 +77,16 @@ void sendMsgToUARTDebugQ(uint32_t type, uint32_t value)
     uint64_t msg1 = type;
     uint64_t msg = (msg1 << UARTSHIFT) | value;
     BaseType_t success = xQueueSend(xQueue, (void *) &msg, pdFALSE);
+    if(success == pdFALSE) ERROR;
+    dbgOutputLoc(AFTER_SEND_QUEUE_ISR_TIMER);
+}
+
+void sendMsgToUARTDebugQFromISR(uint32_t type, uint32_t value)
+{
+    dbgOutputLoc(BEFORE_SEND_QUEUE_ISR_TIMER);
+    uint64_t msg1 = type;
+    uint64_t msg = (msg1 << UARTSHIFT) | value;
+    BaseType_t success = xQueueSendFromISR(xQueue, (void *) &msg, pdFALSE);
     if(success == pdFALSE) ERROR;
     dbgOutputLoc(AFTER_SEND_QUEUE_ISR_TIMER);
 }

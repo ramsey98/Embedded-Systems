@@ -22,13 +22,15 @@ void pixytests(test_num* num)
     switch (*num)
     {
         case test1:
-            sendMsgToPixyQ(PIXY_VERSION);
-            sleep(1);
-            sendMsgToPixyQ(PIXY_PAN);
-            sleep(1);
-            sendMsgToPixyQ(PIXY_COLOR);
-            sleep(1);
+            //sendMsgToPixyQ(PIXY_VERSION);
+            //sleep(1);
+            //sendMsgToPixyQ(PIXY_PAN);
+            //sleep(1);
+            //sendMsgToPixyQ(PIXY_COLOR);
+            //sleep(1);
             *num = test2;
+            break;
+        case test2:
             break;
         default:
             break;
@@ -195,12 +197,12 @@ void motortests(test_num* num)
         *num = end;
         break;
     case end:
-        //GPIO_write(CONFIG_LED_1_GPIO, CONFIG_GPIO_LED_ON);
+        GPIO_write(CONFIG_LED_0_GPIO, CONFIG_GPIO_LED_ON);
         break;
     default:
         break;
     }
     sleep(10);
-    //GPIO_toggle(CONFIG_LED_1_GPIO);
+    GPIO_toggle(CONFIG_LED_0_GPIO);
 }
 

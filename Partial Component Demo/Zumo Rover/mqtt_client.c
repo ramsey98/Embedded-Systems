@@ -183,8 +183,6 @@ void * MqttClient(void *pvParameters)
     char publish_topic[JSON_TOPIC_BUFFER_SIZE] = {0};
 
     if(MqttClient_start() == -1) ERROR;
-
-    timerInit();
     for(;;)
     {
         MQTTMsg msg;
@@ -475,7 +473,7 @@ int32_t SetClientIdNamefromMacAddress()
     return(ret);
 }
 
-void runMQTT()
+void MQTTInit()
 {
     pthread_t spawn_thread = (pthread_t) NULL;
     pthread_attr_t pAttrs_spawn;

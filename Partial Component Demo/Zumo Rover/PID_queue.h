@@ -27,6 +27,7 @@
 #define RESUME 13
 #define LEFTCOUNT 14
 #define RIGHTCOUNT 15
+#define PID_SENSOR 16
 
 #define PIDSHIFT (32)
 

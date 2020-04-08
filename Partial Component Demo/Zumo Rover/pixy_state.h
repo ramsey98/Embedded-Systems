@@ -10,6 +10,8 @@
 
 #include "debug.h"
 #include "debug_queue.h"
+#include "mqtt_queue.h"
+#include "json_parse.h"
 #include <string.h>
 
 #define MAX_BLOCKS (10)
@@ -26,6 +28,7 @@
 #define PIXY_VERSION 2
 #define PIXY_PAN 3
 #define PIXY_COLOR 4
+#define PIXY_TRANS 5
 
 typedef struct
 {

@@ -14,8 +14,9 @@
 #include "ti_drivers_config.h"
 #include "FreeRTOS.h"
 #include "task.h"
+#include "uart_term.h"
 
-#define STRLEN 5
+#define STRLEN 10
 
 #define DBG_HALT (0)
 #define ENTER_TASK (1)
