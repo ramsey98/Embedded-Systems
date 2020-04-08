@@ -14,12 +14,14 @@
 #include "debug.h"
 #include "sensor_queue.h"
 #include "pixy_queue.h"
+#include "mqtt_queue.h"
+#include "json_parse.h"
 
-#define TIMER1_PERIOD (75000)
+#define TIMER100_PERIOD (100000)
 
 //Timer functions
-void timer75Callback(Timer_Handle myHandle);
-void timerTwoInit();
+void timer100MSCallback(Timer_Handle myHandle);
+void timer100MSInit();
 
 //ADC function
 int conversion(uint32_t sensorVal);

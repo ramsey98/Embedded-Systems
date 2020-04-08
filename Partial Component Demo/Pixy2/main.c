@@ -3,7 +3,7 @@
  * Main.c
  *
  *  Created on: Jan 25, 2020
- *      Author: Team 20
+ *      Author: Matthew Conway
  */
 #include "debug.h"
 #include "sensor_state.h"
@@ -17,6 +17,8 @@
 #include "distance_thread.h"
 #include <pthread.h>
 #include "uart_term.h"
+
+extern void runMQTT();
 
 #define THREADSTACKSIZE (1024)
 
@@ -36,7 +38,7 @@ void *mainThread(void *arg0)
     UART_init();
 
     timerOneInit();
-    timerTwoInit();
+    timer100MSInit();
     dbgGPIOInit();
     adcInit();
     spiInit();
@@ -80,6 +82,7 @@ void *mainThread(void *arg0)
         ERROR;
     }
 
+    runMQTT();
     return (NULL);
 
 }
