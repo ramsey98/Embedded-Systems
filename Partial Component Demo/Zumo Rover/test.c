@@ -202,7 +202,7 @@ void motortests(test_num* num)
     default:
         break;
     }
-    sleep(10);
+    sleep(5);
     GPIO_toggle(CONFIG_LED_0_GPIO);
 }
 

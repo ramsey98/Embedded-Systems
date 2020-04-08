@@ -35,7 +35,7 @@ void timerCallback(Timer_Handle myHandle)
     }
     if(count % 10 == 0)
     {
-        //sendMsgToPIDQFromISR(TIMER, EMPTY);
+        sendMsgToPIDQFromISR(TIMER, EMPTY);
     }
     if(count % 20 == 0)
     {

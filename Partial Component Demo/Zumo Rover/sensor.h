@@ -14,7 +14,7 @@
 #include "sensor_queue.h"
 #include "PID_queue.h"
 
-#define DICTLEN (11)
+#define DICTLEN (15)
 
 typedef struct
 {

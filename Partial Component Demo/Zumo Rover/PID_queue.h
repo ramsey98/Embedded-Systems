@@ -25,9 +25,8 @@
 #define DECEL 11
 #define PAUSE 12
 #define RESUME 13
-#define LEFTCOUNT 14
-#define RIGHTCOUNT 15
-#define PID_SENSOR 16
+#define PID_SENSOR 14
+#define SYNCING 15
 
 #define PIDSHIFT (32)
 

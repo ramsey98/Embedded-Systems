@@ -146,58 +146,67 @@ void updateValues(MOTORS_DATA *motorsState, uint32_t type, uint32_t value)
             break;
         }
     }
+
 }
 
 void PIDEvent(MOTORS_DATA *motorsState, uint32_t type, uint32_t value)
 {
-    static int leftCount = 0, rightCount = 0;
     switch(type)
     {
         case TIMER:
         {
-            if(leftCount != getLeftCount()) ERROR;
-            if(rightCount != getRightCount()) ERROR;
-            clearCounts();
             updateMotors(*motorsState);
             sendMsgToUARTDebugQ(LEFTCAP, motorsState->realLeftSpeed);
             sendMsgToUARTDebugQ(RIGHTCAP, motorsState->realRightSpeed);
-            sendMsgToUARTDebugQ(LEFTCOUNT, leftCount);
-            sendMsgToUARTDebugQ(RIGHTCOUNT, rightCount);
-            leftCount = 0;
-            rightCount = 0;
+            motorsState->realLeftSpeed = 0;
+            motorsState->realRightSpeed = 0;
             break;
         }
         case LEFTCAP:
         {
             //1.6ms is full speed, need to measure min speed
             motorsState->realLeftSpeed = value;
-            leftCount++;
             break;
         }
         case RIGHTCAP:
         {
             motorsState->realRightSpeed = value;
-            rightCount++;
             break;
         }
         case SENSOR:
         {
-            if(value > 26)
+            if(value >= 26)
             {
                 sendMsgToUARTDebugQ(PID_SENSOR, ACCEL);
-                //updateValues(motorsState, ACCEL, value - 65);
+                //updateValues(motorsState, ACCEL, value - 22);
             }
-            else if(value < 22)
+            else if(value <= 22 & value >= 10)
             {
                 sendMsgToUARTDebugQ(PID_SENSOR, DECEL);
-                //updateValues(motorsState, DECEL, 55 - value);
+                //updateValues(motorsState, DECEL, 22 - value);
             }
+            /*
+            else if(value < 10)
+            {
+                sendMsgToUARTDebugQ(PID_SENSOR, REVERSE);
+                //updateValues(motorsState, REVERSE, 22 - value);
+            }
+            */
             break;
         }
         case PIXY:
         {
-            //updateValue(motorsState, TURNLEFT, 60);
-            //updateValue(motorsState, TURNRIGHT, 60);
+            if(value == SYNCING)
+            {
+                sendMsgToUARTDebugQ(PIXY, SYNCING);
+                //updateValues(motorsState, PAUSE, EMPTY);
+            }
+            else if(value != SYNCING)
+            {
+                //updateValue(motorsState, TURNLEFT, 60);
+                //updateValue(motorsState, TURNRIGHT, 60);
+                sendMsgToUARTDebugQ(PIXY, EMPTY);
+            }
             break;
         }
         default:

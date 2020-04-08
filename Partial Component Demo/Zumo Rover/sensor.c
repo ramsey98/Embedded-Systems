@@ -10,7 +10,7 @@
 #include "json_parse.h"
 
 static ADC_Handle adc;
-const lookupTable sensorLookup[DICTLEN] = {{880000,4},
+const lookupTable sensorLookup[DICTLEN] = {{880000,4}, //{microvolt, in}
                                            {750000,6},
                                            {500000,8},
                                            {400000,10},
@@ -24,7 +24,7 @@ const lookupTable sensorLookup[DICTLEN] = {{880000,4},
                                            {140000,26},
                                            {130000,28},
                                            {125000,30},
-                                           {000100,0}};
+                                           {0,0}};
 
 void *sensorThread(void *arg0)
 {
@@ -42,7 +42,7 @@ void *sensorThread(void *arg0)
             avg = total/count;
             total = 0;
             count = 0;
-            //sendMsgToPIDQ(SENSOR, avg);
+            sendMsgToPIDQ(SENSOR, avg);
             MQTTMsg msg = {.type = JSON_TYPE_DEBUG, .value = avg};
             sendMsgToMQTTQ(msg);
         }
@@ -69,7 +69,6 @@ void pollSensor()
 int conversion(uint32_t sensorVal)
 {
     int i, sensorConv = 0;
-    sendMsgToUARTDebugQFromISR(SENSOR, sensorVal);
     for(i = 0; i < DICTLEN; i++)
     {
         if(sensorVal > sensorLookup[i].val)
@@ -78,8 +77,6 @@ int conversion(uint32_t sensorVal)
             break;
         }
     }
-    //sendMsgToUARTDebugQFromISR(SENSOR, sensorConv);
-    //if(sensorConv == 0) ERROR;
     return sensorConv;
 }
 

@@ -48,7 +48,6 @@ void *mainThread(void *arg0)
     createMQTTQueue();
     createConfigQueue();
 
-
     captureInit();
     motorsUARTInit();
     adcInit();

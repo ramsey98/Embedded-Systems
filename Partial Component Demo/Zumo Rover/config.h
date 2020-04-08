@@ -11,6 +11,9 @@
 #include "debug.h"
 #include "queue.h"
 
+#define ROVER_MOVING (1)
+#define ROVER_LOADING (2)
+
 void * configThread(void *arg0);
 void sendMsgToConfigQ(int msg);
 void receiveFromConfigQ(int *received);
