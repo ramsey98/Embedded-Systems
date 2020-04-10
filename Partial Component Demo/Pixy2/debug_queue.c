@@ -16,7 +16,7 @@ void *UARTDebugThread(void *arg0)
     dbgOutputLoc(WHILE1);
     while(1)
     {
-        receiveFromUARTDebugQ(&type, &value);
+        //receiveFromDebugQ(&value); todo fix later, recieveFromUARTDebugQ
         switch(type)
         {
             case PIXY_COLOR:
@@ -42,39 +42,29 @@ void *UARTDebugThread(void *arg0)
     }
 }
 
-void createUARTDebugQueue()
+void createDebugQueue()
 {
-    xQueue = xQueueCreate(16, sizeof(uint64_t));
+    xQueue = xQueueCreate(16, sizeof(int));
     if(xQueue == NULL) ERROR;
 }
 
-void sendMsgToUARTDebugQ(uint32_t type, uint32_t value)
+void sendMsgToDebugQ(int msg)
 {
     dbgOutputLoc(BEFORE_SEND_QUEUE_ISR_TIMER2);
-    uint64_t msg1 = type;
-    uint64_t msg = (msg1 << UARTSHIFT) | value;
-    BaseType_t success = xQueueSend(xQueue, (void *) &msg, pdFALSE);
-    if(success == pdFALSE) ERROR;
-    dbgOutputLoc(AFTER_SEND_QUEUE_ISR_TIMER2);
-}
-
-void sendMsgToUARTDebugQFromISR(uint32_t type, uint32_t value)
-{
-    dbgOutputLoc(BEFORE_SEND_QUEUE_ISR_TIMER2);
-    uint64_t msg1 = type;
-    uint64_t msg = (msg1 << UARTSHIFT) | value;
     BaseType_t success = xQueueSendFromISR(xQueue, (void *) &msg, pdFALSE);
     if(success == pdFALSE) ERROR;
     dbgOutputLoc(AFTER_SEND_QUEUE_ISR_TIMER2);
 }
 
-void receiveFromUARTDebugQ(uint32_t * type, uint32_t * value)
+void receiveFromDebugQ(int *received)
 {
     dbgOutputLoc(BEFORE_RECEIVE_QUEUE);
-    uint64_t received;
-    BaseType_t success = xQueueReceive(xQueue, &received, portMAX_DELAY);
+    int temp;
+    BaseType_t success = xQueueReceive(xQueue, &temp, portMAX_DELAY);
     if(success == pdFALSE) ERROR;
-    *type = received >> UARTSHIFT;
-    *value = received;
+    *received = temp;
     dbgOutputLoc(AFTER_RECEIVE_QUEUE);
 }
+
+
+

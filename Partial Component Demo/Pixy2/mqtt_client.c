@@ -178,7 +178,6 @@ void * MqttClientThread(void * pvParameters)
 //*****************************************************************************
 void * MqttClient(void *pvParameters)
 {
-    UART_PRINT("Beginning MqttClient thread.\n\r");
     long lRetVal = -1;
     char publish_data[JSON_DATA_BUFFER_SIZE] = {0};
     char publish_topic[JSON_TOPIC_BUFFER_SIZE] = {0};
@@ -197,6 +196,22 @@ void * MqttClient(void *pvParameters)
                           strlen((char*) publish_data),
                           MQTT_QOS_0); // | ((RETAIN_ENABLE) ? MQTT_PUBLISH_RETAIN : 0)
         if(lRetVal < 0) ERROR;
+    }
+}
+
+void * debugThread(void *pvParameters)
+{
+    int i;
+    int j;
+    for(;;)
+    {
+        int msg;
+        j = 0;
+        receiveFromDebugQ(&msg);
+        for(i = 0; i < 1000; i++)
+        {
+            j++;
+        }
     }
 }
 
@@ -270,7 +285,6 @@ int32_t Mqtt_IF_Connect()
 //*****************************************************************************
 void Mqtt_start()
 {
-    UART_PRINT("Beginning Mqtt_start function.\n\r");
     int32_t threadArg = 100;
     pthread_attr_t pAttrs;
     struct sched_param priParam;
@@ -283,12 +297,20 @@ void Mqtt_start()
     if(pthread_attr_setstacksize(&pAttrs, MQTTTHREADSIZE) != 0) ERROR;
     if(pthread_attr_setdetachstate(&pAttrs, PTHREAD_CREATE_DETACHED) != 0) ERROR;
     if(pthread_create(&mqttThread, &pAttrs, MqttClient, (void *) &threadArg) != 0) ERROR;
-    UART_PRINT("Ending MqttClient_start function.\n\r");
+
+
+    pthread_attr_t attrs;
+    pthread_t debug_thread;
+    pthread_attr_init(&attrs);
+    priParam.sched_priority = 1;
+    if(pthread_attr_setdetachstate(&attrs, PTHREAD_CREATE_DETACHED) != 0) ERROR;
+    if(pthread_attr_setstacksize(&attrs, TASKSTACKSIZE) != 0) ERROR;
+    if(pthread_attr_setschedparam(&attrs, &priParam) != 0) ERROR;
+    if(pthread_create(&debug_thread, &attrs, debugThread, NULL) != 0) ERROR;
 }
 
 int32_t MqttClient_start()
 {
-    UART_PRINT("Beginning MqttClient_start function.\n\r");
     char *topic[SUBSCRIPTION_TOPIC_COUNT] =
     { SUBSCRIPTION_TOPIC };
     unsigned char qos[SUBSCRIPTION_TOPIC_COUNT] =
@@ -335,7 +357,6 @@ int32_t MqttClient_start()
         UART_PRINT("Client Thread Create Failed failed\n\r");
         return(-1);
     }
-    UART_PRINT("Client returns from create\n\r");
 
 #ifdef SECURE_CLIENT
     setTime();
@@ -366,7 +387,6 @@ int32_t MqttClient_start()
     /*The return code of MQTTClient_connect is the ConnACK value that
        returns from the server */
     lRetVal = MQTTClient_connect(gMqttClient);
-    UART_PRINT("Client returns from connect\n\r");
 
     /*negative lRetVal means error,
        0 means connection successful without session stored by the server,

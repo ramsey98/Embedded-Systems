@@ -18,6 +18,7 @@
 #include <pthread.h>
 #include "config.h"
 #include "debug_queue.h"
+#include "uart_term.h"
 
 extern void runMQTT();
 
@@ -43,13 +44,13 @@ void *mainThread(void *arg0)
 
     createPixyQueue();
     createDistanceQueue();
-    createUARTDebugQueue();
+    createDebugQueue();
     createMQTTQueue();
     createConfigQueue();
 
     adcInit();
     spiInit();
-    //runMQTT();
+    runMQTT();
     dbgOutputLoc(ENTER_TASK);
 
     pthread_attr_init(&attrs);
@@ -61,7 +62,7 @@ void *mainThread(void *arg0)
 
     if(pthread_create(&spi, &attrs, spiThread, NULL) != 0) ERROR;
     if(pthread_create(&distance, &attrs, distanceThread, NULL) != 0) ERROR;
-    if(pthread_create(&UARTDebug, &attrs, UARTDebugThread, NULL) != 0) ERROR;
+    //if(pthread_create(&UARTDebug, &attrs, UARTDebugThread, NULL) != 0) ERROR;  //todo, this is currently overlapped with MQTT debug queu
 
     timerOneInit();
     timer100MSInit();

@@ -16,10 +16,9 @@
 #define SENSOR 3
 
 #define UARTSHIFT (32)
-void sendMsgToUARTDebugQ(uint32_t type, uint32_t value);
-void sendMsgToUARTDebugQFromISR(uint32_t type, uint32_t value);
-void receiveFromUARTDebugQ(uint32_t * type, uint32_t * value);
-void createUARTDebugQueue();
+void sendMsgToDebugQ(int msg);
+void receiveFromDebugQ(int *received);
+void createDebugQueue();
 void *UARTDebugThread(void *arg0);
 
 #endif /* DEBUG_QUEUE_H_ */
