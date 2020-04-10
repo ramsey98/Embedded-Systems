@@ -178,13 +178,13 @@ void * MqttClientThread(void * pvParameters)
 //*****************************************************************************
 void * MqttClient(void *pvParameters)
 {
+    UART_PRINT("Beginning MqttClient thread.\n\r");
     long lRetVal = -1;
     char publish_data[JSON_DATA_BUFFER_SIZE] = {0};
     char publish_topic[JSON_TOPIC_BUFFER_SIZE] = {0};
 
     if(MqttClient_start() == -1) ERROR;
 
-    timer100MSInit();
     for(;;)
     {
         MQTTMsg msg;
@@ -270,6 +270,7 @@ int32_t Mqtt_IF_Connect()
 //*****************************************************************************
 void Mqtt_start()
 {
+    UART_PRINT("Beginning Mqtt_start function.\n\r");
     int32_t threadArg = 100;
     pthread_attr_t pAttrs;
     struct sched_param priParam;
@@ -282,10 +283,12 @@ void Mqtt_start()
     if(pthread_attr_setstacksize(&pAttrs, MQTTTHREADSIZE) != 0) ERROR;
     if(pthread_attr_setdetachstate(&pAttrs, PTHREAD_CREATE_DETACHED) != 0) ERROR;
     if(pthread_create(&mqttThread, &pAttrs, MqttClient, (void *) &threadArg) != 0) ERROR;
+    UART_PRINT("Ending MqttClient_start function.\n\r");
 }
 
 int32_t MqttClient_start()
 {
+    UART_PRINT("Beginning MqttClient_start function.\n\r");
     char *topic[SUBSCRIPTION_TOPIC_COUNT] =
     { SUBSCRIPTION_TOPIC };
     unsigned char qos[SUBSCRIPTION_TOPIC_COUNT] =
@@ -313,6 +316,7 @@ int32_t MqttClient_start()
     {
         /*lib initialization failed                                          */
         //gInitState &= ~CLIENT_INIT_STATE;
+        UART_PRINT("Error: qMQTTClient returns null\n\r");
         return(-1);
     }
 
@@ -331,6 +335,8 @@ int32_t MqttClient_start()
         UART_PRINT("Client Thread Create Failed failed\n\r");
         return(-1);
     }
+    UART_PRINT("Client returns from create\n\r");
+
 #ifdef SECURE_CLIENT
     setTime();
 #endif
@@ -360,6 +366,7 @@ int32_t MqttClient_start()
     /*The return code of MQTTClient_connect is the ConnACK value that
        returns from the server */
     lRetVal = MQTTClient_connect(gMqttClient);
+    UART_PRINT("Client returns from connect\n\r");
 
     /*negative lRetVal means error,
        0 means connection successful without session stored by the server,

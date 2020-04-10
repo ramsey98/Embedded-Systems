@@ -39,12 +39,9 @@ void *mainThread(void *arg0)
     GPIO_init();
     UART_init();
 
-    timerOneInit();
-    timer100MSInit();
     dbgGPIOInit();
-    adcInit();
-    spiInit();
-    dbgOutputLoc(ENTER_TASK);
+    tUartHndl = InitTerm();
+    dbgUARTInit(tUartHndl);
 
     createPixyQueue();
     createDistanceQueue();
@@ -52,11 +49,10 @@ void *mainThread(void *arg0)
     createMQTTQueue();
     createConfigQueue();
 
-    /*Configure the UART                                                     */
-    tUartHndl = InitTerm();
-    /*remove uart receive from LPDS dependency                               */
-    UART_control(tUartHndl, UART_CMD_RXDISABLE, NULL);
-    dbgUARTInit(tUartHndl);
+    adcInit();
+    spiInit();
+    runMQTT();
+    dbgOutputLoc(ENTER_TASK);
 
     pthread_attr_init(&attrs);
     detachState = PTHREAD_CREATE_DETACHED;
@@ -90,7 +86,9 @@ void *mainThread(void *arg0)
 
     if(pthread_create(&UARTDebug, &attrs, UARTDebugThread, NULL) != 0) ERROR;
 
-    runMQTT();
+    timerOneInit();
+    timer100MSInit();
+
     return (NULL);
 
 }
