@@ -16,11 +16,10 @@
 #include "spi_thread.h"
 #include "distance_thread.h"
 #include <pthread.h>
-#include "uart_term.h"
 #include "config.h"
 #include "debug_queue.h"
 
-//extern void runMQTT();
+extern void runMQTT();
 
 #define THREADSTACKSIZE (1024)
 
@@ -29,7 +28,6 @@ void *mainThread(void *arg0)
     pthread_t spi, distance, UARTDebug;//, mqtt; //pixy, sensor;
     pthread_attr_t attrs;
     struct sched_param  priParam;
-    int retc;
     int detachState;
     UART_Handle tUartHndl;
 
@@ -51,39 +49,18 @@ void *mainThread(void *arg0)
 
     adcInit();
     spiInit();
-    runMQTT();
+    //runMQTT();
     dbgOutputLoc(ENTER_TASK);
 
     pthread_attr_init(&attrs);
     detachState = PTHREAD_CREATE_DETACHED;
-
-    retc = pthread_attr_setdetachstate(&attrs, detachState);
-    if (retc != 0)
-    {
-        ERROR;
-    }
-
-    retc |= pthread_attr_setstacksize(&attrs, THREADSTACKSIZE);
-    if (retc != 0)
-    {
-        ERROR;
-    }
-
+    if(pthread_attr_setdetachstate(&attrs, detachState) != 0) ERROR;
+    if(pthread_attr_setstacksize(&attrs, THREADSTACKSIZE) != 0) ERROR;
     priParam.sched_priority = 1;
     pthread_attr_setschedparam(&attrs, &priParam);
 
-    retc = pthread_create(&spi, &attrs, spiThread, NULL);
-    if (retc != 0)
-    {
-        ERROR;
-    }
-
-    retc = pthread_create(&distance, &attrs, distanceThread, NULL);
-    if (retc != 0)
-    {
-        ERROR;
-    }
-
+    if(pthread_create(&spi, &attrs, spiThread, NULL) != 0) ERROR;
+    if(pthread_create(&distance, &attrs, distanceThread, NULL) != 0) ERROR;
     if(pthread_create(&UARTDebug, &attrs, UARTDebugThread, NULL) != 0) ERROR;
 
     timerOneInit();
