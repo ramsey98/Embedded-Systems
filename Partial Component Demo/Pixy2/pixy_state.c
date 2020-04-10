@@ -31,7 +31,7 @@ int pixyFsm(PIXY_DATA *curState, int *timeInc, int *complete, int *sendInc) {
            sendBlockMsgToDistanceQ1(&toSend);
            valid_data = 0;
        } else {
-           dbgUARTStr("No response from Pixy.\n\r");
+           dbgUARTStr("Invalid response from Pixy.\n\r");
        }
    }
 

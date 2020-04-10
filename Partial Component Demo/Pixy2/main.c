@@ -17,6 +17,8 @@
 #include "distance_thread.h"
 #include <pthread.h>
 #include "uart_term.h"
+#include "config.h"
+#include "debug_queue.h"
 
 //extern void runMQTT();
 
@@ -24,7 +26,7 @@
 
 void *mainThread(void *arg0)
 {
-    pthread_t spi, distance;//, mqtt; //pixy, sensor;
+    pthread_t spi, distance, UARTDebug;//, mqtt; //pixy, sensor;
     pthread_attr_t attrs;
     struct sched_param  priParam;
     int retc;
@@ -42,9 +44,13 @@ void *mainThread(void *arg0)
     dbgGPIOInit();
     adcInit();
     spiInit();
+    dbgOutputLoc(ENTER_TASK);
+
     createPixyQueue();
     createDistanceQueue();
-    dbgOutputLoc(ENTER_TASK);
+    createUARTDebugQueue();
+    createMQTTQueue();
+    createConfigQueue();
 
     /*Configure the UART                                                     */
     tUartHndl = InitTerm();
@@ -82,7 +88,9 @@ void *mainThread(void *arg0)
         ERROR;
     }
 
-    //runMQTT();
+    if(pthread_create(&UARTDebug, &attrs, UARTDebugThread, NULL) != 0) ERROR;
+
+    runMQTT();
     return (NULL);
 
 }
