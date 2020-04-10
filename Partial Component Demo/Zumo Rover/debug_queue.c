@@ -30,14 +30,6 @@ void *UARTDebugThread(void *arg0)
             case TIMER:
                 dbgUARTStr("Timer");
                 break;
-            case LEFTCOUNT:
-                dbgUARTStr("Left Count:");
-                dbgUARTNum(value);
-                break;
-            case RIGHTCOUNT:
-                dbgUARTStr("Right Count:");
-                dbgUARTNum(value);
-                break;
             case PID_SENSOR:
                 dbgUARTStr("PID Sensor:");
                 if(value == ACCEL)

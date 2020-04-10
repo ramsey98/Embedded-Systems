@@ -9,23 +9,6 @@
 
 volatile uint32_t curInterval;
 static Capture_Handle capture0, capture1;
-static int leftCount = 0, rightCount = 0;
-
-void clearCounts()
-{
-    leftCount = 0;
-    rightCount = 0;
-}
-
-int getLeftCount()
-{
-    return leftCount;
-}
-
-int getRightCount()
-{
-    return rightCount;
-}
 
 void captureInit()
 {
@@ -47,13 +30,11 @@ void captureCallback(Capture_Handle handle, uint32_t interval)
     curInterval = interval;
     if(handle == capture0)
     {
-        sendMsgToPIDQ(LEFTCAP, curInterval);
-        leftCount++;
+        sendMsgToPIDQFromISR(LEFTCAP, curInterval);
     }
     else if(handle == capture1)
     {
-        sendMsgToPIDQ(RIGHTCAP, curInterval);
-        rightCount++;
+        sendMsgToPIDQFromISR(RIGHTCAP, curInterval);
     }
     else ERROR;
 }

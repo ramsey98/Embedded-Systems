@@ -6,15 +6,25 @@
  */
 
 #include "config.h"
+#include "PID.h"
 
 static QueueHandle_t xQueue = NULL;
 
 void * configThread(void *arg0)
 {
-    int msg;
+    int prevmsg, msg;
     while(1)
     {
         receiveFromConfigQ(&msg);
+        if(prevmsg == ROVER_MOVING & msg == ROVER_LOADING)
+        {
+            sendMsgToPIDQ(PAUSE, EMPTY);
+        }
+        else if(prevmsg == ROVER_LOADING & msg == ROVER_MOVING)
+        {
+            sendMsgToPIDQ(RESUME, EMPTY);
+        }
+        prevmsg = msg;
     }
 }
 
