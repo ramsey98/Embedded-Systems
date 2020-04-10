@@ -16,7 +16,7 @@ void * configThread(void *arg0)
     while(1)
     {
         receiveFromConfigQ(&msg);
-        if(prevmsg != ROVER_MOVING & msg == ROVER_LOADING)
+        if(prevmsg == ROVER_MOVING & msg == ROVER_LOADING)
         {
             sendMsgToPIDQ(PAUSE, EMPTY);
         }

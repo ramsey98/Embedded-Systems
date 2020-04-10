@@ -7,6 +7,20 @@
 
 #include "PID.h"
 
+const PIDLookupTable PIDLookup[PIDLOOKUPLEN] = {{0,4}, //{microvolt, in}
+                                                {10,6},
+                                                {20,8},
+                                                {30,10},
+                                                {40,12},
+                                                {50,14},
+                                                {60,16},
+                                                {70,18},
+                                                {80,20},
+                                                {90,22},
+                                                {100,24},
+                                                {120,26},
+                                                {127,28}};
+
 void updateMotors(MOTORS_DATA motorsState)
 {
     if(motorsState.paused == 0)
@@ -35,27 +49,26 @@ void updateMotors(MOTORS_DATA motorsState)
     }
 }
 
+void PIDAdjust(MOTORS_DATA *motorsState)
+{
+    int i;
+    for(i = 0; i < PIDLOOKUPLEN; i++)
+    {
+        if(motorsState->realLeftSpeed <= PIDLookup[i].measured)
+        {
+            motorsState->setLeftSpeed = PIDLookup[i].expected;
+        }
+        if(motorsState->realRightSpeed <= PIDLookup[i].measured)
+        {
+            motorsState->setRightSpeed = PIDLookup[i].expected;
+        }
+    }
+    //updateMotors(*motorsState); //or just update speeds?
+}
+
 void updateValues(MOTORS_DATA *motorsState, uint32_t type, uint32_t value)
 {
-    //this is the PID adjustment
-    /*
-    if(motorsState->setLeftSpeed < motorsState->realLeftSpeed)
-    {
-        motorsState->setLeftSpeed--;
-    }
-    else if(motorsState->setLeftSpeed > motorsState->realLeftSpeed)
-    {
-        motorsState->setLeftSpeed++;
-    }
-    if(motorsState->setLeftSpeed < motorsState->realRightSpeed)
-    {
-        motorsState->setRightSpeed--;
-    }
-    else if(motorsState->setRightSpeed > motorsState->realRightSpeed)
-    {
-        motorsState->setRightSpeed++;
-    }
-    */
+    //PIDAdjust(motorsState);
     switch(type)
     {
         case PAUSE:
@@ -102,21 +115,21 @@ void updateValues(MOTORS_DATA *motorsState, uint32_t type, uint32_t value)
         }
         case ACCEL:
         {
-            if((motorsState->setLeftSpeed + value) < 255)
+            if((motorsState->setLeftSpeed + value) < 127)
             {
                 motorsState->setLeftSpeed += value;
             }
             else
             {
-                motorsState->setLeftSpeed = 255;
+                motorsState->setLeftSpeed = 127;
             }
-            if((motorsState->setRightSpeed + value) < 255)
+            if((motorsState->setRightSpeed + value) < 127)
             {
                 motorsState->setRightSpeed += value;
             }
             else
             {
-                motorsState->setRightSpeed = 255;
+                motorsState->setRightSpeed = 127;
             }
             break;
         }
@@ -156,15 +169,12 @@ void PIDEvent(MOTORS_DATA *motorsState, uint32_t type, uint32_t value)
         case TIMER:
         {
             updateMotors(*motorsState);
-            sendMsgToUARTDebugQ(LEFTCAP, motorsState->realLeftSpeed);
-            sendMsgToUARTDebugQ(RIGHTCAP, motorsState->realRightSpeed);
             motorsState->realLeftSpeed = 0;
             motorsState->realRightSpeed = 0;
             break;
         }
         case LEFTCAP:
         {
-            //1.6ms is full speed, need to measure min speed
             motorsState->realLeftSpeed = value;
             break;
         }
@@ -175,23 +185,18 @@ void PIDEvent(MOTORS_DATA *motorsState, uint32_t type, uint32_t value)
         }
         case SENSOR:
         {
-            if(value >= 26)
+            if(value >= 20)
             {
-                sendMsgToUARTDebugQ(PID_SENSOR, ACCEL);
-                //updateValues(motorsState, ACCEL, value - 22);
+                updateValues(motorsState, ACCEL, value - 12);
             }
-            else if(value <= 22 & value >= 10)
+            else if(value <= 12 & value >= 8)
             {
-                sendMsgToUARTDebugQ(PID_SENSOR, DECEL);
-                //updateValues(motorsState, DECEL, 22 - value);
+                updateValues(motorsState, DECEL, 12 - value);
             }
-            /*
-            else if(value < 10)
+            else if(value < 8)
             {
-                sendMsgToUARTDebugQ(PID_SENSOR, REVERSE);
-                //updateValues(motorsState, REVERSE, 22 - value);
+                updateValues(motorsState, FORWARD, 0);
             }
-            */
             break;
         }
         case PIXY:
