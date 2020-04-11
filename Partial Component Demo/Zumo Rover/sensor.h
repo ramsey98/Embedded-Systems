@@ -11,7 +11,6 @@
 
 #include <ti/drivers/ADC.h>
 #include "debug.h"
-#include "sensor_queue.h"
 #include "PID_queue.h"
 
 #define DICTLEN (15)
