@@ -23,7 +23,7 @@ const lookupTable sensorLookup[DICTLEN] = {{880000,4}, //{microvolt, in}
                                            {150000,24},
                                            {140000,26},
                                            {130000,28},
-                                           {125000,30},
+                                           {120000,30},
                                            {0,0}};
 
 void *sensorThread(void *arg0)

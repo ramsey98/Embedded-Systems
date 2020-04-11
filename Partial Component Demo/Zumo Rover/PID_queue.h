@@ -27,6 +27,7 @@
 #define RESUME 13
 #define PID_SENSOR 14
 #define SYNCING 15
+#define TIMER_PID 16
 
 #define PIDSHIFT (32)
 

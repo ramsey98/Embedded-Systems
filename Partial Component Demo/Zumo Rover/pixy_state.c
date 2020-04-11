@@ -14,7 +14,7 @@ extern void pixyGetConnectedBlocks(uint8_t *rx_buffer, uint8_t *tx_buffer);
 
 void processVersion(PIXY_DATA *curState)
 {
-    UART_PRINT("V");
+    sendMsgToUARTDebugQ(PIXY, 4);
     uint8_t version = 0;
     if(curState->rx_buffer[15+2] == 15)
     {

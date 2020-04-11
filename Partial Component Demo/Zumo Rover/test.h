@@ -32,6 +32,7 @@ typedef enum
 } test_num;
 
 void *testThread(void *arg0);
+void capturetests();
 void motortests(test_num* num);
 void pixytests(test_num* num);
 void sensortests(test_num* num);

@@ -14,7 +14,7 @@
 #include "debug.h"
 #include <PID_queue.h>
 
-#define PIDLOOKUPLEN 13
+#define PIDLOOKUPLEN 14
 
 typedef struct
 {

@@ -25,14 +25,18 @@ void timerCallback(Timer_Handle myHandle)
 {
     static int count = 0;
     dbgOutputLoc(ENTER_ISR_TIMER);
-    if(count % 5 == 0)
+    if(count % 1 == 0)
     {
         pollSensor();
         //sendMsgToPixyQFromISR(PIXY_COLOR);
     }
-    if(count % 10 == 0)
+    if(count % 2 == 0)
     {
         sendMsgToPIDQFromISR(TIMER, EMPTY);
+    }
+    if(count % 5 == 0)
+    {
+        sendMsgToPIDQFromISR(TIMER_PID, EMPTY);
     }
     if(count % 20 == 0)
     {

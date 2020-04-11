@@ -23,7 +23,7 @@ extern void MQTTInit();
 
 void *mainThread(void *arg0)
 {
-    pthread_t UARTTx, PID, UARTDebug, sensor;// test//config, pixy;
+    pthread_t UARTTx, PID, UARTDebug, sensor;//, test;//config, pixy;
     pthread_attr_t attrs;
     struct sched_param  priParam;
     int detachState;

@@ -9,11 +9,25 @@
 
 void *testThread(void *arg0)
 {
-    test_num num = test1;
+    //test_num num = test1;
     while(1)
     {
         //pixytests(&num);
-        motortests(&num);
+        //motortests(&num);
+        capturetests();
+    }
+}
+
+
+void capturetests()
+{
+    int values[] = {10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 127};
+    int i;
+    for(i = 0; i < 13; i++)
+    {
+        GPIO_toggle(CONFIG_LED_0_GPIO);
+        sendMsgToPIDQ(FORWARD, values[i]);
+        sleep(10);
     }
 }
 
