@@ -87,7 +87,7 @@ void json_send_debug(MQTTMsg msg, Json_Handle objectHandle)
 {
     dbgOutputLoc(ENTER_SEND_DEBUG);
     static int debugID = 0;
-    int value = msg.value;
+    int value = msg.value1;
     if(Json_parse(objectHandle, JSON_DEBUG_BUF, strlen(JSON_DEBUG_BUF)) != 0) ERROR;
     if(Json_setValue(objectHandle, "\"ID\"", &debugID, sizeof(debugID)) != 0) ERROR;
     if(Json_setValue(objectHandle, "\"value\"", &value, sizeof(value)) != 0) ERROR;
@@ -98,7 +98,7 @@ void json_send_error(MQTTMsg msg, Json_Handle objectHandle)
 {
     dbgOutputLoc(ENTER_SEND_ERROR);
     static int errorsID = 0;
-    int error = msg.value;
+    int error = msg.value1;
     if(Json_parse(objectHandle, JSON_ERRORS_BUF, strlen(JSON_ERRORS_BUF)) != 0) ERROR;
     if(Json_setValue(objectHandle, "\"ID\"", &errorsID, sizeof(errorsID)) != 0) ERROR;
     if(Json_setValue(objectHandle, "\"Type\"", &error, sizeof(error)) != 0) ERROR;
