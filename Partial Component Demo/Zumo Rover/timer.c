@@ -35,9 +35,9 @@ void timerCallback(Timer_Handle myHandle)
     }
     if(count % 5 == 0)
     {
-        sendMsgToNaviQFromISR(TIMER_NAVI, EMPTY);
+        sendMsgToNaviQFromISR(PID, EMPTY);
     }
-    if(count % 20 == 0)
+    if(count % 10 == 0)
     {
         sendMsgToPixyQFromISR(PIXY_VERSION);
     }

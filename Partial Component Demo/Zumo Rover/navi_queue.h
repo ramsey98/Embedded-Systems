@@ -27,7 +27,7 @@
 #define RESUME 13
 #define NAVI_SENSOR 14
 #define SYNCING 15
-#define TIMER_NAVI 16
+#define PID 16
 
 #define NAVISHIFT (32)
 

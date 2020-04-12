@@ -51,13 +51,14 @@ void processVersion(PIXY_DATA *curState)
 void processColor(PIXY_DATA *curState)
 {
     int i, loc;
-    if(curState->rx_buffer[CONNECTED_LENGTH_LOC-1] == 33)
+    int start = processBuffer(curState);
+    if(curState->rx_buffer[start] == 33)
     {
-        curState->blockCount = curState->rx_buffer[CONNECTED_LENGTH_LOC];
+        curState->blockCount = curState->rx_buffer[start+1];
         if(curState->blockCount > 0)
         {
-            sendMsgToUARTDebugQ(PIXY, curState->rx_buffer[CONNECTED_LENGTH_LOC]);
-            loc = CONNECTED_LENGTH_LOC + 2;
+            sendMsgToUARTDebugQ(PIXY, curState->rx_buffer[start+1]);
+            loc = start + 3;
             for(i = 0; i < curState->blockCount/CONNECTED_PACKET_LENGTH; i++)
             {
                 curState->blocks[i].colorCode = curState->rx_buffer[loc+1];

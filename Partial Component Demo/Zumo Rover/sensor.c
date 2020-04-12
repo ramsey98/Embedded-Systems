@@ -49,9 +49,12 @@ void pollSensor()
         avg = total/count;
         total = 0;
         count = 0;
-        sendMsgToNaviQFromISR(SENSOR, avg);
-        MQTTMsg msg = {.type = JSON_TYPE_DEBUG, .value = avg};
-        sendMsgToMQTTQFromISR(msg);
+        if(avg != 0)
+        {
+            sendMsgToNaviQFromISR(SENSOR, avg);
+            MQTTMsg msg = {.type = JSON_TYPE_DEBUG, .value = avg};
+            sendMsgToMQTTQFromISR(msg);
+        }
     }
 }
 

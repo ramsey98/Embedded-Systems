@@ -14,6 +14,8 @@
 #include "capture.h"
 #include "debug.h"
 
+#define KP 0.5
+#define KI 0.5
 #define NAVILOOKUPLEN 14
 
 typedef struct
@@ -28,7 +30,7 @@ typedef struct
     uint32_t realLeftSpeed, realRightSpeed;
 } MOTORS_DATA;
 
-void naviAdjust(MOTORS_DATA *motorsState);
+int PIDAdjust(uint8_t setSpeed, uint8_t measuredSpeed);
 void updateMotors(MOTORS_DATA motorsState);
 void updateValues(MOTORS_DATA * motorsState, uint32_t type, uint32_t value);
 void *naviThread(void *arg0);

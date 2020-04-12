@@ -145,28 +145,42 @@ void updateValues(MOTORS_DATA *motorsState, uint32_t type, uint32_t value)
 
 }
 
-void naviAdjust(MOTORS_DATA *motorsState)
+int PIDAdjust(uint8_t setSpeed, uint8_t measuredSpeed)
 {
     int i;
+    static int error = 0, integral = 0;
+    int PIDResult = 0, ret = 0;
     for(i = 0; i < NAVILOOKUPLEN; i++)
     {
-        if(motorsState->realLeftSpeed >= naviLookup[i].measured & motorsState->setLeftSpeed >= naviLookup[i].expected)
+        if(measuredSpeed >= naviLookup[i].measured)
         {
-            motorsState->setLeftSpeed = naviLookup[i].expected;
-        }
-        if(motorsState->realRightSpeed >= naviLookup[i].measured & motorsState->setRightSpeed >= naviLookup[i].expected)
-        {
-            motorsState->setRightSpeed = naviLookup[i].expected;
+            error = naviLookup[i].expected - setSpeed;
         }
     }
+    integral += error;
+    PIDResult = (KP*error) + (KI*integral*.5);
+    if(setSpeed + PIDResult > 127)
+    {
+        ret = 127;
+    }
+    else if(setSpeed + PIDResult < 0)
+    {
+        ret = 0;
+    }
+    else
+    {
+        ret = setSpeed + PIDResult;
+    }
+    return ret;
 }
 
 void naviEvent(MOTORS_DATA *motorsState, uint32_t type, uint32_t value)
 {
     switch(type)
     {
-        case TIMER_NAVI:
-            //naviAdjust(motorsState);
+        case PID:
+            motorsState->setLeftSpeed = PIDAdjust(motorsState->setLeftSpeed, motorsState->realLeftSpeed);
+            motorsState->setRightSpeed = PIDAdjust(motorsState->setRightSpeed, motorsState->realRightSpeed);
             break;
         case TIMER:
             updateMotors(*motorsState);
@@ -175,9 +189,11 @@ void naviEvent(MOTORS_DATA *motorsState, uint32_t type, uint32_t value)
             break;
         case LEFTCAP:
             motorsState->realLeftSpeed = value;
+            //motorsState->setLeftSpeed = PIDAdjust(motorsState->setLeftSpeed, motorsState->realLeftSpeed);
             break;
         case RIGHTCAP:
             motorsState->realRightSpeed = value;
+            //motorsState->setRightSpeed = PIDAdjust(motorsState->setRightSpeed, motorsState->realRightSpeed);
             break;
         case SENSOR:
             if(value >= 20)
