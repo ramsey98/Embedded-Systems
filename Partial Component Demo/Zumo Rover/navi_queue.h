@@ -5,8 +5,8 @@
  *      Author: Holden Ramsey
  */
 
-#ifndef PID_QUEUE_H_
-#define PID_QUEUE_H_
+#ifndef NAVI_QUEUE_H_
+#define NAVI_QUEUE_H_
 
 #include <debug_queue.h>
 #include "debug.h"
@@ -25,14 +25,15 @@
 #define DECEL 11
 #define PAUSE 12
 #define RESUME 13
-#define PID_SENSOR 14
+#define NAVI_SENSOR 14
 #define SYNCING 15
+#define TIMER_NAVI 16
 
-#define PIDSHIFT (32)
+#define NAVISHIFT (32)
 
-void sendMsgToPIDQFromISR(uint32_t type, uint32_t value);
-void sendMsgToPIDQ(uint32_t type, uint32_t value);
-void receiveFromPIDQ(uint32_t * type, uint32_t * value);
-void createPIDQueue();
+void sendMsgToNaviQFromISR(uint32_t type, uint32_t value);
+void sendMsgToNaviQ(uint32_t type, uint32_t value);
+void receiveFromNaviQ(uint32_t * type, uint32_t * value);
+void createNaviQueue();
 
-#endif /* PID_QUEUE_H_ */
+#endif /* NAVI_QUEUE_H_ */

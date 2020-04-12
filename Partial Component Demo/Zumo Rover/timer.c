@@ -25,22 +25,26 @@ void timerCallback(Timer_Handle myHandle)
 {
     static int count = 0;
     dbgOutputLoc(ENTER_ISR_TIMER);
-    if(count % 5 == 0)
+    if(count % 1 == 0)
     {
         pollSensor();
-        //sendMsgToPixyQFromISR(PIXY_COLOR);
     }
-    if(count % 10 == 0)
+    if(count % 2 == 0)
     {
-        sendMsgToPIDQFromISR(TIMER, EMPTY);
+        sendMsgToNaviQFromISR(TIMER, EMPTY);
+    }
+    if(count % 5 == 0)
+    {
+        sendMsgToNaviQFromISR(TIMER_NAVI, EMPTY);
+    }
+    if(count % 20 == 0)
+    {
+        sendMsgToPixyQFromISR(PIXY_VERSION);
     }
     if(count % 20 == 0)
     {
         MQTTMsg msg = {.type = JSON_TYPE_STATS, .value = 0};
         sendMsgToMQTTQFromISR(msg);
-    }
-    if(count == 100)
-    {
         count = 0;
     }
     count++;

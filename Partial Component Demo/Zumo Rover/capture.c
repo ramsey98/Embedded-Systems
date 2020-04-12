@@ -30,11 +30,11 @@ void captureCallback(Capture_Handle handle, uint32_t interval)
     curInterval = interval;
     if(handle == capture0)
     {
-        sendMsgToPIDQFromISR(LEFTCAP, curInterval);
+        sendMsgToNaviQFromISR(LEFTCAP, curInterval);
     }
     else if(handle == capture1)
     {
-        sendMsgToPIDQFromISR(RIGHTCAP, curInterval);
+        sendMsgToNaviQFromISR(RIGHTCAP, curInterval);
     }
     else ERROR;
 }

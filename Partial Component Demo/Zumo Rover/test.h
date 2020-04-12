@@ -8,7 +8,7 @@
 #ifndef TEST_H_
 #define TEST_H_
 
-#include <PID.h>
+#include <navigation.h>
 #include "sensor.h"
 #include "pixy.h"
 #include "mqtt_client.h"
@@ -32,6 +32,7 @@ typedef enum
 } test_num;
 
 void *testThread(void *arg0);
+void capturetests();
 void motortests(test_num* num);
 void pixytests(test_num* num);
 void sensortests(test_num* num);

@@ -5,26 +5,25 @@
  *      Author: Holden Ramsey
  */
 
+#include <navigation.h>
 #include "config.h"
-#include "PID.h"
 
 static QueueHandle_t xQueue = NULL;
 
 void * configThread(void *arg0)
 {
-    int prevmsg, msg;
+    int msg;
     while(1)
     {
         receiveFromConfigQ(&msg);
-        if(prevmsg == ROVER_MOVING & msg == ROVER_LOADING)
+        if(msg == ROVER_LOADING)
         {
-            sendMsgToPIDQ(PAUSE, EMPTY);
+            sendMsgToNaviQ(PAUSE, EMPTY);
         }
-        else if(prevmsg == ROVER_LOADING & msg == ROVER_MOVING)
+        else if(msg == ROVER_MOVING)
         {
-            sendMsgToPIDQ(RESUME, EMPTY);
+            sendMsgToNaviQ(RESUME, EMPTY);
         }
-        prevmsg = msg;
     }
 }
 

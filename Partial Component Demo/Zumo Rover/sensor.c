@@ -23,31 +23,9 @@ const lookupTable sensorLookup[DICTLEN] = {{880000,4}, //{microvolt, in}
                                            {150000,24},
                                            {140000,26},
                                            {130000,28},
-                                           {125000,30},
+                                           {120000,30},
                                            {0,0}};
 
-void *sensorThread(void *arg0)
-{
-    dbgOutputLoc(ENTER_TASK);
-    uint16_t sensorVal = 0;
-    static int total = 0, count = 0, avg = 0;
-    dbgOutputLoc(WHILE1);
-    while(1)
-    {
-        receiveFromSensorQ(&sensorVal);
-        total+=sensorVal;
-        count++;
-        if(count == 5)
-        {
-            avg = total/count;
-            total = 0;
-            count = 0;
-            sendMsgToPIDQ(SENSOR, avg);
-            MQTTMsg msg = {.type = JSON_TYPE_DEBUG, .value = avg};
-            sendMsgToMQTTQ(msg);
-        }
-    }
-}
 
 void adcInit()
 {
@@ -59,11 +37,22 @@ void adcInit()
 
 void pollSensor()
 {
+    static int total = 0, count = 0, avg = 0;
     uint16_t adcValue;
     if(ADC_convert(adc, &adcValue) != ADC_STATUS_SUCCESS) ERROR;
     uint32_t adcValueMicroVolt = ADC_convertRawToMicroVolts(adc, adcValue);
     int result = conversion(adcValueMicroVolt);
-    sendSensorMsgToQ(result);
+    total+=result;
+    count++;
+    if(count == 5)
+    {
+        avg = total/count;
+        total = 0;
+        count = 0;
+        sendMsgToNaviQFromISR(SENSOR, avg);
+        MQTTMsg msg = {.type = JSON_TYPE_DEBUG, .value = avg};
+        sendMsgToMQTTQFromISR(msg);
+    }
 }
 
 int conversion(uint32_t sensorVal)

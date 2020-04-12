@@ -8,10 +8,10 @@
 #ifndef TIMER_H_
 #define TIMER_H_
 
+#include <navigation.h>
 #include <ti/drivers/Timer.h>
 #include "debug.h"
 #include "sensor.h"
-#include "PID.h"
 #include "pixy.h"
 #include "capture.h"
 #include "mqtt_queue.h"

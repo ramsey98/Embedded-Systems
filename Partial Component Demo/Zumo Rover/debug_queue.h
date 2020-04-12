@@ -8,9 +8,9 @@
 #ifndef DEBUG_QUEUE_H_
 #define DEBUG_QUEUE_H_
 
+#include <navi_queue.h>
 #include "debug.h"
 #include "queue.h"
-#include "PID_queue.h"
 
 #define UARTSHIFT (32)
 void sendMsgToUARTDebugQ(uint32_t type, uint32_t value);
