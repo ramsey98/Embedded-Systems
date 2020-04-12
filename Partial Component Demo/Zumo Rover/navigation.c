@@ -28,19 +28,19 @@ void updateMotors(MOTORS_DATA motorsState)
     {
         if(motorsState.leftDir == 0)
         {
-            sendMsgToUARTTxQ(motorsState.setLeftSpeed, M0_FORWARD_8BIT);
+            sendMsgToUARTTxQ(motorsState.realLeftSpeed, M0_FORWARD_8BIT);
         }
         else
         {
-            sendMsgToUARTTxQ(motorsState.setLeftSpeed, M0_REVERSE_8BIT);
+            sendMsgToUARTTxQ(motorsState.realLeftSpeed, M0_REVERSE_8BIT);
         }
         if(motorsState.rightDir == 0)
         {
-            sendMsgToUARTTxQ(motorsState.setRightSpeed, M1_FORWARD_8BIT);
+            sendMsgToUARTTxQ(motorsState.realRightSpeed, M1_FORWARD_8BIT);
         }
         else
         {
-            sendMsgToUARTTxQ(motorsState.setRightSpeed, M1_REVERSE_8BIT);
+            sendMsgToUARTTxQ(motorsState.realRightSpeed, M1_REVERSE_8BIT);
         }
     }
     else if(motorsState.paused == 1)
@@ -145,7 +145,8 @@ void updateValues(MOTORS_DATA *motorsState, uint32_t type, uint32_t value)
 
 }
 
-int PIDAdjust(uint8_t setSpeed, uint8_t measuredSpeed)
+//https://softwareengineering.stackexchange.com/questions/186124/programming-pid-loops-in-c
+uint8_t PIDAdjust(uint8_t setSpeed, uint32_t measuredSpeed)
 {
     int i;
     static int error = 0, integral = 0;
@@ -158,7 +159,7 @@ int PIDAdjust(uint8_t setSpeed, uint8_t measuredSpeed)
         }
     }
     integral += error;
-    PIDResult = (KP*error) + (KI*integral*.5);
+    PIDResult = (KP*error) + (KI*integral*measuredSpeed);
     if(setSpeed + PIDResult > 127)
     {
         ret = 127;
@@ -176,24 +177,21 @@ int PIDAdjust(uint8_t setSpeed, uint8_t measuredSpeed)
 
 void naviEvent(MOTORS_DATA *motorsState, uint32_t type, uint32_t value)
 {
+    int halfway, scaled;
     switch(type)
     {
-        case PID:
-            motorsState->setLeftSpeed = PIDAdjust(motorsState->setLeftSpeed, motorsState->realLeftSpeed);
-            motorsState->setRightSpeed = PIDAdjust(motorsState->setRightSpeed, motorsState->realRightSpeed);
-            break;
         case TIMER:
             updateMotors(*motorsState);
-            motorsState->realLeftSpeed = 0;
-            motorsState->realRightSpeed = 0;
+            motorsState->realLeftSpeed = motorsState->setLeftSpeed;
+            motorsState->realRightSpeed = motorsState->setRightSpeed;
             break;
         case LEFTCAP:
-            motorsState->realLeftSpeed = value;
-            //motorsState->setLeftSpeed = PIDAdjust(motorsState->setLeftSpeed, motorsState->realLeftSpeed);
+            motorsState->measuredLeftSpeed = value;
+            //motorsState->realLeftSpeed = PIDAdjust(motorsState->setLeftSpeed, motorsState->measuredLeftSpeed);
             break;
         case RIGHTCAP:
-            motorsState->realRightSpeed = value;
-            //motorsState->setRightSpeed = PIDAdjust(motorsState->setRightSpeed, motorsState->realRightSpeed);
+            motorsState->measuredRightSpeed = value;
+            //motorsState->realRightSpeed = PIDAdjust(motorsState->setRightSpeed, motorsState->measuredRightSpeed);
             break;
         case SENSOR:
             if(value >= 20)
@@ -210,16 +208,15 @@ void naviEvent(MOTORS_DATA *motorsState, uint32_t type, uint32_t value)
             }
             break;
         case PIXY:
-            if(value == SYNCING)
+            halfway = (PIXY_X_RANGE/2);
+            scaled = 127*(value / halfway);
+            if(value < halfway)
             {
-                sendMsgToUARTDebugQ(PIXY, SYNCING);
-                //updateValues(motorsState, PAUSE, EMPTY);
+                updateValues(motorsState, TURNLEFT, scaled);
             }
-            else if(value != SYNCING)
+            else if(value > (PIXY_X_RANGE/2))
             {
-                //updateValue(motorsState, TURNLEFT, 60);
-                //updateValue(motorsState, TURNRIGHT, 60);
-                sendMsgToUARTDebugQ(PIXY, EMPTY);
+                updateValues(motorsState, TURNRIGHT, scaled);
             }
             break;
         default:
@@ -236,6 +233,8 @@ void *naviThread(void *arg0)
                                .setRightSpeed = 0,
                                .realLeftSpeed = 0,
                                .realRightSpeed = 0,
+                               .measuredLeftSpeed = 0,
+                               .measuredRightSpeed = 0,
                                .leftDir = 0,
                                .rightDir = 0,
                                .paused = 0};

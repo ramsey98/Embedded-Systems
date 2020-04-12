@@ -19,11 +19,11 @@ int processBuffer(PIXY_DATA *curState)
     int start = 0;
     for(i = 0; i < SPI_MSG_LENGTH; i++)
     {
-        if(curState->rx_buffer[i] == 175)
+        if(curState->rx_buffer[i] == SYNC_FIRST)
         {
             check1 = 1;
         }
-        if(curState->rx_buffer[i] == 193)
+        if(curState->rx_buffer[i] == SYNC_SECOND)
         {
             check2 = 1;
         }
@@ -40,7 +40,7 @@ void processVersion(PIXY_DATA *curState)
 {
     uint8_t version = 0;
     int start = processBuffer(curState);
-    if(curState->rx_buffer[start] == 15)
+    if(curState->rx_buffer[start] == TYPE_VERSION)
     {
         version = curState->rx_buffer[start+6];
     }
@@ -52,12 +52,11 @@ void processColor(PIXY_DATA *curState)
 {
     int i, loc;
     int start = processBuffer(curState);
-    if(curState->rx_buffer[start] == 33)
+    if(curState->rx_buffer[start] == TYPE_COLOR)
     {
         curState->blockCount = curState->rx_buffer[start+1];
         if(curState->blockCount > 0)
         {
-            sendMsgToUARTDebugQ(PIXY, curState->rx_buffer[start+1]);
             loc = start + 3;
             for(i = 0; i < curState->blockCount/CONNECTED_PACKET_LENGTH; i++)
             {
@@ -71,6 +70,13 @@ void processColor(PIXY_DATA *curState)
                 curState->blocks[i].age = curState->rx_buffer[loc+13];
                 loc += CONNECTED_PACKET_LENGTH;
             }
+            sendMsgToNaviQ(PIXY, curState->blocks[0].xPos);
+        }
+        else
+        {
+            //sendMsgToNaviQFromISR(PIXY, SYNCING); //send pause to movement
+            //sendMsgToPixyQFromISR(PIXY_PAN); //search 360 degrees for object
+            //sendMsgToPixyQFromISR(PIXY_TILT);
         }
     }
 }

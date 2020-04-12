@@ -17,6 +17,8 @@
 #define KP 0.5
 #define KI 0.5
 #define NAVILOOKUPLEN 14
+#define PIXY_X_RANGE 315
+#define PIXY_Y_RANGE 207
 
 typedef struct
 {
@@ -27,10 +29,11 @@ typedef struct
 typedef struct
 {
     uint8_t setLeftSpeed, setRightSpeed, leftDir, rightDir, paused;//, distance, distLeft, distRight;
-    uint32_t realLeftSpeed, realRightSpeed;
+    uint8_t realLeftSpeed, realRightSpeed;
+    uint32_t measuredLeftSpeed, measuredRightSpeed;
 } MOTORS_DATA;
 
-int PIDAdjust(uint8_t setSpeed, uint8_t measuredSpeed);
+uint8_t PIDAdjust(uint8_t setSpeed, uint32_t measuredSpeed);
 void updateMotors(MOTORS_DATA motorsState);
 void updateValues(MOTORS_DATA * motorsState, uint32_t type, uint32_t value);
 void *naviThread(void *arg0);
