@@ -23,11 +23,13 @@
 #define JSON_TYPE_STATS (1)
 #define JSON_TYPE_DEBUG (2)
 #define JSON_TYPE_ERROR (3)
+#define JSON_TYPE_PIXY  (4)
 
 #define PUBLISH_TOPIC_0 "/team20/stats"
 #define PUBLISH_TOPIC_1 "/team20/debug"
 #define PUBLISH_TOPIC_2 "/team20/errors"
-#define PUBLISH_TOPIC_COUNT 3
+#define PUBLISH_TOPIC_3 "/team20/pixy"
+#define PUBLISH_TOPIC_COUNT 4
 
 #define JSON_STATS      \
 "{"                        \
@@ -68,6 +70,20 @@
     "\"Type\": 0"    \
 "}"
 
+#define JSON_PIXY      \
+"{"                        \
+    "\"ID\": int32,"        \
+    "\"Color\": int32,"    \
+    "\"Distance\": int32"    \
+"}"
+
+#define JSON_PIXY_BUF      \
+"{"                        \
+    "\"ID\": 0,"        \
+    "\"Color\": 0,"    \
+    "\"Distance\": 0"    \
+"}"
+
 #define SUBSCRIPTION_TOPIC "/team20/config"
 #define SUBSCRIPTION_TOPIC_COUNT 1
 #define JSON_CONFIG      \
@@ -87,6 +103,7 @@ void json_read_config(Json_Handle objectHandle);
 void json_send_stats(Json_Handle objectHandle);
 void json_send_debug(MQTTMsg msg, Json_Handle objectHandle);
 void json_send_error(MQTTMsg msg, Json_Handle objectHandle);
+void json_send_pixy(MQTTMsg msg, Json_Handle objectHandle);
 void json_send(char *publish_topic, char *publish_data, MQTTMsg msg);
 
 #endif /* JSON_PARSE_H_ */

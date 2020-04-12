@@ -19,7 +19,7 @@ void timer100MSCallback(Timer_Handle myHandle)
     if(ret < 0) {
         ERROR;
     }
-    /* todo uncomment
+
     MQTTMsg msg = {0, 0};
     if(count == 10)
     {
@@ -34,7 +34,7 @@ void timer100MSCallback(Timer_Handle myHandle)
     count++;
 
     //MQTT section
-
+    /*
     if(count % 20 == 0)
     {
         msg.type = JSON_TYPE_STATS;

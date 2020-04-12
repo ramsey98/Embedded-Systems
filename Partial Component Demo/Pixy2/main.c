@@ -6,7 +6,6 @@
  *      Author: Matthew Conway
  */
 #include "debug.h"
-#include "sensor_state.h"
 #include "sensor_queue.h"
 #include "timerone.h"
 #include "timertwo.h"

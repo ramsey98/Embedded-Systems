@@ -87,7 +87,7 @@ void json_send_debug(MQTTMsg msg, Json_Handle objectHandle)
 {
     dbgOutputLoc(ENTER_SEND_DEBUG);
     static int debugID = 0;
-    int value = msg.value;
+    int value = msg.value1;
     if(Json_parse(objectHandle, JSON_DEBUG_BUF, strlen(JSON_DEBUG_BUF)) != 0) ERROR;
     if(Json_setValue(objectHandle, "\"ID\"", &debugID, sizeof(debugID)) != 0) ERROR;
     if(Json_setValue(objectHandle, "\"value\"", &value, sizeof(value)) != 0) ERROR;
@@ -98,12 +98,25 @@ void json_send_error(MQTTMsg msg, Json_Handle objectHandle)
 {
     dbgOutputLoc(ENTER_SEND_ERROR);
     static int errorsID = 0;
-    int error = msg.value;
+    int error = msg.value1;
     if(Json_parse(objectHandle, JSON_ERRORS_BUF, strlen(JSON_ERRORS_BUF)) != 0) ERROR;
     if(Json_setValue(objectHandle, "\"ID\"", &errorsID, sizeof(errorsID)) != 0) ERROR;
     if(Json_setValue(objectHandle, "\"Type\"", &error, sizeof(error)) != 0) ERROR;
     errorsID++;
 }
+
+void json_send_pixy(MQTTMsg msg, Json_Handle objectHandle) {
+    dbgOutputLoc(ENTER_SEND_PIXY);
+    static int pixyID = 0;
+    int color = msg.value1;
+    int dist = msg.value2;
+    if(Json_parse(objectHandle, JSON_PIXY_BUF, strlen(JSON_PIXY_BUF)) != 0) ERROR;
+    if(Json_setValue(objectHandle, "\"ID\"", &pixyID, sizeof(pixyID)) != 0) ERROR;
+    if(Json_setValue(objectHandle, "\"Color\"", &color, sizeof(color)) != 0) ERROR;
+    if(Json_setValue(objectHandle, "\"Distance\"", &dist, sizeof(dist)) != 0) ERROR;
+    pixyID++;
+}
+
 
 void json_send(char *publish_topic, char *publish_data, MQTTMsg msg)
 {
@@ -130,6 +143,12 @@ void json_send(char *publish_topic, char *publish_data, MQTTMsg msg)
             if(Json_createObject(&objectHandle, templateHandle, 0) != 0) ERROR;
             json_send_error(msg, objectHandle);
             strncpy(publish_topic, PUBLISH_TOPIC_2, sizeof(PUBLISH_TOPIC_2));
+            break;
+        case JSON_TYPE_PIXY:
+            if(Json_createTemplate(&templateHandle, JSON_PIXY, strlen(JSON_PIXY)) != 0) ERROR;
+            if(Json_createObject(&objectHandle, templateHandle, 0) != 0) ERROR;
+            json_send_pixy(msg, objectHandle);
+            strncpy(publish_topic, PUBLISH_TOPIC_3, sizeof(PUBLISH_TOPIC_3));
             break;
         default:
             ERROR;

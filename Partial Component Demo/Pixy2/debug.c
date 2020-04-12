@@ -140,7 +140,7 @@ void halt(int line, const char* func)
     dbgUARTStr("Error in func: ");
     dbgUARTStr(func);
     dbgUARTStr(" at line #: ");
-    dbgUARTNum(line);
+    dbgUARTNumAsChars(line);
     HwiP_disable();
     vTaskSuspendAll();
     int timerCount = 0;
