@@ -103,8 +103,8 @@ int findDistances(DISTANCE_DATA *data, int * transfer) {
 
                 msg.value1 = data->blocks[i].colorCode;
                 msg.value2 = data->blocks[i].distance;
-                sendMsgToMQTTQ(msg);
-                //sendMsgToMQTTQFromISR(msg);
+                //sendMsgToMQTTQ(msg);
+                sendMsgToMQTTQFromISR(msg);
             }
         }
         dbgUARTStr("}\n\r");
