@@ -28,23 +28,23 @@ void timerCallback(Timer_Handle myHandle)
     if(count % 1 == 0)
     {
         pollSensor();
-        //sendMsgToPixyQFromISR(PIXY_COLOR);
     }
     if(count % 2 == 0)
     {
-        sendMsgToPIDQFromISR(TIMER, EMPTY);
+        sendMsgToNaviQFromISR(TIMER, EMPTY);
     }
     if(count % 5 == 0)
     {
-        sendMsgToPIDQFromISR(TIMER_PID, EMPTY);
+        sendMsgToNaviQFromISR(TIMER_NAVI, EMPTY);
+    }
+    if(count % 20 == 0)
+    {
+        sendMsgToPixyQFromISR(PIXY_VERSION);
     }
     if(count % 20 == 0)
     {
         MQTTMsg msg = {.type = JSON_TYPE_STATS, .value = 0};
         sendMsgToMQTTQFromISR(msg);
-    }
-    if(count == 100)
-    {
         count = 0;
     }
     count++;

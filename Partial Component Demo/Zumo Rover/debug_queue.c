@@ -30,8 +30,8 @@ void *UARTDebugThread(void *arg0)
             case TIMER:
                 dbgUARTStr("Timer");
                 break;
-            case PID_SENSOR:
-                dbgUARTStr("PID Sensor:");
+            case NAVI_SENSOR:
+                dbgUARTStr("NAVI Sensor:");
                 if(value == ACCEL)
                 {
                     dbgUARTStr("ACCEL");
@@ -46,7 +46,7 @@ void *UARTDebugThread(void *arg0)
                 dbgUARTNum(value);
                 break;
             case PIXY:
-                dbgUARTStr("Blocks:");
+                //dbgUARTStr("Blocks:");
                 dbgUARTNum(value);
                 break;
             default:

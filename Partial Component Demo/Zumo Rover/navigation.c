@@ -5,9 +5,9 @@
  *      Author: Holden Ramsey
  */
 
-#include "PID.h"
+#include <navigation.h>
 
-const PIDLookupTable PIDLookup[PIDLOOKUPLEN] = {{0,0}, //{expected, measured}
+const naviLookupTable naviLookup[NAVILOOKUPLEN] = {{0,0}, //{expected, measured}
                                                 {10,0},
                                                 {20,18000},
                                                 {30,10000},
@@ -145,28 +145,28 @@ void updateValues(MOTORS_DATA *motorsState, uint32_t type, uint32_t value)
 
 }
 
-void PIDAdjust(MOTORS_DATA *motorsState)
+void naviAdjust(MOTORS_DATA *motorsState)
 {
     int i;
-    for(i = 0; i < PIDLOOKUPLEN; i++)
+    for(i = 0; i < NAVILOOKUPLEN; i++)
     {
-        if(motorsState->realLeftSpeed >= PIDLookup[i].measured & motorsState->setLeftSpeed >= PIDLookup[i].expected)
+        if(motorsState->realLeftSpeed >= naviLookup[i].measured & motorsState->setLeftSpeed >= naviLookup[i].expected)
         {
-            motorsState->setLeftSpeed = PIDLookup[i].expected;
+            motorsState->setLeftSpeed = naviLookup[i].expected;
         }
-        if(motorsState->realRightSpeed >= PIDLookup[i].measured & motorsState->setRightSpeed >= PIDLookup[i].expected)
+        if(motorsState->realRightSpeed >= naviLookup[i].measured & motorsState->setRightSpeed >= naviLookup[i].expected)
         {
-            motorsState->setRightSpeed = PIDLookup[i].expected;
+            motorsState->setRightSpeed = naviLookup[i].expected;
         }
     }
 }
 
-void PIDEvent(MOTORS_DATA *motorsState, uint32_t type, uint32_t value)
+void naviEvent(MOTORS_DATA *motorsState, uint32_t type, uint32_t value)
 {
     switch(type)
     {
-        case TIMER_PID:
-            //PIDAdjust(motorsState);
+        case TIMER_NAVI:
+            //naviAdjust(motorsState);
             break;
         case TIMER:
             updateMotors(*motorsState);
@@ -212,7 +212,7 @@ void PIDEvent(MOTORS_DATA *motorsState, uint32_t type, uint32_t value)
     }
 }
 
-void *PIDThread(void *arg0)
+void *naviThread(void *arg0)
 {
     dbgOutputLoc(ENTER_TASK);
     uint32_t type = 0, value = 0;
@@ -226,7 +226,7 @@ void *PIDThread(void *arg0)
     dbgOutputLoc(WHILE1);
     while(1)
     {
-        receiveFromPIDQ(&type, &value);
-        PIDEvent(&motorsState, type, value);
+        receiveFromNaviQ(&type, &value);
+        naviEvent(&motorsState, type, value);
     }
 }

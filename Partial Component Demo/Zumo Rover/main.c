@@ -7,13 +7,13 @@
 //#include "mqtt_client_app.h"
 
 #include <motors.h>
+#include <navigation.h>
 #include "debug.h"
 #include "pixy.h"
 #include "capture.h"
 #include "sensor.h"
 #include "test.h"
 #include "timer.h"
-#include "PID.h"
 #include "config.h"
 #include <pthread.h>
 
@@ -23,7 +23,7 @@ extern void MQTTInit();
 
 void *mainThread(void *arg0)
 {
-    pthread_t UARTTx, PID, UARTDebug, config;//, test, pixy;
+    pthread_t UARTTx, navi, UARTDebug, config, pixy;//, test, pixy;
     pthread_attr_t attrs;
     struct sched_param  priParam;
     int detachState;
@@ -41,7 +41,7 @@ void *mainThread(void *arg0)
     dbgUARTInit(tUartHndl);
 
     createPixyQueue();
-    createPIDQueue();
+    createNaviQueue();
     createUARTTxQueue();
     createUARTDebugQueue();
     createMQTTQueue();
@@ -50,7 +50,7 @@ void *mainThread(void *arg0)
     captureInit();
     motorsUARTInit();
     adcInit();
-    //pixyInit();
+    pixyInit();
     MQTTInit();
 
     pthread_attr_init(&attrs);
@@ -61,8 +61,8 @@ void *mainThread(void *arg0)
     priParam.sched_priority = 1;
     pthread_attr_setschedparam(&attrs, &priParam);
 
-    //if(pthread_create(&pixy, &attrs, pixyThread, NULL) != 0) ERROR;
-    if(pthread_create(&PID, &attrs, PIDThread, NULL) != 0) ERROR;
+    if(pthread_create(&pixy, &attrs, pixyThread, NULL) != 0) ERROR;
+    if(pthread_create(&navi, &attrs, naviThread, NULL) != 0) ERROR;
     if(pthread_create(&config, &attrs, configThread, NULL) != 0) ERROR;
     if(pthread_create(&UARTTx, &attrs, UARTTxThread, NULL) != 0) ERROR;
     if(pthread_create(&UARTDebug, &attrs, UARTDebugThread, NULL) != 0) ERROR;

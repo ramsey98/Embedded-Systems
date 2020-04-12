@@ -5,8 +5,8 @@
  *      Author: Holden Ramsey
  */
 
+#include <navigation.h>
 #include "config.h"
-#include "PID.h"
 
 static QueueHandle_t xQueue = NULL;
 
@@ -18,11 +18,11 @@ void * configThread(void *arg0)
         receiveFromConfigQ(&msg);
         if(msg == ROVER_LOADING)
         {
-            sendMsgToPIDQ(PAUSE, EMPTY);
+            sendMsgToNaviQ(PAUSE, EMPTY);
         }
         else if(msg == ROVER_MOVING)
         {
-            sendMsgToPIDQ(RESUME, EMPTY);
+            sendMsgToNaviQ(RESUME, EMPTY);
         }
     }
 }

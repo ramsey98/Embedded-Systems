@@ -12,13 +12,37 @@ extern void pixySetServos(uint8_t *rx_buffer, uint8_t *tx_buffer, uint16_t panX,
 extern void pixySetColor(uint8_t *rx_buffer, uint8_t *tx_buffer, uint8_t r, uint8_t g, uint8_t b);
 extern void pixyGetConnectedBlocks(uint8_t *rx_buffer, uint8_t *tx_buffer);
 
+int processBuffer(PIXY_DATA *curState)
+{
+    int i;
+    int check1 = 0, check2 = 0;
+    int start = 0;
+    for(i = 0; i < SPI_MSG_LENGTH; i++)
+    {
+        if(curState->rx_buffer[i] == 175)
+        {
+            check1 = 1;
+        }
+        if(curState->rx_buffer[i] == 193)
+        {
+            check2 = 1;
+        }
+        if(check1 & check2)
+        {
+            start = i+1;
+            break;
+        }
+    }
+    return start;
+}
+
 void processVersion(PIXY_DATA *curState)
 {
-    sendMsgToUARTDebugQ(PIXY, 4);
     uint8_t version = 0;
-    if(curState->rx_buffer[15+2] == 15)
+    int start = processBuffer(curState);
+    if(curState->rx_buffer[start] == 15)
     {
-        version = curState->rx_buffer[15+8];
+        version = curState->rx_buffer[start+6];
     }
     MQTTMsg msg = {JSON_TYPE_DEBUG, version};
     sendMsgToMQTTQ(msg);
@@ -81,7 +105,6 @@ void pixy_fsm(PIXY_DATA *curState, uint8_t *type)
             switch(*type)
             {
                 case PIXY_VERSION:
-                    sendMsgToUARTDebugQ(PIXY, 2);
                     pixyGetVersion(curState->rx_buffer, curState->tx_buffer);
                     break;
                 case PIXY_PAN:
@@ -99,7 +122,6 @@ void pixy_fsm(PIXY_DATA *curState, uint8_t *type)
         case PixyWaitingForTransfer:
             if(*type == PIXY_COMPLETE)
             {
-                sendMsgToUARTDebugQ(PIXY, 3);
                 switch(prevType)
                 {
                     case PIXY_VERSION:

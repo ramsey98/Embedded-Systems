@@ -8,11 +8,11 @@
 #ifndef PIXY_H_
 #define PIXY_H_
 
+#include <navi_queue.h>
 #include <ti/drivers/SPI.h>
 #include "debug.h"
 #include "pixy_queue.h"
 #include "pixy_state.h"
-#include "PID_queue.h"
 
 void pixyInit();
 void SPICallback(SPI_Handle handle, SPI_Transaction *trans);
