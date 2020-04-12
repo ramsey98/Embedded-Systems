@@ -300,13 +300,22 @@ void Mqtt_start()
 
 
     pthread_attr_t attrs;
-    pthread_t debug_thread;
+    pthread_t debug_thread, config_thread;
     pthread_attr_init(&attrs);
     priParam.sched_priority = 1;
     if(pthread_attr_setdetachstate(&attrs, PTHREAD_CREATE_DETACHED) != 0) ERROR;
     if(pthread_attr_setstacksize(&attrs, TASKSTACKSIZE) != 0) ERROR;
     if(pthread_attr_setschedparam(&attrs, &priParam) != 0) ERROR;
     if(pthread_create(&debug_thread, &attrs, debugThread, NULL) != 0) ERROR;
+
+
+    pthread_attr_t attrs1;
+    pthread_attr_init(&attrs1);
+    priParam.sched_priority = 4;
+    if(pthread_attr_setdetachstate(&attrs1, PTHREAD_CREATE_DETACHED) != 0) ERROR;
+    if(pthread_attr_setstacksize(&attrs1, TASKSTACKSIZE) != 0) ERROR;
+    if(pthread_attr_setschedparam(&attrs1, &priParam) != 0) ERROR;
+    if(pthread_create(&config_thread, &attrs1, configThread, NULL) != 0) ERROR;
 }
 
 int32_t MqttClient_start()

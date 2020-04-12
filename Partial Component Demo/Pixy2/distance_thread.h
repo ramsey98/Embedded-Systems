@@ -31,6 +31,7 @@
 #include "debug.h"
 #include "spi.h"
 #include "distance_queue.h"
+#include "mqtt_queue.h"
 
 int findDistances(DISTANCE_DATA *data, int * transfer);
 int findDistance(BLOCK_DATA *data);

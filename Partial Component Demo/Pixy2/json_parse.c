@@ -105,6 +105,19 @@ void json_send_error(MQTTMsg msg, Json_Handle objectHandle)
     errorsID++;
 }
 
+void json_send_pixy(MQTTMsg msg, Json_Handle objectHandle) {
+    dbgOutputLoc(ENTER_SEND_PIXY);
+    static int pixyID = 0;
+    int color = msg.value1;
+    int dist = msg.value2;
+    if(Json_parse(objectHandle, JSON_PIXY_BUF, strlen(JSON_PIXY_BUF)) != 0) ERROR;
+    if(Json_setValue(objectHandle, "\"ID\"", &pixyID, sizeof(pixyID)) != 0) ERROR;
+    if(Json_setValue(objectHandle, "\"Color\"", &color, sizeof(color)) != 0) ERROR;
+    if(Json_setValue(objectHandle, "\"Distance\"", &dist, sizeof(dist)) != 0) ERROR;
+    pixyID++;
+}
+
+
 void json_send(char *publish_topic, char *publish_data, MQTTMsg msg)
 {
     Json_Handle templateHandle, objectHandle;
@@ -130,6 +143,12 @@ void json_send(char *publish_topic, char *publish_data, MQTTMsg msg)
             if(Json_createObject(&objectHandle, templateHandle, 0) != 0) ERROR;
             json_send_error(msg, objectHandle);
             strncpy(publish_topic, PUBLISH_TOPIC_2, sizeof(PUBLISH_TOPIC_2));
+            break;
+        case JSON_TYPE_PIXY:
+            if(Json_createTemplate(&templateHandle, JSON_PIXY, strlen(JSON_PIXY)) != 0) ERROR;
+            if(Json_createObject(&objectHandle, templateHandle, 0) != 0) ERROR;
+            json_send_pixy(msg, objectHandle);
+            strncpy(publish_topic, PUBLISH_TOPIC_3, sizeof(PUBLISH_TOPIC_3));
             break;
         default:
             ERROR;
