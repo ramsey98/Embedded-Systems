@@ -45,8 +45,12 @@ void *UARTDebugThread(void *arg0)
                 dbgUARTStr("Sensor:");
                 dbgUARTNum(value);
                 break;
-            case PIXY:
-                //dbgUARTStr("Blocks:");
+            case PIXY_X:
+                dbgUARTStr("Pixy X:");
+                dbgUARTNum(value);
+                break;
+            case PIXY_Y:
+                dbgUARTStr("Pixy Y:");
                 dbgUARTNum(value);
                 break;
             default:

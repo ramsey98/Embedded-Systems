@@ -12,6 +12,8 @@ extern void pixySetServos(uint8_t *rx_buffer, uint8_t *tx_buffer, uint16_t panX,
 extern void pixySetColor(uint8_t *rx_buffer, uint8_t *tx_buffer, uint8_t r, uint8_t g, uint8_t b);
 extern void pixyGetConnectedBlocks(uint8_t *rx_buffer, uint8_t *tx_buffer);
 
+static int panx = 0, pany = 0;
+
 int processBuffer(PIXY_DATA *curState)
 {
     int i;
@@ -50,6 +52,7 @@ void processVersion(PIXY_DATA *curState)
 
 void processColor(PIXY_DATA *curState)
 {
+    static int paused = 0;
     int i, loc;
     int start = processBuffer(curState);
     if(curState->rx_buffer[start] == TYPE_COLOR)
@@ -57,6 +60,11 @@ void processColor(PIXY_DATA *curState)
         curState->blockCount = curState->rx_buffer[start+1];
         if(curState->blockCount > 0)
         {
+            if(paused == 1)
+            {
+                paused = 0;
+                sendMsgToNaviQ(RESUME, 0);
+            }
             loc = start + 3;
             for(i = 0; i < curState->blockCount/CONNECTED_PACKET_LENGTH; i++)
             {
@@ -69,14 +77,26 @@ void processColor(PIXY_DATA *curState)
                 curState->blocks[i].trackIndex = curState->rx_buffer[loc+12];
                 curState->blocks[i].age = curState->rx_buffer[loc+13];
                 loc += CONNECTED_PACKET_LENGTH;
+                break;
             }
-            sendMsgToNaviQ(PIXY, curState->blocks[0].xPos);
+            panx = curState->blocks[0].xPos;
+            pany = curState->blocks[0].yPos;
+            sendMsgToNaviQ(PIXY, panx);
+            //sendMsgToPixyQ(PIXY_PAN);
         }
         else
         {
-            //sendMsgToNaviQFromISR(PIXY, SYNCING); //send pause to movement
-            //sendMsgToPixyQFromISR(PIXY_PAN); //search 360 degrees for object
-            //sendMsgToPixyQFromISR(PIXY_TILT);
+            sendMsgToNaviQ(PAUSE, 0); //send pause to movement
+            pany = PIXY_Y_RANGE/2;
+            if(panx < PIXY_X_RANGE)
+            {
+                panx+=10;
+            }
+            else
+            {
+                panx=0;
+            }
+            sendMsgToPixyQ(PIXY_PAN);
         }
     }
 }
@@ -86,7 +106,6 @@ void pixy_fsm(PIXY_DATA *curState, uint8_t *type)
     dbgOutputLoc(ENTER_PIXY_FSM);
     int i;
     static uint8_t prevType = 0;
-    uint16_t panX = 1, panY = 1;
     switch (curState->state)
     {
         case PixyInit:
@@ -115,7 +134,7 @@ void pixy_fsm(PIXY_DATA *curState, uint8_t *type)
                     pixyGetVersion(curState->rx_buffer, curState->tx_buffer);
                     break;
                 case PIXY_PAN:
-                    pixySetServos(curState->rx_buffer, curState->tx_buffer, panX, panY);
+                    pixySetServos(curState->rx_buffer, curState->tx_buffer, panx, pany);
                     break;
                 case PIXY_COLOR:
                     pixyGetConnectedBlocks(curState->rx_buffer, curState->tx_buffer);
@@ -133,6 +152,9 @@ void pixy_fsm(PIXY_DATA *curState, uint8_t *type)
                 {
                     case PIXY_VERSION:
                         processVersion(curState);
+                        break;
+                    case PIXY_PAN:
+
                         break;
                     case PIXY_COLOR:
                         processColor(curState);

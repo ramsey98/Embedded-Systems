@@ -15,7 +15,7 @@
 #include "pixy_queue.h"
 #include <string.h>
 
-#define MAX_BLOCKS (10)
+#define MAX_BLOCKS (5)
 #define SPI_MSG_LENGTH (128)
 #define SPI_TX_MSG_VERSION (4)
 #define SPI_TX_MSG_CONNECTED (6)
@@ -28,7 +28,6 @@
 #define PIXY_VERSION 2
 #define PIXY_PAN 3
 #define PIXY_COLOR 4
-#define PIXY_TRANS 5
 
 #define SYNC_FIRST 175
 #define SYNC_SECOND 193
@@ -68,6 +67,7 @@ typedef struct
 } PIXY_DATA;
 
 void pixy_fsm(PIXY_DATA *curState, uint8_t *type);
+int processBuffer(PIXY_DATA *curState);
 void processColor(PIXY_DATA *curState);
 void processVersion(PIXY_DATA *curState);
 

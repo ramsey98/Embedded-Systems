@@ -12,28 +12,44 @@ static QueueHandle_t xQueue = NULL;
 
 void * configThread(void *arg0)
 {
-    int msg;
+    int type = 0, value = 0;
+    MQTTMsg msg;
     while(1)
     {
         receiveFromConfigQ(&msg);
-        if(msg == ROVER_LOADING)
+        type = msg.type;
+        value = msg.value;
+        switch(type)
         {
-            sendMsgToNaviQ(PAUSE, EMPTY);
-        }
-        else if(msg == ROVER_MOVING)
-        {
-            sendMsgToNaviQ(RESUME, EMPTY);
+            case CONFIG_STATE:
+                if(value == ROVER_LOADING)
+                {
+                    sendMsgToNaviQ(PAUSE, EMPTY);
+                }
+                else if(value == ROVER_MOVING)
+                {
+                    sendMsgToNaviQ(RESUME, EMPTY);
+                }
+                break;
+            case CONFIG_PID_KP:
+                sendMsgToNaviQ(PID_KP, value);
+                break;
+            case CONFIG_PID_KI:
+                sendMsgToNaviQ(PID_KI, value);
+                break;
+            default:
+                break;
         }
     }
 }
 
 void createConfigQueue()
 {
-    xQueue = xQueueCreate(16, sizeof(int));
+    xQueue = xQueueCreate(16, sizeof(MQTTMsg));
     if(xQueue == NULL) ERROR;
 }
 
-void sendMsgToConfigQ(int msg)
+void sendMsgToConfigQFromISR(MQTTMsg msg)
 {
     dbgOutputLoc(BEFORE_SEND_QUEUE_ISR_TIMER);
     BaseType_t success = xQueueSendFromISR(xQueue, (void *) &msg, pdFALSE);
@@ -41,10 +57,10 @@ void sendMsgToConfigQ(int msg)
     dbgOutputLoc(AFTER_SEND_QUEUE_ISR_TIMER);
 }
 
-void receiveFromConfigQ(int *received)
+void receiveFromConfigQ(MQTTMsg *received)
 {
     dbgOutputLoc(BEFORE_RECEIVE_QUEUE);
-    int temp;
+    MQTTMsg temp;
     BaseType_t success = xQueueReceive(xQueue, &temp, portMAX_DELAY);
     if(success == pdFALSE) ERROR;
     *received = temp;

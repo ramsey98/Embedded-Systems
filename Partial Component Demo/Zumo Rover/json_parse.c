@@ -59,15 +59,16 @@ void json_receive(char *payload, char *msgTopic)
 void json_read_config(Json_Handle objectHandle)
 {
     uint16_t bufSize;
-    int value = 0;
+    int type = 0, value = 0;
     bufSize = sizeof(value);
-    if(Json_getValue(objectHandle, "\"value\"", &value, &bufSize) != 0)
+    if(Json_getValue(objectHandle, "\"Type\"", &type, &bufSize) != 0 & Json_getValue(objectHandle, "\"Value\"", &value, &bufSize) != 0)
     {
         json_miss(1, JSON_ERROR_FORMAT);
     }
     else
     {
-        sendMsgToConfigQ(value);
+        MQTTMsg rcv = {type, value};
+        sendMsgToConfigQFromISR(rcv);
     }
 }
 

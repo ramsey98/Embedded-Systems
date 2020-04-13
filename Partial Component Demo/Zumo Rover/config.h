@@ -10,13 +10,17 @@
 
 #include "debug.h"
 #include "queue.h"
+#include "mqtt_queue.h"
 
+#define CONFIG_STATE 1
+#define CONFIG_PID_KP 2
+#define CONFIG_PID_KI 3
 #define ROVER_MOVING (1)
 #define ROVER_LOADING (2)
 
 void * configThread(void *arg0);
-void sendMsgToConfigQ(int msg);
-void receiveFromConfigQ(int *received);
+void sendMsgToConfigQFromISR(MQTTMsg msg);
+void receiveFromConfigQ(MQTTMsg *received);
 void createConfigQueue();
 
 #endif /* CONFIG_H_ */

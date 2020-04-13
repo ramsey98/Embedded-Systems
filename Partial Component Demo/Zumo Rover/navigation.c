@@ -6,6 +6,7 @@
  */
 
 #include <navigation.h>
+static float curKP = KP, curKI = KI;
 
 const naviLookupTable naviLookup[NAVILOOKUPLEN] = {{0,0}, //{expected, measured}
                                                 {10,0},
@@ -159,7 +160,7 @@ uint8_t PIDAdjust(uint8_t setSpeed, uint32_t measuredSpeed)
         }
     }
     integral += error;
-    PIDResult = (KP*error) + (KI*integral*measuredSpeed);
+    PIDResult = (curKP*error) + (curKI*integral*measuredSpeed);
     if(setSpeed + PIDResult > 127)
     {
         ret = 127;
@@ -210,13 +211,33 @@ void naviEvent(MOTORS_DATA *motorsState, uint32_t type, uint32_t value)
         case PIXY:
             halfway = (PIXY_X_RANGE/2);
             scaled = 127*(value / halfway);
-            if(value < halfway)
+            if(value < (PIXY_X_RANGE*.25))
             {
                 updateValues(motorsState, TURNLEFT, scaled);
             }
-            else if(value > (PIXY_X_RANGE/2))
+            else if(value > (PIXY_X_RANGE*.75))
             {
                 updateValues(motorsState, TURNRIGHT, scaled);
+            }
+            break;
+        case PID_KP:
+            if(value != 0)
+            {
+                curKP = 1/value;
+            }
+            else
+            {
+                curKP = 0;
+            }
+            break;
+        case PID_KI:
+            if(value != 0)
+            {
+                curKI = 1/value;
+            }
+            else
+            {
+                curKI = 0;
             }
             break;
         default:

@@ -26,8 +26,14 @@
 #define PAUSE 12
 #define RESUME 13
 #define NAVI_SENSOR 14
-#define SYNCING 15
-#define PID 16
+#define PIXY_SYNC 15
+#define PID_KP 16
+#define PID_KI 17
+#define PIXY_X 18
+#define PIXY_Y 19
+
+#define PIXY_X_RANGE 315
+#define PIXY_Y_RANGE 207
 
 #define NAVISHIFT (32)
 
