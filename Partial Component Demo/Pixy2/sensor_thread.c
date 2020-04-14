@@ -1,5 +1,5 @@
 /*
- * spi_thread.c
+ * sensor_thread.c
  *
  *  Created on: Mar 3, 2020
  *      Author: Matthew

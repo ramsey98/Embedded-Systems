@@ -13,12 +13,11 @@ void timerSecondCallback(Timer_Handle myHandle)
     dbgOutputLoc(ENTER_ISR_TIMER1);
     uint32_t time = TIMER0_PERIOD/1000;
 
-    int ret2 = sendTimeMsgToPixyQ1(time);
-    sendSensorMsgToQ(SENSOR_TYPE_SUM);
+    //Pixy Section
+    if(sendTimeMsgToPixyQ1(time) < 0) ERROR;
 
-    if(ret2 < 0) {
-        ERROR;
-    }
+    //Sensor Section
+    sendSensorMsgToQ(SENSOR_TYPE_SUM);
 
     dbgOutputLoc(LEAVE_ISR_TIMER1);
 }

@@ -20,6 +20,7 @@ void timer100MSCallback(Timer_Handle myHandle)
     //Sensor Section
     sendSensorMsgToQ(SENSOR_TYPE_TRIGGER);
 
+    //MQTT Section
     MQTTMsg msg = {0, 0};
     if(count == 10)
     {
@@ -32,24 +33,6 @@ void timer100MSCallback(Timer_Handle myHandle)
     }
     sendMsgToMQTTQFromISR(msg);
     count++;
-
-    //MQTT section
-    /*
-    if(count % 20 == 0)
-    {
-        msg.type = JSON_TYPE_STATS;
-        sendMsgToMQTTQFromISR(msg);
-    }
-    if(count == 100)
-    {
-        count = 0;
-    }
-    else
-    {
-        msg.type = JSON_TYPE_DEBUG;
-        sendMsgToMQTTQFromISR(msg);
-        count++;
-    } */
 
     dbgOutputLoc(LEAVE_ISR_TIMER2);
 }
