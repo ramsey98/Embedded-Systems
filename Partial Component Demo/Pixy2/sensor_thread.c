@@ -14,7 +14,7 @@ void *sensorThread(void *arg0) {
 
     while(1) {
         received = receiveFromSensorQ();
-        dbgUARTStr("Sensor queue returned: ");
+        dbgUARTStr("Sensor: ");
         dbgUARTNumAsChars(received);
         dbgUARTStr("\n\r");
     }

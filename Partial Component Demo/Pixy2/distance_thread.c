@@ -73,12 +73,13 @@ int findDistances(DISTANCE_DATA *data, int * transfer) {
 
     if(*transfer > 0){
         *transfer = 0;
-        dbgUARTStr("{ ");
+        //dbgUARTStr("{ ");
         for(i=0; i < data->blockCount/CONNECTED_PACKET_LENGTH; i++) {
 
             if(data->blocks[i].xPos > 10) {     //ensuring a proper size
                 MQTTMsg msg = {4, 0, 0};
 
+                /*
                 if(first) {
                     first = 0;
                     dbgUARTStr("{ ");
@@ -94,20 +95,19 @@ int findDistances(DISTANCE_DATA *data, int * transfer) {
                     dbgUARTStr("y ");
                 } else {
                     dbgUARTStr("?");
-                }
+                } */
 
                 findDistance(&(data->blocks[i]));
-                dbgUARTStr(", distance:");
-                dbgUARTNumAsChars(data->blocks[i].distance);
-                dbgUARTStr("}");
+                //dbgUARTStr(", distance:");
+                //dbgUARTNumAsChars(data->blocks[i].distance);
+                //dbgUARTStr("}");
 
                 msg.value1 = data->blocks[i].colorCode;
                 msg.value2 = data->blocks[i].distance;
-                //sendMsgToMQTTQ(msg);
                 sendMsgToMQTTQFromISR(msg);
             }
         }
-        dbgUARTStr("}\n\r");
+        //dbgUARTStr("}\n\r");
     }
 
     return success;

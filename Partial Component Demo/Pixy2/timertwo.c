@@ -13,12 +13,12 @@ void timer100MSCallback(Timer_Handle myHandle)
 {
     dbgOutputLoc(ENTER_ISR_TIMER2);
     static int count = 0;
-    //Pixy Section
-    int ret = sendPollMsgToPixyQ1();
 
-    if(ret < 0) {
-        ERROR;
-    }
+    //Pixy Section
+    if(sendPollMsgToPixyQ1() < 0) ERROR;
+
+    //Sensor Section
+    sendSensorMsgToQ(SENSOR_TYPE_TRIGGER);
 
     MQTTMsg msg = {0, 0};
     if(count == 10)
