@@ -24,7 +24,7 @@ void timerTriggerInit()
     timer_params.periodUnits = Timer_PERIOD_US;
     timer_params.timerMode = Timer_ONESHOT_CALLBACK;
     timer_params.timerCallback = timerTriggerCallback;
-    timertrig = Timer_open(CONFIG_TIMER_2, &timer_params);
+    timertrig = Timer_open(CONFIG_TIMER_1, &timer_params);
     if (timertrig == 0) ERROR;
 }
 

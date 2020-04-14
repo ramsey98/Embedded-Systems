@@ -7,8 +7,6 @@
 
 #include "timer.h"
 
-static ADC_Handle adc;
-
 void timer100MSCallback(Timer_Handle myHandle)
 {
     dbgOutputLoc(ENTER_ISR_TIMER2);
@@ -54,7 +52,7 @@ void timer100MSInit()
     timer_params.timerMode = Timer_CONTINUOUS_CALLBACK;
     timer_params.timerCallback = timer100MSCallback;
 
-    timer1 = Timer_open(CONFIG_TIMER_1, &timer_params);
+    timer1 = Timer_open(CONFIG_TIMER_0, &timer_params);
     if (timer1 == NULL)
     {
         ERROR;

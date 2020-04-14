@@ -6,15 +6,13 @@
  *      Author: Matthew Conway
  */
 
-#include <ti/drivers/Capture.h>
-#include "ti_drivers_config.h"
-
 //general file imports
 #include "debug.h"
 #include "timer.h"
 #include "timertrigger.h"
 #include "config.h"
 #include "uart_term.h"
+#include "capture.h"
 
 //queue imports
 #include "pixy_queue.h"
@@ -42,9 +40,9 @@ void *mainThread(void *arg0)
 
     SPI_init();
     Timer_init();
+    Capture_init();
     GPIO_init();
     UART_init();
-    Capture_init();
 
     dbgGPIOInit();
     tUartHndl = InitTerm();
@@ -57,6 +55,7 @@ void *mainThread(void *arg0)
     createConfigQueue();
     createSensorQueue();
 
+    captureInit();
     spiInit();
     runMQTT();
     dbgOutputLoc(ENTER_TASK);
@@ -74,6 +73,7 @@ void *mainThread(void *arg0)
     //if(pthread_create(&UARTDebug, &attrs, UARTDebugThread, NULL) != 0) ERROR;  //todo, this is currently overlapped with MQTT debug queu
 
     timer100MSInit();
+    timerTriggerInit();
 
     return (NULL);
 
