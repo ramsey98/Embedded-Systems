@@ -6,10 +6,14 @@
  *      Author: Matthew Conway
  */
 
+#include <ti/drivers/Capture.h>
+#include "ti_drivers_config.h"
+
 //general file imports
 #include "debug.h"
 #include "timerone.h"
 #include "timertwo.h"
+#include "timertrigger.h"
 #include "config.h"
 #include "uart_term.h"
 
@@ -41,6 +45,7 @@ void *mainThread(void *arg0)
     Timer_init();
     GPIO_init();
     UART_init();
+    Capture_init();
 
     dbgGPIOInit();
     tUartHndl = InitTerm();
@@ -72,6 +77,7 @@ void *mainThread(void *arg0)
 
     timerOneInit();
     timer100MSInit();
+    timerTriggerInit();
 
     return (NULL);
 

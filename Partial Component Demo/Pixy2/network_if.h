@@ -59,11 +59,11 @@ extern "C"
 /* is executed.                                                               */
 
 /* AP SSID                                                                    */
-#define SSID_NAME               "TC's Wi-Fi Network"
+#define SSID_NAME               "Fios-Pj3Gn"
 /* Security type (OPEN or WEP or WPA)                                         */
 #define SECURITY_TYPE           SL_WLAN_SEC_TYPE_WPA_WPA2
 /* Password of the secured AP                                                 */
-#define SECURITY_KEY            "Timindy112192"
+#define SECURITY_KEY            "gut95tag64gloomy"
 
 #define SSID_AP_MODE            "<ap-ssid>"
 #define SEC_TYPE_AP_MODE        SL_WLAN_SEC_TYPE_OPEN
