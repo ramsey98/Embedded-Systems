@@ -11,8 +11,7 @@
 
 //general file imports
 #include "debug.h"
-#include "timerone.h"
-#include "timertwo.h"
+#include "timer.h"
 #include "timertrigger.h"
 #include "config.h"
 #include "uart_term.h"
@@ -27,6 +26,7 @@
 #include "distance_thread.h"
 #include "sensor_thread.h"
 #include <pthread.h>
+#include <timer.h>
 
 extern void runMQTT();
 
@@ -75,9 +75,7 @@ void *mainThread(void *arg0)
     if(pthread_create(&sensor, &attrs, sensorThread, NULL) != 0) ERROR;
     //if(pthread_create(&UARTDebug, &attrs, UARTDebugThread, NULL) != 0) ERROR;  //todo, this is currently overlapped with MQTT debug queu
 
-    timerOneInit();
     timer100MSInit();
-    timerTriggerInit();
 
     return (NULL);
 

@@ -35,6 +35,8 @@ void *sensorThread(void *arg0) {
     if (capture == NULL) ERROR;
     Capture_start(capture);
 
+    timerTriggerInit();
+
     while(1) {
         received = receiveFromSensorQ();
 

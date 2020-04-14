@@ -5,8 +5,8 @@
  *      Author: Team 20
  */
 
-#ifndef TIMERTWO_H_
-#define TIMERTWO_H_
+#ifndef TIMER_H_
+#define TIMER_H_
 
 #include <ti/drivers/Timer.h>
 #include <ti/drivers/ADC.h>
@@ -26,4 +26,4 @@ void timer100MSInit();
 //ADC function
 void adcInit();
 
-#endif /* TIMERTWO_H_ */
+#endif /* TIMER_H_ */
