@@ -23,7 +23,4 @@
 void timer100MSCallback(Timer_Handle myHandle);
 void timer100MSInit();
 
-//ADC function
-void adcInit();
-
 #endif /* TIMER_H_ */

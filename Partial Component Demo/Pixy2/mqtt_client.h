@@ -26,7 +26,6 @@
 
 /* MQTT Library includes                                                     */
 #include <ti/net/mqtt/mqttclient.h>
-#include <timer.h>
 
 /* Common interface includes                                                 */
 #include "network_if.h"
@@ -43,6 +42,7 @@
 #include "mqtt_queue.h"
 #include "debug_queue.h"
 #include "config.h"
+#include "timer.h"
 //*****************************************************************************
 //                          LOCAL DEFINES
 //*****************************************************************************

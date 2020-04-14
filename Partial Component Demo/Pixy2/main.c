@@ -40,7 +40,6 @@ void *mainThread(void *arg0)
     int detachState;
     UART_Handle tUartHndl;
 
-    ADC_init();
     SPI_init();
     Timer_init();
     GPIO_init();
@@ -58,7 +57,6 @@ void *mainThread(void *arg0)
     createConfigQueue();
     createSensorQueue();
 
-    adcInit();
     spiInit();
     runMQTT();
     dbgOutputLoc(ENTER_TASK);

@@ -44,18 +44,6 @@ void timer100MSCallback(Timer_Handle myHandle)
     dbgOutputLoc(LEAVE_ISR_TIMER2);
 }
 
-void adcInit()
-{
-    ADC_init();
-    ADC_Params adc_params;
-    ADC_Params_init(&adc_params);
-    adc = ADC_open(CONFIG_ADC_0, &adc_params);
-    if (adc == NULL)
-    {
-        ERROR;
-    }
-}
-
 void timer100MSInit()
 {
     Timer_Handle timer1;
