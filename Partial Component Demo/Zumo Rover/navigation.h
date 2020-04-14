@@ -13,6 +13,8 @@
 #include <navi_queue.h>
 #include "capture.h"
 #include "debug.h"
+#include "mqtt_queue.h"
+#include "json_parse.h"
 
 #define KP 0.5
 #define KI 0.5

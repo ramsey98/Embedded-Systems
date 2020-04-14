@@ -31,6 +31,8 @@
 #define PID_KI 17
 #define PIXY_X 18
 #define PIXY_Y 19
+#define PID_BEFORE 20
+#define PID_AFTER 21
 
 #define PIXY_X_RANGE 315
 #define PIXY_Y_RANGE 207

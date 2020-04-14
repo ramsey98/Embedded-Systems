@@ -45,6 +45,10 @@ void *UARTDebugThread(void *arg0)
                 dbgUARTStr("Sensor:");
                 dbgUARTNum(value);
                 break;
+            case PIXY:
+                dbgUARTStr("Scaled:");
+                dbgUARTNum(value);
+                break;
             case PIXY_X:
                 dbgUARTStr("Pixy X:");
                 dbgUARTNum(value);
@@ -53,6 +57,12 @@ void *UARTDebugThread(void *arg0)
                 dbgUARTStr("Pixy Y:");
                 dbgUARTNum(value);
                 break;
+            case PID_BEFORE:
+                dbgUARTStr("PID Before:");
+                dbgUARTNum(value);
+            case PID_AFTER:
+                dbgUARTStr("PID After:");
+                dbgUARTNum(value);
             default:
                 dbgUARTStr("Invalid Debug");
                 break;

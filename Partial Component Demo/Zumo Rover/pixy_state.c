@@ -53,50 +53,31 @@ void processVersion(PIXY_DATA *curState)
 void processColor(PIXY_DATA *curState)
 {
     static int paused = 0;
-    int i, loc;
     int start = processBuffer(curState);
     if(curState->rx_buffer[start] == TYPE_COLOR)
     {
-        curState->blockCount = curState->rx_buffer[start+1];
+        curState->blockCount = curState->rx_buffer[start+1]/14;
         if(curState->blockCount > 0)
         {
-            if(paused == 1)
+            if(paused == PIXY_SYNC)
             {
                 paused = 0;
                 sendMsgToNaviQ(RESUME, 0);
             }
-            loc = start + 3;
-            for(i = 0; i < curState->blockCount/CONNECTED_PACKET_LENGTH; i++)
-            {
-                curState->blocks[i].colorCode = curState->rx_buffer[loc+1];
-                curState->blocks[i].xPos = (curState->rx_buffer[loc+2] << 8) | curState->rx_buffer[loc+3];
-                curState->blocks[i].yPos = curState->rx_buffer[loc+5];
-                curState->blocks[i].xPixels = (curState->rx_buffer[loc+6] << 8) | curState->rx_buffer[loc+7];
-                curState->blocks[i].yPixels = curState->rx_buffer[loc+9];
-                curState->blocks[i].angle = (curState->rx_buffer[loc+10] << 8) | curState->rx_buffer[loc+11];
-                curState->blocks[i].trackIndex = curState->rx_buffer[loc+12];
-                curState->blocks[i].age = curState->rx_buffer[loc+13];
-                loc += CONNECTED_PACKET_LENGTH;
-                break;
-            }
-            panx = curState->blocks[0].xPos;
-            pany = curState->blocks[0].yPos;
-            sendMsgToNaviQ(PIXY, panx);
+            curState->block.xPos = (curState->rx_buffer[start+7] << 8) | curState->rx_buffer[start+6];
+            curState->block.yPos = curState->rx_buffer[start+8];
+            panx = (PIXY_X_RANGE/2.0) - curState->block.xPos;
+            pany = curState->block.yPos - (PIXY_Y_RANGE/2.0);
+            sendMsgToNaviQ(PIXY, curState->block.xPos);
             //sendMsgToPixyQ(PIXY_PAN);
         }
         else
         {
+            /*
             sendMsgToNaviQ(PAUSE, 0); //send pause to movement
-            pany = PIXY_Y_RANGE/2;
-            if(panx < PIXY_X_RANGE)
-            {
-                panx+=10;
-            }
-            else
-            {
-                panx=0;
-            }
-            sendMsgToPixyQ(PIXY_PAN);
+            paused = PIXY_SYNC;
+            panx = 10;
+            */
         }
     }
 }
@@ -104,27 +85,12 @@ void processColor(PIXY_DATA *curState)
 void pixy_fsm(PIXY_DATA *curState, uint8_t *type)
 {
     dbgOutputLoc(ENTER_PIXY_FSM);
-    int i;
     static uint8_t prevType = 0;
     switch (curState->state)
     {
         case PixyInit:
-            curState->blockCount = 0;
-            curState->xPan = 0;
-            curState->yPan = 0;
-            memset(curState->blocks, 0, MAX_BLOCKS * sizeof(BLOCK_DATA));
-            for(i=0; i < MAX_BLOCKS; i++)
-            {
-                 curState->blocks[i].colorCode = i+1;
-                 curState->blocks[i].xPos = 0;
-                 curState->blocks[i].yPos = 0;
-                 curState->blocks[i].xPixels = 0;
-                 curState->blocks[i].yPixels = 0;
-                 curState->blocks[i].angle = 0;
-                 curState->blocks[i].trackIndex = 0;
-                 curState->blocks[i].age = 0;
-                 curState->blocks[i].distance = 0;
-            }
+            curState->block.xPos = 0;
+            curState->block.yPos = 0;
             curState->state = PixyWaitingToSend;
             break;
         case PixyWaitingToSend:
@@ -154,7 +120,6 @@ void pixy_fsm(PIXY_DATA *curState, uint8_t *type)
                         processVersion(curState);
                         break;
                     case PIXY_PAN:
-
                         break;
                     case PIXY_COLOR:
                         processColor(curState);

@@ -15,13 +15,11 @@
 #include "pixy_queue.h"
 #include <string.h>
 
-#define MAX_BLOCKS (5)
 #define SPI_MSG_LENGTH (128)
 #define SPI_TX_MSG_VERSION (4)
 #define SPI_TX_MSG_CONNECTED (6)
 #define SPI_TX_MSG_COLOR (7)
 #define SPI_TX_MSG_SERVOS (8)
-#define CONNECTED_PACKET_LENGTH (14)
 #define SPI_RATE (2000000)
 
 #define PIXY_COMPLETE 1
@@ -36,15 +34,8 @@
 
 typedef struct
 {
-    uint8_t colorCode;
     uint16_t xPos;
-    uint8_t yPos;
-    uint16_t xPixels;
-    uint8_t yPixels;
-    int angle;
-    uint8_t trackIndex;
-    uint8_t age;
-    uint8_t distance;
+    uint16_t yPos;
 } BLOCK_DATA;
 
 typedef enum
@@ -58,12 +49,10 @@ typedef enum
 typedef struct
 {
     PIXY_STATES state;
-    BLOCK_DATA blocks[MAX_BLOCKS];
+    BLOCK_DATA block;
     uint8_t rx_buffer[SPI_MSG_LENGTH];
     uint8_t tx_buffer[SPI_MSG_LENGTH];
     uint8_t blockCount;
-    int xPan;
-    int yPan;
 } PIXY_DATA;
 
 void pixy_fsm(PIXY_DATA *curState, uint8_t *type);
