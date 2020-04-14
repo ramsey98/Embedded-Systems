@@ -2,7 +2,7 @@
  * capture.h
  *
  *  Created on: Feb 17, 2020
- *      Author: Holden Ramsey
+ *      Author: Matthew Conway
  */
 
 #ifndef CAPTURE_H_

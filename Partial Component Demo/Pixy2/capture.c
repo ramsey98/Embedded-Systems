@@ -2,13 +2,13 @@
  * capture.c
  *
  *  Created on: Feb 17, 2020
- *      Author: Holden Ramsey
+ *      Author: Matthew Conway
  */
 
 #include "capture.h"
 
 volatile uint32_t curInterval;
-static Capture_Handle capture0, capture1;
+static Capture_Handle capture0;
 
 void captureInit()
 {
@@ -19,7 +19,7 @@ void captureInit()
     captureParams.callbackFxn = captureCallback;
     capture0 = Capture_open(CONFIG_CAPTURE_0, &captureParams);
     if (capture0 == NULL) ERROR;
-    if (Capture_start(capture1) == Capture_STATUS_ERROR) ERROR;
+    if (Capture_start(capture0) == Capture_STATUS_ERROR) ERROR;
 }
 
 void captureCallback(Capture_Handle handle, uint32_t interval)

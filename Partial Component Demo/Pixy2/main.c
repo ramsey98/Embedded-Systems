@@ -55,7 +55,7 @@ void *mainThread(void *arg0)
     createConfigQueue();
     createSensorQueue();
 
-    captureInit();
+    //captureInit();
     spiInit();
     runMQTT();
     dbgOutputLoc(ENTER_TASK);
