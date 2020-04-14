@@ -6,6 +6,7 @@
  */
 
 #include <navigation.h>
+static float curKP = KP, curKI = KI;
 
 const naviLookupTable naviLookup[NAVILOOKUPLEN] = {{0,0}, //{expected, measured}
                                                 {10,0},
@@ -66,18 +67,46 @@ void updateValues(MOTORS_DATA *motorsState, uint32_t type, uint32_t value)
         }
         case TURNLEFT:
         {
-            motorsState->leftDir = 1;
-            motorsState->setLeftSpeed = value/2;
+            motorsState->leftDir = 0;
             motorsState->rightDir = 0;
-            motorsState->setRightSpeed = value;
+            if(motorsState->setLeftSpeed > value)
+            {
+                motorsState->setLeftSpeed -= value;
+            }
+            else
+            {
+                motorsState->setLeftSpeed = 0;
+            }
+            if(motorsState->setRightSpeed + value > 127)
+            {
+                motorsState->setRightSpeed = 127;
+            }
+            else
+            {
+                motorsState->setRightSpeed += value;
+            }
             break;
         }
         case TURNRIGHT:
         {
             motorsState->leftDir = 0;
-            motorsState->setLeftSpeed = value;
-            motorsState->rightDir = 1;
-            motorsState->setRightSpeed = value/2;
+            motorsState->rightDir = 0;
+            if(motorsState->setRightSpeed > value)
+            {
+                motorsState->setRightSpeed -= value;
+            }
+            else
+            {
+                motorsState->setRightSpeed = 0;
+            }
+            if(motorsState->setLeftSpeed + value > 127)
+            {
+                motorsState->setLeftSpeed = 127;
+            }
+            else
+            {
+                motorsState->setLeftSpeed += value;
+            }
             break;
         }
         case FORWARD:
@@ -148,6 +177,10 @@ void updateValues(MOTORS_DATA *motorsState, uint32_t type, uint32_t value)
 //https://softwareengineering.stackexchange.com/questions/186124/programming-pid-loops-in-c
 uint8_t PIDAdjust(uint8_t setSpeed, uint32_t measuredSpeed)
 {
+    /*
+    MQTTMsg msg = {.type = JSON_TYPE_DEBUG, .value = setSpeed};
+    sendMsgToMQTTQ(msg);
+    sendMsgToUARTDebugQ(PID_BEFORE, setSpeed);
     int i;
     static int error = 0, integral = 0;
     int PIDResult = 0, ret = 0;
@@ -159,7 +192,7 @@ uint8_t PIDAdjust(uint8_t setSpeed, uint32_t measuredSpeed)
         }
     }
     integral += error;
-    PIDResult = (KP*error) + (KI*integral*measuredSpeed);
+    PIDResult = (curKP*error) + (curKI*integral*measuredSpeed);
     if(setSpeed + PIDResult > 127)
     {
         ret = 127;
@@ -172,12 +205,17 @@ uint8_t PIDAdjust(uint8_t setSpeed, uint32_t measuredSpeed)
     {
         ret = setSpeed + PIDResult;
     }
+    MQTTMsg msg2 = {.type = JSON_TYPE_DEBUG, .value = ret};
+    sendMsgToMQTTQ(msg2);
+    sendMsgToUARTDebugQ(PID_AFTER, ret);
     return ret;
+    */
+    return setSpeed;
 }
 
 void naviEvent(MOTORS_DATA *motorsState, uint32_t type, uint32_t value)
 {
-    int halfway, scaled;
+    float scaled, halfway, diff;
     switch(type)
     {
         case TIMER:
@@ -187,11 +225,11 @@ void naviEvent(MOTORS_DATA *motorsState, uint32_t type, uint32_t value)
             break;
         case LEFTCAP:
             motorsState->measuredLeftSpeed = value;
-            //motorsState->realLeftSpeed = PIDAdjust(motorsState->setLeftSpeed, motorsState->measuredLeftSpeed);
+            motorsState->realLeftSpeed = PIDAdjust(motorsState->setLeftSpeed, motorsState->measuredLeftSpeed);
             break;
         case RIGHTCAP:
             motorsState->measuredRightSpeed = value;
-            //motorsState->realRightSpeed = PIDAdjust(motorsState->setRightSpeed, motorsState->measuredRightSpeed);
+            motorsState->realRightSpeed = PIDAdjust(motorsState->setRightSpeed, motorsState->measuredRightSpeed);
             break;
         case SENSOR:
             if(value >= 20)
@@ -208,15 +246,42 @@ void naviEvent(MOTORS_DATA *motorsState, uint32_t type, uint32_t value)
             }
             break;
         case PIXY:
-            halfway = (PIXY_X_RANGE/2);
-            scaled = 127*(value / halfway);
-            if(value < halfway)
+            halfway = (PIXY_X_RANGE/2.0);
+            if(value < (PIXY_X_RANGE*.25))
             {
+                diff = halfway - value;
+                scaled = 127.0-(127.0*(diff / halfway));
                 updateValues(motorsState, TURNLEFT, scaled);
             }
-            else if(value > (PIXY_X_RANGE/2))
+            else if(value > (PIXY_X_RANGE*.75))
             {
+                diff = value - halfway;
+                scaled = 127.0*(diff / halfway);
                 updateValues(motorsState, TURNRIGHT, scaled);
+            }
+            else
+            {
+                //updateValues(motorsState, FORWARD, 0); //change this to previous speed?
+            }
+            break;
+        case PID_KP:
+            if(value != 0)
+            {
+                curKP = 1.0/value;
+            }
+            else
+            {
+                curKP = 0;
+            }
+            break;
+        case PID_KI:
+            if(value != 0)
+            {
+                curKI = 1.0/value;
+            }
+            else
+            {
+                curKI = 0;
             }
             break;
         default:

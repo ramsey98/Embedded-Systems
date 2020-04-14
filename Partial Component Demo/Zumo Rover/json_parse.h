@@ -73,12 +73,14 @@
 #define JSON_CONFIG      \
 "{"                        \
     "\"ID\": int32,"        \
-    "\"value\": int32"    \
+    "\"Type\": int32,"    \
+    "\"Value\": int32"    \
 "}"
 #define JSON_CONFIG_BUF      \
 "{"                        \
     "\"ID\": 0,"        \
-    "\"value\": 0"    \
+    "\"Type\": 0,"    \
+    "\"Value\": 0"    \
 "}"
 
 void json_miss(int count, int type);

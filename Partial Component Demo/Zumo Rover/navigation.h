@@ -13,12 +13,12 @@
 #include <navi_queue.h>
 #include "capture.h"
 #include "debug.h"
+#include "mqtt_queue.h"
+#include "json_parse.h"
 
 #define KP 0.5
 #define KI 0.5
 #define NAVILOOKUPLEN 14
-#define PIXY_X_RANGE 315
-#define PIXY_Y_RANGE 207
 
 typedef struct
 {

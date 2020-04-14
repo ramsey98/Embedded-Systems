@@ -12,6 +12,8 @@ extern void pixySetServos(uint8_t *rx_buffer, uint8_t *tx_buffer, uint16_t panX,
 extern void pixySetColor(uint8_t *rx_buffer, uint8_t *tx_buffer, uint8_t r, uint8_t g, uint8_t b);
 extern void pixyGetConnectedBlocks(uint8_t *rx_buffer, uint8_t *tx_buffer);
 
+static int panx = 0, pany = 0;
+
 int processBuffer(PIXY_DATA *curState)
 {
     int i;
@@ -50,33 +52,32 @@ void processVersion(PIXY_DATA *curState)
 
 void processColor(PIXY_DATA *curState)
 {
-    int i, loc;
+    static int paused = 0;
     int start = processBuffer(curState);
     if(curState->rx_buffer[start] == TYPE_COLOR)
     {
-        curState->blockCount = curState->rx_buffer[start+1];
+        curState->blockCount = curState->rx_buffer[start+1]/14;
         if(curState->blockCount > 0)
         {
-            loc = start + 3;
-            for(i = 0; i < curState->blockCount/CONNECTED_PACKET_LENGTH; i++)
+            if(paused == PIXY_SYNC)
             {
-                curState->blocks[i].colorCode = curState->rx_buffer[loc+1];
-                curState->blocks[i].xPos = (curState->rx_buffer[loc+2] << 8) | curState->rx_buffer[loc+3];
-                curState->blocks[i].yPos = curState->rx_buffer[loc+5];
-                curState->blocks[i].xPixels = (curState->rx_buffer[loc+6] << 8) | curState->rx_buffer[loc+7];
-                curState->blocks[i].yPixels = curState->rx_buffer[loc+9];
-                curState->blocks[i].angle = (curState->rx_buffer[loc+10] << 8) | curState->rx_buffer[loc+11];
-                curState->blocks[i].trackIndex = curState->rx_buffer[loc+12];
-                curState->blocks[i].age = curState->rx_buffer[loc+13];
-                loc += CONNECTED_PACKET_LENGTH;
+                paused = 0;
+                sendMsgToNaviQ(RESUME, 0);
             }
-            sendMsgToNaviQ(PIXY, curState->blocks[0].xPos);
+            curState->block.xPos = (curState->rx_buffer[start+7] << 8) | curState->rx_buffer[start+6];
+            curState->block.yPos = curState->rx_buffer[start+8];
+            panx = (PIXY_X_RANGE/2.0) - curState->block.xPos;
+            pany = curState->block.yPos - (PIXY_Y_RANGE/2.0);
+            sendMsgToNaviQ(PIXY, curState->block.xPos);
+            //sendMsgToPixyQ(PIXY_PAN);
         }
         else
         {
-            //sendMsgToNaviQFromISR(PIXY, SYNCING); //send pause to movement
-            //sendMsgToPixyQFromISR(PIXY_PAN); //search 360 degrees for object
-            //sendMsgToPixyQFromISR(PIXY_TILT);
+            /*
+            sendMsgToNaviQ(PAUSE, 0); //send pause to movement
+            paused = PIXY_SYNC;
+            panx = 10;
+            */
         }
     }
 }
@@ -84,28 +85,12 @@ void processColor(PIXY_DATA *curState)
 void pixy_fsm(PIXY_DATA *curState, uint8_t *type)
 {
     dbgOutputLoc(ENTER_PIXY_FSM);
-    int i;
     static uint8_t prevType = 0;
-    uint16_t panX = 1, panY = 1;
     switch (curState->state)
     {
         case PixyInit:
-            curState->blockCount = 0;
-            curState->xPan = 0;
-            curState->yPan = 0;
-            memset(curState->blocks, 0, MAX_BLOCKS * sizeof(BLOCK_DATA));
-            for(i=0; i < MAX_BLOCKS; i++)
-            {
-                 curState->blocks[i].colorCode = i+1;
-                 curState->blocks[i].xPos = 0;
-                 curState->blocks[i].yPos = 0;
-                 curState->blocks[i].xPixels = 0;
-                 curState->blocks[i].yPixels = 0;
-                 curState->blocks[i].angle = 0;
-                 curState->blocks[i].trackIndex = 0;
-                 curState->blocks[i].age = 0;
-                 curState->blocks[i].distance = 0;
-            }
+            curState->block.xPos = 0;
+            curState->block.yPos = 0;
             curState->state = PixyWaitingToSend;
             break;
         case PixyWaitingToSend:
@@ -115,7 +100,7 @@ void pixy_fsm(PIXY_DATA *curState, uint8_t *type)
                     pixyGetVersion(curState->rx_buffer, curState->tx_buffer);
                     break;
                 case PIXY_PAN:
-                    pixySetServos(curState->rx_buffer, curState->tx_buffer, panX, panY);
+                    pixySetServos(curState->rx_buffer, curState->tx_buffer, panx, pany);
                     break;
                 case PIXY_COLOR:
                     pixyGetConnectedBlocks(curState->rx_buffer, curState->tx_buffer);
@@ -133,6 +118,8 @@ void pixy_fsm(PIXY_DATA *curState, uint8_t *type)
                 {
                     case PIXY_VERSION:
                         processVersion(curState);
+                        break;
+                    case PIXY_PAN:
                         break;
                     case PIXY_COLOR:
                         processColor(curState);
