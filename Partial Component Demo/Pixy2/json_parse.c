@@ -110,10 +110,12 @@ void json_send_pixy(MQTTMsg msg, Json_Handle objectHandle) {
     static int pixyID = 0;
     int color = msg.value1;
     int dist = msg.value2;
+    int offset = msg.value4;
     if(Json_parse(objectHandle, JSON_PIXY_BUF, strlen(JSON_PIXY_BUF)) != 0) ERROR;
     if(Json_setValue(objectHandle, "\"ID\"", &pixyID, sizeof(pixyID)) != 0) ERROR;
     if(Json_setValue(objectHandle, "\"Color\"", &color, sizeof(color)) != 0) ERROR;
     if(Json_setValue(objectHandle, "\"Distance\"", &dist, sizeof(dist)) != 0) ERROR;
+    if(Json_setValue(objectHandle, "\"Offset\"", &offset, sizeof(offset)) != 0) ERROR;
     pixyID++;
 }
 

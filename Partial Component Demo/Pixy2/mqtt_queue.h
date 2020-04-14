@@ -18,6 +18,7 @@ typedef struct
     uint8_t value1;
     uint8_t value2;
     uint8_t value3;
+    int value4;
 } MQTTMsg;
 
 void sendMsgToMQTTQ(MQTTMsg msg);

@@ -74,14 +74,16 @@
 "{"                        \
     "\"ID\": int32,"        \
     "\"Color\": int32,"    \
-    "\"Distance\": int32"    \
+    "\"Distance\": int32,"    \
+    "\"Offset\": int32"    \
 "}"
 
 #define JSON_PIXY_BUF      \
 "{"                        \
     "\"ID\": 0,"        \
     "\"Color\": 0,"    \
-    "\"Distance\": 0"    \
+    "\"Distance\": 0,"    \
+    "\"Offset\": 0"    \
 "}"
 
 #define SUBSCRIPTION_TOPIC "/team20/config"

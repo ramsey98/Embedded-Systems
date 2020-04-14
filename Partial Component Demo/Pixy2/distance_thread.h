@@ -34,7 +34,7 @@
 #include "mqtt_queue.h"
 
 int findDistances(DISTANCE_DATA *data, int * transfer);
-int findDistance(BLOCK_DATA *data);
+void findDistanceAndOffset(BLOCK_DATA *data);
 void *distanceThread(void *arg0);
 
 

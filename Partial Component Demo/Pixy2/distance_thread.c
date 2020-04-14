@@ -97,13 +97,14 @@ int findDistances(DISTANCE_DATA *data, int * transfer) {
                     dbgUARTStr("?");
                 } */
 
-                findDistance(&(data->blocks[i]));
+                findDistanceAndOffset(&(data->blocks[i]));
                 //dbgUARTStr(", distance:");
                 //dbgUARTNumAsChars(data->blocks[i].distance);
                 //dbgUARTStr("}");
 
                 msg.value1 = data->blocks[i].colorCode;
                 msg.value2 = data->blocks[i].distance;
+                msg.value4 = data->blocks[i].angle;
                 sendMsgToMQTTQFromISR(msg);
             }
         }
@@ -113,29 +114,26 @@ int findDistances(DISTANCE_DATA *data, int * transfer) {
     return success;
 }
 
-int findDistance(BLOCK_DATA *data) {
-    int dx, i;
-    int computed = 0;
+void findDistanceAndOffset(BLOCK_DATA *data) {
+    int i;
+    int computed = 0, focus = 0;
 
     if(data->xPixels > focalPixels[0]) {
         computed = 1;
-        int focus = focalPixels[0] * focalDistances[0]/EGG_WIDTH;
-        dx = EGG_WIDTH * focus/data->xPixels;
+        focus = focalPixels[0] * focalDistances[0]/EGG_WIDTH;
     }
 
     for(i=1; i < FOCAL_LENGTH-1; i++) {
         if(data->xPixels > (focalPixels[i] + focalPixels[i+1])/2 && data->xPixels < (focalPixels[i] + focalPixels[i-1])/2) {
             computed = 1;
-            int focus = focalPixels[i] * focalDistances[i]/EGG_WIDTH;
-            dx = EGG_WIDTH * focus/data->xPixels;
+            focus = focalPixels[i] * focalDistances[i]/EGG_WIDTH;
         }
     }
 
     if(computed == 0) {
-        int focus = focalPixels[FOCAL_LENGTH-1] * focalDistances[FOCAL_LENGTH-1]/EGG_WIDTH;
-        dx = EGG_WIDTH * focus/data->xPixels;
+        focus = focalPixels[FOCAL_LENGTH-1] * focalDistances[FOCAL_LENGTH-1]/EGG_WIDTH;
     }
 
-    data->distance = dx;
-    return data->distance;
-}
+    data->distance = EGG_WIDTH * focus/data->xPixels;
+    int xFromCenterInCm = (157.5 - data->xPos)/(data->xPixels/EGG_WIDTH);
+    data->angle = xFromCenterInCm;}
