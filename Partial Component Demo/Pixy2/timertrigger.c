@@ -7,7 +7,7 @@
 
 #include "timertrigger.h"
 
-Timer_Handle timertrig;
+static Timer_Handle timertrig;
 
 void timerTriggerCallback(Timer_Handle myHandle)
 {
