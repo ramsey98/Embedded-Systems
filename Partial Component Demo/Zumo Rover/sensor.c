@@ -52,7 +52,7 @@ void pollSensor()
         if(avg != 0)
         {
             sendMsgToNaviQFromISR(SENSOR, avg);
-            MQTTMsg msg = {.type = JSON_TYPE_DEBUG, .value = avg};
+            MQTTMsg msg = {.topic = JSON_TOPIC_DEBUG, .type = JSON_SENSOR, .value = avg};
             sendMsgToMQTTQFromISR(msg);
         }
     }

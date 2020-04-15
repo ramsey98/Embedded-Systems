@@ -37,6 +37,9 @@ void * configThread(void *arg0)
             case CONFIG_PID_KI:
                 sendMsgToNaviQ(PID_KI, value);
                 break;
+            case SET_SPEED:
+                sendMsgToNaviQ(FORWARD, value);
+                break;
             default:
                 break;
         }

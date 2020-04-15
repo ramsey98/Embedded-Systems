@@ -15,6 +15,7 @@
 #define CONFIG_STATE 1
 #define CONFIG_PID_KP 2
 #define CONFIG_PID_KI 3
+#define SET_SPEED 4
 #define ROVER_MOVING (1)
 #define ROVER_LOADING (2)
 

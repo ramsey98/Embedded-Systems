@@ -33,13 +33,13 @@ void timerCallback(Timer_Handle myHandle)
     {
         sendMsgToNaviQFromISR(TIMER, EMPTY);
     }
-    if(count % 10 == 0)
+    if(count % 5 == 0)
     {
         sendMsgToPixyQFromISR(PIXY_COLOR);
     }
-    if(count % 20 == 0)
+    if(count % 10 == 0)
     {
-        MQTTMsg msg = {.type = JSON_TYPE_STATS, .value = 0};
+        MQTTMsg msg = {.topic = JSON_TOPIC_STATS, .type = 0, .value = 0};
         sendMsgToMQTTQFromISR(msg);
         count = 0;
     }

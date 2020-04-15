@@ -14,8 +14,9 @@
 
 typedef struct
 {
+    uint8_t topic;
     uint8_t type;
-    uint8_t value;
+    uint32_t value;
 } MQTTMsg;
 
 void sendMsgToMQTTQ(MQTTMsg msg);

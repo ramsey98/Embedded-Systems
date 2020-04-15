@@ -20,9 +20,15 @@
 #define JSON_ERROR_MISSED_ID (3)
 #define JSON_ERROR_REPEAT_ID (4)
 #define JSON_ERROR_NO_ID (5)
-#define JSON_TYPE_STATS (1)
-#define JSON_TYPE_DEBUG (2)
-#define JSON_TYPE_ERROR (3)
+#define JSON_TOPIC_STATS (1)
+#define JSON_TOPIC_DEBUG (2)
+#define JSON_TOPIC_ERROR (3)
+#define JSON_CAPTURE_LEFT (4)
+#define JSON_CAPTURE_RIGHT (5)
+#define JSON_SENSOR (6)
+#define JSON_PID_BEFORE (7)
+#define JSON_PID_AFTER (8)
+#define JSON_PIXY_VERSION (9)
 
 #define PUBLISH_TOPIC_0 "/team20/stats"
 #define PUBLISH_TOPIC_1 "/team20/debug"
@@ -48,12 +54,14 @@
 #define JSON_DEBUG      \
 "{"                        \
     "\"ID\": int32,"        \
-    "\"value\": int32,"    \
+    "\"Type\": int32,"        \
+    "\"Value\": int32,"    \
 "}"
 #define JSON_DEBUG_BUF      \
 "{"                        \
     "\"ID\": 0,"        \
-    "\"value\": 0"    \
+    "\"Type\": 0,"        \
+    "\"Value\": 0"    \
 "}"
 
 #define JSON_ERRORS      \
