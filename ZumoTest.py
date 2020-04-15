@@ -10,10 +10,10 @@ IP = "192.168.1.45"
 PORT = 1883
 
 tests = {"pause": False,
-         "PID": False,
+         "PID_straight": False,
+         "PID_turning": False,
          "distance": False,
          "movement": False,
-         "obstacle": False,
          "capture": False,
          "sync": False}
 
@@ -21,8 +21,8 @@ topics = {"/team20/debug": ["ID", "value"]}
 test_keys = ["ID", "Type", "Value"]
 
 ID = {"/team20/config": 0}
-capLeftVal = 0
-capRightVal = 0
+capLeftVals = []
+capRightVals = []
 sensorVal = 0
 PIDBeforeVal = 0
 PIDAfterVal = 0
@@ -96,8 +96,46 @@ def test_pause():
     if check1 and check2:
         tests["pause"] = True
 
-def test_PID():
+def test_PID_straight():
     global ID, tests
+    data = {"ID": ID[topic],
+            "Type": 2,#PID_ENABLE
+            "Value": 1}#enabled
+    client.publish(topic,package)
+    ID[topic] += 1
+    print("Sent",package,"to",topic,"@",round(time.time() - starttime,2))
+    data = {"ID": ID[topic],
+            "Type": 3,#SET_SPEED
+            "Value": 50}#50/127
+    client.publish(topic,package)
+    ID[topic] += 1
+    print("Sent",package,"to",topic,"@",round(time.time() - starttime,2))
+    time.sleep(1)
+    x = [PIDBeforeVal]
+    y = [PIDAfterVal]
+##    plt.plot(x,y)
+##    plt.ylabel('y')
+##    plt.xlabel('x')
+##    plt.show()
+    time.sleep(10)
+    if sensorVal == 0:
+        tests["PID"] = True
+
+def test_PID_turning():
+    global ID, tests
+    data = {"ID": ID[topic],
+            "Type": 2,#PID_ENABLE
+            "Value": 1}#enabled
+    client.publish(topic,package)
+    ID[topic] += 1
+    print("Sent",package,"to",topic,"@",round(time.time() - starttime,2))
+    data = {"ID": ID[topic],
+            "Type": 5,#TURN_LEFT
+            "Value": 50}#50/127
+    client.publish(topic,package)
+    ID[topic] += 1
+    print("Sent",package,"to",topic,"@",round(time.time() - starttime,2))
+    time.sleep(1)
     x = [PIDBeforeVal]
     y = [PIDAfterVal]
 ##    plt.plot(x,y)
@@ -126,25 +164,22 @@ def test_distance():
     if check1 and check2 and check3:
         tests["distance"] = True
 
-def test_obstacle():
-    global tests
-    print("Running test: obstacle @",round(time.time() - starttime,2))
-    time.sleep(10)
-    if sensorVal < 14 and sensorVal > 10:
-        tests["distance"] = True
-
 def test_capture():
     global tests
     check1 = False
     check2 = False
+    check3 = False
+    capLeftVals = []
+    capRightVals = []
     print("Running test: capture @",round(time.time() - starttime,2))
-    time.sleep(10)
-    if 0 < leftCapVal < 1000 and 0 < rightCapVal < 1000: #what should these be
-        check1 = True
     time.sleep(5)
-    if 0 < leftCapVal < 1000 and 0 < rightCapVal < 1000:
+    if len(capLeftVals) >= 50 and len(capRightVals) >= 50:
+        check1 = True
+    if max(capLeftVals) < 1000 and min(capLeftVals) > 0:
         check2 = True
-    if check1 and check2:
+    if max(capRightVals) < 1000 and min(capRightVals) > 0:
+        check3 = True
+    if check1 and check2 and check3:
         tests["capture"] = True 
 
 def test_movement():
@@ -170,7 +205,7 @@ def run_tests():
         time.sleep(1)
         print("Waiting for connection:", waiting)
         waiting+=1
-    run_tests = ["pause", "PID", "distance", "movement", "obstacle", "capture", "sync"]
+    run_tests = ["distance", "movement", "pause", "sync", "capture", "PID_straight", "PID_turning"]
     for func in run_tests:
         globals()["test_"+func]()
         time.sleep(delay)    

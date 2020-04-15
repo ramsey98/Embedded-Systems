@@ -13,9 +13,10 @@
 #include "mqtt_queue.h"
 
 #define CONFIG_STATE 1
-#define CONFIG_PID_KP 2
-#define CONFIG_PID_KI 3
-#define SET_SPEED 4
+#define CONFIG_PID_ENABLE 2
+#define CONFIG_SET_SPEED 3
+#define CONFIG_TURN_RIGHT 4
+#define CONFIG_TURN_LEFT 5
 #define ROVER_MOVING (1)
 #define ROVER_LOADING (2)
 
