@@ -7,6 +7,7 @@
 
 #include <navigation.h>
 static float curKP = KP, curKI = KI;
+static int enablePID = 0;
 
 const naviLookupTable naviLookup[NAVILOOKUPLEN] = {{0,0}, //{expected, measured}
                                                 {10,0},
@@ -177,59 +178,72 @@ void updateValues(MOTORS_DATA *motorsState, uint32_t type, uint32_t value)
 //https://softwareengineering.stackexchange.com/questions/186124/programming-pid-loops-in-c
 uint8_t PIDAdjust(uint8_t setSpeed, uint32_t measuredSpeed)
 {
-    /*
-    MQTTMsg msg = {.type = JSON_TYPE_DEBUG, .value = setSpeed};
-    sendMsgToMQTTQ(msg);
-    sendMsgToUARTDebugQ(PID_BEFORE, setSpeed);
-    int i;
-    static int error = 0, integral = 0;
-    int PIDResult = 0, ret = 0;
-    for(i = 0; i < NAVILOOKUPLEN; i++)
+    uint8_t ret;
+    if(enablePID == 1)
     {
-        if(measuredSpeed >= naviLookup[i].measured)
+        MQTTMsg msg = {.topic = JSON_TOPIC_DEBUG, .type = JSON_PID_BEFORE, .value = setSpeed};
+        sendMsgToMQTTQFromISR(msg);
+        sendMsgToUARTDebugQ(PID_BEFORE, setSpeed);
+        int i;
+        static int error = 0, integral = 0;
+        int PIDResult = 0, ret = 0;
+        for(i = 0; i < NAVILOOKUPLEN; i++)
         {
-            error = naviLookup[i].expected - setSpeed;
+            if(measuredSpeed >= naviLookup[i].measured)
+            {
+                error = naviLookup[i].expected - setSpeed;
+            }
         }
-    }
-    integral += error;
-    PIDResult = (curKP*error) + (curKI*integral*measuredSpeed);
-    if(setSpeed + PIDResult > 127)
-    {
-        ret = 127;
-    }
-    else if(setSpeed + PIDResult < 0)
-    {
-        ret = 0;
+        integral += error;
+        PIDResult = (curKP*error) + (curKI*integral*measuredSpeed);
+        if(setSpeed + PIDResult > 127)
+        {
+            ret = 127;
+        }
+        else if(setSpeed + PIDResult < 0)
+        {
+            ret = 0;
+        }
+        else
+        {
+            ret = setSpeed + PIDResult;
+        }
+        MQTTMsg msg2 = {.topic = JSON_TOPIC_DEBUG, .type = JSON_PID_AFTER, .value = setSpeed};
+        sendMsgToMQTTQFromISR(msg2);
+        sendMsgToUARTDebugQ(PID_AFTER, ret);
     }
     else
     {
-        ret = setSpeed + PIDResult;
+        ret = setSpeed;
     }
-    MQTTMsg msg2 = {.type = JSON_TYPE_DEBUG, .value = ret};
-    sendMsgToMQTTQ(msg2);
-    sendMsgToUARTDebugQ(PID_AFTER, ret);
     return ret;
-    */
-    return setSpeed;
 }
 
 void naviEvent(MOTORS_DATA *motorsState, uint32_t type, uint32_t value)
 {
     float scaled, halfway, diff;
+    static MQTTMsg leftMsg = {.topic = JSON_TOPIC_DEBUG, .type = JSON_CAPTURE_LEFT};
+    static MQTTMsg rightMsg = {.topic = JSON_TOPIC_DEBUG, .type = JSON_CAPTURE_RIGHT};
     switch(type)
     {
         case TIMER:
             updateMotors(*motorsState);
             motorsState->realLeftSpeed = motorsState->setLeftSpeed;
             motorsState->realRightSpeed = motorsState->setRightSpeed;
+            sendMsgToMQTTQ(leftMsg);
+            sendMsgToMQTTQ(rightMsg);
+            leftMsg.value = 0;
+            rightMsg.value = 0;
             break;
         case LEFTCAP:
             motorsState->measuredLeftSpeed = value;
             motorsState->realLeftSpeed = PIDAdjust(motorsState->setLeftSpeed, motorsState->measuredLeftSpeed);
+            leftMsg.value = motorsState->measuredLeftSpeed;
             break;
         case RIGHTCAP:
             motorsState->measuredRightSpeed = value;
             motorsState->realRightSpeed = PIDAdjust(motorsState->setRightSpeed, motorsState->measuredRightSpeed);
+            rightMsg.value = motorsState->measuredRightSpeed;
             break;
         case SENSOR:
             if(value >= 20)
@@ -261,27 +275,24 @@ void naviEvent(MOTORS_DATA *motorsState, uint32_t type, uint32_t value)
             }
             else
             {
-                //updateValues(motorsState, FORWARD, 0); //change this to previous speed?
+                if(motorsState->setLeftSpeed > motorsState->setRightSpeed)
+                {
+                    updateValues(motorsState, FORWARD, motorsState->setLeftSpeed);
+                }
+                else
+                {
+                    updateValues(motorsState, FORWARD, motorsState->setRightSpeed);
+                }
             }
             break;
-        case PID_KP:
-            if(value != 0)
+        case PID_ENABLE:
+            if(value == 0)
             {
-                curKP = 1.0/value;
+                enablePID = 0;
             }
             else
             {
-                curKP = 0;
-            }
-            break;
-        case PID_KI:
-            if(value != 0)
-            {
-                curKI = 1.0/value;
-            }
-            else
-            {
-                curKI = 0;
+                enablePID = 1;
             }
             break;
         default:

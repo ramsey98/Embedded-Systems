@@ -11,7 +11,7 @@ static int attempts = 0, received = 0, missed = 0;
 
 void json_miss(int count, int type)
 {
-    MQTTMsg msg = {JSON_TYPE_ERROR, type};
+    MQTTMsg msg = {JSON_TOPIC_ERROR, .type=type, .value=0};
     sendMsgToMQTTQFromISR(msg);
     missed+=count;
 }
@@ -89,9 +89,11 @@ void json_send_debug(MQTTMsg msg, Json_Handle objectHandle)
     dbgOutputLoc(ENTER_SEND_DEBUG);
     static int debugID = 0;
     int value = msg.value;
+    int type = msg.type;
     if(Json_parse(objectHandle, JSON_DEBUG_BUF, strlen(JSON_DEBUG_BUF)) != 0) ERROR;
     if(Json_setValue(objectHandle, "\"ID\"", &debugID, sizeof(debugID)) != 0) ERROR;
-    if(Json_setValue(objectHandle, "\"value\"", &value, sizeof(value)) != 0) ERROR;
+    if(Json_setValue(objectHandle, "\"Type\"", &type, sizeof(type)) != 0) ERROR;
+    if(Json_setValue(objectHandle, "\"Value\"", &value, sizeof(value)) != 0) ERROR;
     debugID++;
 }
 
@@ -99,7 +101,7 @@ void json_send_error(MQTTMsg msg, Json_Handle objectHandle)
 {
     dbgOutputLoc(ENTER_SEND_ERROR);
     static int errorsID = 0;
-    int error = msg.value;
+    int error = msg.type;
     if(Json_parse(objectHandle, JSON_ERRORS_BUF, strlen(JSON_ERRORS_BUF)) != 0) ERROR;
     if(Json_setValue(objectHandle, "\"ID\"", &errorsID, sizeof(errorsID)) != 0) ERROR;
     if(Json_setValue(objectHandle, "\"Type\"", &error, sizeof(error)) != 0) ERROR;
@@ -112,21 +114,21 @@ void json_send(char *publish_topic, char *publish_data, MQTTMsg msg)
     uint16_t buf = JSON_DATA_BUFFER_SIZE;
     attempts++;
     memset(publish_data, 0, JSON_DATA_BUFFER_SIZE);
-    switch(msg.type)
+    switch(msg.topic)
     {
-        case JSON_TYPE_STATS:
+        case JSON_TOPIC_STATS:
             if(Json_createTemplate(&templateHandle, JSON_STATS, strlen(JSON_STATS)) != 0) ERROR;
             if(Json_createObject(&objectHandle, templateHandle, 0) != 0) ERROR;
             json_send_stats(objectHandle);
             strncpy(publish_topic, PUBLISH_TOPIC_0, sizeof(PUBLISH_TOPIC_0));
             break;
-        case JSON_TYPE_DEBUG:
+        case JSON_TOPIC_DEBUG:
             if(Json_createTemplate(&templateHandle, JSON_DEBUG, strlen(JSON_DEBUG)) != 0) ERROR;
             if(Json_createObject(&objectHandle, templateHandle, 0) != 0) ERROR;
             json_send_debug(msg, objectHandle);
             strncpy(publish_topic, PUBLISH_TOPIC_1, sizeof(PUBLISH_TOPIC_1));
             break;
-        case JSON_TYPE_ERROR:
+        case JSON_TOPIC_ERROR:
             if(Json_createTemplate(&templateHandle, JSON_ERRORS, strlen(JSON_ERRORS)) != 0) ERROR;
             if(Json_createObject(&objectHandle, templateHandle, 0) != 0) ERROR;
             json_send_error(msg, objectHandle);

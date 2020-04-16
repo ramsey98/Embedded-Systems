@@ -46,7 +46,7 @@ void processVersion(PIXY_DATA *curState)
     {
         version = curState->rx_buffer[start+6];
     }
-    MQTTMsg msg = {JSON_TYPE_DEBUG, version};
+    MQTTMsg msg = {.topic = JSON_TOPIC_DEBUG, .type = JSON_PIXY_VERSION, .value = version};
     sendMsgToMQTTQ(msg);
 }
 

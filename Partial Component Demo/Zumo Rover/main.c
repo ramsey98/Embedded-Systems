@@ -4,7 +4,6 @@
  *  Created on: Feb 18, 2020
  *      Author: Holden Ramsey
  */
-//#include "mqtt_client_app.h"
 
 #include <motors.h>
 #include <navigation.h>

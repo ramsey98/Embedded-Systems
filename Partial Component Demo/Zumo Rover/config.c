@@ -31,11 +31,17 @@ void * configThread(void *arg0)
                     sendMsgToNaviQ(RESUME, EMPTY);
                 }
                 break;
-            case CONFIG_PID_KP:
-                sendMsgToNaviQ(PID_KP, value);
+            case CONFIG_PID_ENABLE:
+                sendMsgToNaviQ(PID_ENABLE, value);
                 break;
-            case CONFIG_PID_KI:
-                sendMsgToNaviQ(PID_KI, value);
+            case CONFIG_SET_SPEED:
+                sendMsgToNaviQ(FORWARD, value);
+                break;
+            case CONFIG_TURN_RIGHT:
+                sendMsgToNaviQ(TURNRIGHT, value);
+                break;
+            case CONFIG_TURN_LEFT:
+                sendMsgToNaviQ(TURNLEFT, value);
                 break;
             default:
                 break;

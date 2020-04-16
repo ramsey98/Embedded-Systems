@@ -2,6 +2,7 @@ import paho.mqtt.client as mqtt
 import time
 import json
 import threading
+#import matplotlib.pyplot as plt
 
 connected = False
 starttime = time.time()
@@ -9,15 +10,23 @@ IP = "192.168.1.45"
 PORT = 1883
 
 tests = {"pause": False,
-         "PID": False,
+         "PID_straight": False,
+         "PID_turning": False,
          "distance": False,
-         "movement": False}
+         "movement": False,
+         "capture": False,
+         "sync": False}
 
 topics = {"/team20/debug": ["ID", "value"]}
 test_keys = ["ID", "Type", "Value"]
 
 ID = {"/team20/config": 0}
-debugval = 0
+capLeftVals = []
+capRightVals = []
+sensorVal = 0
+PIDBeforeVal = 0
+PIDAfterVal = 0
+PIXYVersionVal = 0
 
 def on_connect(client, data, flag, rc):
     global connected
@@ -31,7 +40,18 @@ def on_disconnect(client, data, rc):
 
 def on_msg_debug(decoded):
     global debugval
-    debugval = decoded["value"]
+    if decoded["Type"] == 4:
+        capLeftVal = decoded["Value"]
+    elif decoded["Type"] == 5:
+        capRightVal = decoded["Value"]
+    elif decoded["Type"] == 6:
+        sensorVal = decoded["Value"]
+    elif decoded["Type"] == 7:
+        PIDBeforeVal = decoded["Value"]
+    elif decoded["Type"] == 8:
+        PIDAfterVal = decoded["Value"]
+    elif decoded["Type"] == 9:
+        PixyVersionVal = decoded["Value"]
 
 def on_message(client, data, msg):
     global pub_results, tests, reset, started 
@@ -48,7 +68,11 @@ def on_message(client, data, msg):
 def test_pause():
     global ID, tests
     print("Running test: pause @",round(time.time() - starttime,2))
+    check1 = False
+    check2 = False
     topic = "/team20/config"
+    while(leftCapVal == 0):
+        time.sleep(.1) #wait until moving
     data = {"ID": ID[topic],
             "Type": 1, #CONFIG_STATE
             "value": 2}#ROVER_LOADING
@@ -56,9 +80,9 @@ def test_pause():
     client.publish(topic,package)
     ID[topic] += 1
     print("Sent",package,"to",topic,"@",round(time.time() - starttime,2))
-    time.sleep(10) #should be paused
-    if debugval == 0: #change this to output speed?
-        tests["pause"] = True
+    time.sleep(2)
+    if capLeftVal == 0 and capRightVal == 0:
+        check2 = True
     data = {"ID": ID[topic],
             "Type": 1,
             "Value": 1}#ROVER_MOVING
@@ -66,27 +90,60 @@ def test_pause():
     client.publish(topic,package)
     ID[topic] += 1
     print("Sent",package,"to",topic,"@",round(time.time() - starttime,2))
+    time.sleep(2)
+    if capLeftVal != 0 and capRightVal != 0:
+        check2 = True
+    if check1 and check2:
+        tests["pause"] = True
 
-def test_PID():
+def test_PID_straight():
     global ID, tests
-    print("Running test: PID @",round(time.time() - starttime,2))
-    topic = "/team20/config"
     data = {"ID": ID[topic],
-            "Type": 2, #CONFIG_PID_KP
-            "value": 0}
-    package = json.dumps(data)
-    client.publish(topic,package)
-    ID[topic] += 1
-    print("Sent",package,"to",topic,"@",round(time.time() - starttime,2))    
-    data = {"ID": ID[topic],
-            "Type": 3, #CONFIG_PID_KI
-            "Value": 0}#
-    package = json.dumps(data)
+            "Type": 2,#PID_ENABLE
+            "Value": 1}#enabled
     client.publish(topic,package)
     ID[topic] += 1
     print("Sent",package,"to",topic,"@",round(time.time() - starttime,2))
+    data = {"ID": ID[topic],
+            "Type": 3,#SET_SPEED
+            "Value": 50}#50/127
+    client.publish(topic,package)
+    ID[topic] += 1
+    print("Sent",package,"to",topic,"@",round(time.time() - starttime,2))
+    time.sleep(1)
+    x = [PIDBeforeVal]
+    y = [PIDAfterVal]
+##    plt.plot(x,y)
+##    plt.ylabel('y')
+##    plt.xlabel('x')
+##    plt.show()
     time.sleep(10)
-    if debugval == 0:
+    if sensorVal == 0:
+        tests["PID"] = True
+
+def test_PID_turning():
+    global ID, tests
+    data = {"ID": ID[topic],
+            "Type": 2,#PID_ENABLE
+            "Value": 1}#enabled
+    client.publish(topic,package)
+    ID[topic] += 1
+    print("Sent",package,"to",topic,"@",round(time.time() - starttime,2))
+    data = {"ID": ID[topic],
+            "Type": 5,#TURN_LEFT
+            "Value": 50}#50/127
+    client.publish(topic,package)
+    ID[topic] += 1
+    print("Sent",package,"to",topic,"@",round(time.time() - starttime,2))
+    time.sleep(1)
+    x = [PIDBeforeVal]
+    y = [PIDAfterVal]
+##    plt.plot(x,y)
+##    plt.ylabel('y')
+##    plt.xlabel('x')
+##    plt.show()
+    time.sleep(10)
+    if sensorVal == 0:
         tests["PID"] = True
 
 def test_distance():
@@ -96,23 +153,49 @@ def test_distance():
     check3 = False
     print("Running test: distance @",round(time.time() - starttime,2))
     time.sleep(10)
-    if debugval < 22 and debugval > 18:
+    if sensorVal < 22 and sensorVal > 18:
         check1 = True
     time.sleep(10)
-    if debugval < 14 and debugval > 10:
+    if sensorVal < 14 and sensorVal > 10:
         check2 = True
     time.sleep(10)
-    if debugval < 8 and debugval > 4:
+    if sensorVal < 8 and sensorVal > 4:
         check3 = True
     if check1 and check2 and check3:
         tests["distance"] = True
+
+def test_capture():
+    global tests
+    check1 = False
+    check2 = False
+    check3 = False
+    capLeftVals = []
+    capRightVals = []
+    print("Running test: capture @",round(time.time() - starttime,2))
+    time.sleep(5)
+    if len(capLeftVals) >= 50 and len(capRightVals) >= 50:
+        check1 = True
+    if max(capLeftVals) < 1000 and min(capLeftVals) > 0:
+        check2 = True
+    if max(capRightVals) < 1000 and min(capRightVals) > 0:
+        check3 = True
+    if check1 and check2 and check3:
+        tests["capture"] = True 
 
 def test_movement():
     global tests
     print("Running test: movement @",round(time.time() - starttime,2))
     time.sleep(10)
-    if debugval < 8 and debugval > 4:
-        tests["movement"] = True       
+    if sensorVal < 8 and sensorVal > 4:
+        tests["movement"] = True
+
+def test_sync():
+    global tests
+    print("Running test: sync @",round(time.time() - starttime,2))
+    time.sleep(10)
+    detected = False
+    if sensorVal < 20 and detected: #send pixy offset?
+        tests["sync"] = True
 
 def run_tests():
     print("Thread started: run_tests")
@@ -122,8 +205,7 @@ def run_tests():
         time.sleep(1)
         print("Waiting for connection:", waiting)
         waiting+=1
-    #run_tests = ["config", "badPayload", "noID", "repeatID", "skipID", "overflowBuf", "time", "receive", "send", "reconnect", "dos"]
-    run_tests = ["pause", "PID"]
+    run_tests = ["distance", "movement", "pause", "sync", "capture", "PID_straight", "PID_turning"]
     for func in run_tests:
         globals()["test_"+func]()
         time.sleep(delay)    

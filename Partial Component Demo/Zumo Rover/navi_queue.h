@@ -27,12 +27,11 @@
 #define RESUME 13
 #define NAVI_SENSOR 14
 #define PIXY_SYNC 15
-#define PID_KP 16
-#define PID_KI 17
-#define PIXY_X 18
-#define PIXY_Y 19
-#define PID_BEFORE 20
-#define PID_AFTER 21
+#define PID_ENABLE 16
+#define PIXY_X 17
+#define PIXY_Y 18
+#define PID_BEFORE 19
+#define PID_AFTER 20
 
 #define PIXY_X_RANGE 315
 #define PIXY_Y_RANGE 207
