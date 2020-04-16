@@ -79,7 +79,7 @@ GPIO8.$name = "CONFIG_GPIO_7";
 // Mode - Select the GPIO mode
 GPIO8.mode = "Output";
 // Assign pin
-GPIO8.gpioPin.$assign = "boosterpack.30"; // P50
+GPIO8.gpioPin.$assign = "boosterpack.24"; // P60
 // Name - The C/C++ identifier used in applications as the index parameter passed to UART runtime APIs
 UART1.$name = "CONFIG_UART_0";
 // Use Hardware - Select the hardware to use, or 'None' to use available header pins
@@ -111,6 +111,8 @@ Capture1.timer.$name = "MyTimer1";
 GPIO10.$name = "CONFIG_GPIO_8";
 // Mode - Select the GPIO mode
 GPIO10.mode = "Output";
+// Assign pin
+GPIO10.gpioPin.$assign = "boosterpack.30"; // P50
 // Suggest solution
 Timer1.timer.$suggestSolution = "Timer2";
 // Suggest solution
@@ -145,5 +147,3 @@ SPI1.spi.dmaTxChannel.$suggestSolution = "UDMA_CH31";
 Capture1.timer.$suggestSolution = "Timer1";
 // Suggest solution
 Capture1.timer.capturePin.$suggestSolution = "3";
-// Suggest solution
-GPIO10.gpioPin.$suggestSolution = "60";

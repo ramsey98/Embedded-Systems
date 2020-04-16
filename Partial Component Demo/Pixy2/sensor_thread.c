@@ -17,16 +17,13 @@ void *sensorThread(void *arg0) {
 
     while(1) {
         received = receiveFromSensorQ();
-        dbgUARTStr("Sensor: ");
-        dbgUARTNumAsChars(received);
 
-        /*
         switch(received) {
             case SENSOR_TYPE_TRIGGER:
                 //send 10 us trigger
+                dbgUARTStr("Trig\n\r");
                 GPIO_write(CONFIG_GPIO_8, CONFIG_GPIO_LED_ON);
                 timerTriggerStart();
-
                 numberOfPolls++;
                 break;
             case SENSOR_TYPE_SUM:
@@ -40,9 +37,12 @@ void *sensorThread(void *arg0) {
 
             default:
                 sumSensorTime += received;
+                dbgUARTStr("Time:");
+                dbgUARTNumAsChars(received);
+                dbgUARTStr("\n\r");
                 break;
 
-        } */
+        }
     }
 }
 
