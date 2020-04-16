@@ -43,6 +43,12 @@ void * configThread(void *arg0)
             case CONFIG_TURN_LEFT:
                 sendMsgToNaviQ(TURNLEFT, value);
                 break;
+            case CONFIG_SENSOR_ENABLE:
+                sendMsgToNaviQ(SENSOR_ENABLE, value);
+                break;
+            case CONFIG_PIXY_ENABLE:
+                sendMsgToNaviQ(PIXY_ENABLE, value);
+                break;
             default:
                 break;
         }

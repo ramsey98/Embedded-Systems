@@ -67,7 +67,7 @@ void json_read_config(Json_Handle objectHandle)
     }
     else
     {
-        MQTTMsg rcv = {type, value};
+        MQTTMsg rcv = {.topic = JSON_TOPIC_CONFIG, .type = type, .value = value};
         sendMsgToConfigQFromISR(rcv);
     }
 }
