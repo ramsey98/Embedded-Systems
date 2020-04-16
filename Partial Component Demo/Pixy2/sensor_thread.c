@@ -21,7 +21,6 @@ void *sensorThread(void *arg0) {
         switch(received) {
             case SENSOR_TYPE_TRIGGER:
                 //send 10 us trigger
-                dbgUARTStr("Trig\n\r");
                 GPIO_write(CONFIG_GPIO_8, CONFIG_GPIO_LED_ON);
                 timerTriggerStart();
                 numberOfPolls++;
@@ -31,15 +30,14 @@ void *sensorThread(void *arg0) {
                 distance = (CM_PER_US * averageTime)/2;
                 dbgUARTStr("Sensord: ");
                 dbgUARTNumAsChars(distance);
+                dbgUARTStr("\n\r");
                 sumSensorTime = 0;
                 numberOfPolls = 0;
                 break;
 
             default:
                 sumSensorTime += received;
-                dbgUARTStr("Time:");
                 dbgUARTNumAsChars(received);
-                dbgUARTStr("\n\r");
                 break;
 
         }

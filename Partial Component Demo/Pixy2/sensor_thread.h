@@ -12,7 +12,7 @@
 #include "sensor_queue.h"
 #include "timertrigger.h"
 
-#define CM_PER_US (12)
+#define CM_PER_US (0.0343)
 
 void *sensorThread(void *arg0);
 
