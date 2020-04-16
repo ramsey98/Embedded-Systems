@@ -65,6 +65,17 @@ def on_message(client, data, msg):
     else:
         print("Error:", topic.split("/")[-1], "@", round(time.time() - starttime,2))
 
+def send_config(msgType, msgValue):
+    global ID
+    topic = "/team20/config"
+    data = {"ID": ID[topic],
+            "Type": msgType,
+            "Value": msgValue}
+    package = json.dumps(data)
+    client.publish(topic,package)
+    ID[topic] += 1
+    print("Sent",package,"to",topic,"@",round(time.time() - starttime,2))
+
 def test_pause():
     global ID, tests, capLeftVal
     print("Running test: pause @",round(time.time() - starttime,2))
@@ -75,23 +86,11 @@ def test_pause():
     while(capLeftVal == 0):
         time.sleep(.1) #wait until moving
     print("Pause: detected movement")
-    data = {"ID": ID[topic],
-            "Type": 1, #CONFIG_STATE
-            "Value": 2}#ROVER_LOADING
-    package = json.dumps(data)
-    client.publish(topic,package)
-    ID[topic] += 1
-    print("Sent",package,"to",topic,"@",round(time.time() - starttime,2))
+    send_config(1, 2) #rover loading
     time.sleep(2)
     if capLeftVal == 0 and capRightVal == 0:
         check1 = True
-    data = {"ID": ID[topic],
-            "Type": 1,
-            "Value": 1}#ROVER_MOVING
-    package = json.dumps(data)
-    client.publish(topic,package)
-    ID[topic] += 1
-    print("Sent",package,"to",topic,"@",round(time.time() - starttime,2))
+    send_config(1, 1) #rover moving
     time.sleep(2)
     if capLeftVal != 0 or capRightVal != 0:
         check2 = True
@@ -100,18 +99,8 @@ def test_pause():
 
 def test_PID_straight():
     global ID, tests
-    data = {"ID": ID[topic],
-            "Type": 2,#PID_ENABLE
-            "Value": 1}#enabled
-    client.publish(topic,package)
-    ID[topic] += 1
-    print("Sent",package,"to",topic,"@",round(time.time() - starttime,2))
-    data = {"ID": ID[topic],
-            "Type": 3,#SET_SPEED
-            "Value": 50}#50/127
-    client.publish(topic,package)
-    ID[topic] += 1
-    print("Sent",package,"to",topic,"@",round(time.time() - starttime,2))
+    send_config(16, 1)#enable PID
+    send_config(3, 50)#set speed
     time.sleep(1)
     x = [PIDBeforeVal]
     y = [PIDAfterVal]
@@ -125,18 +114,8 @@ def test_PID_straight():
 
 def test_PID_turning():
     global ID, tests
-    data = {"ID": ID[topic],
-            "Type": 2,#PID_ENABLE
-            "Value": 1}#enabled
-    client.publish(topic,package)
-    ID[topic] += 1
-    print("Sent",package,"to",topic,"@",round(time.time() - starttime,2))
-    data = {"ID": ID[topic],
-            "Type": 5,#TURN_LEFT
-            "Value": 50}#50/127
-    client.publish(topic,package)
-    ID[topic] += 1
-    print("Sent",package,"to",topic,"@",round(time.time() - starttime,2))
+    send_config(16, 1)#enable PID
+    send_config(5, 50)#turn left
     time.sleep(1)
     x = [PIDBeforeVal]
     y = [PIDAfterVal]
@@ -153,7 +132,6 @@ def test_distance():
     check1 = False
     check2 = False
     check3 = False
-    print("Running test: distance @",round(time.time() - starttime,2))
     time.sleep(10)
     if sensorVal < 22 and sensorVal > 18:
         check1 = True
@@ -174,12 +152,7 @@ def test_capture():
     check3 = False
     capLeftVals = []
     capRightVals = []
-    data = {"ID": ID[topic],
-            "Type": 3,#SET_SPEED
-            "Value": 50}#50/127
-    client.publish(topic,package)
-    ID[topic] += 1
-    print("Sent",package,"to",topic,"@",round(time.time() - starttime,2))   
+    send_config(3, 50) #set speed  
     time.sleep(5)
     if len(capLeftVals) >= 50 and len(capRightVals) >= 50:
         check1 = True

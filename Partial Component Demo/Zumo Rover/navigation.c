@@ -6,7 +6,7 @@
  */
 
 #include <navigation.h>
-static int enablePID = 0, enableSensor = 1, enablePixy = 1;
+static int enablePID = 0, enableSensor = 0, enablePixy = 1;
 
 const naviLookupTable naviLookup[NAVILOOKUPLEN] = {{0,0}, //{expected, measured}
                                                 {10,0},
