@@ -11,7 +11,7 @@ static int attempts = 0, received = 0, missed = 0;
 
 void json_miss(int count, int type)
 {
-    MQTTMsg msg = {JSON_TOPIC_ERROR, .type=type, .value=0};
+    MQTTMsg msg = {.topic=JSON_TOPIC_ERROR, .type=type, .value=0};
     sendMsgToMQTTQFromISR(msg);
     missed+=count;
 }

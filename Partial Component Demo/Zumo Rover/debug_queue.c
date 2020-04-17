@@ -60,9 +60,15 @@ void *UARTDebugThread(void *arg0)
             case PID_BEFORE:
                 dbgUARTStr("PID Before:");
                 dbgUARTNum(value);
+                break;
             case PID_AFTER:
                 dbgUARTStr("PID After:");
                 dbgUARTNum(value);
+                break;
+            case CONFIG_MSG:
+                dbgUARTStr("Config:");
+                dbgUARTNum(value);
+                break;
             default:
                 dbgUARTStr("Invalid Debug");
                 break;

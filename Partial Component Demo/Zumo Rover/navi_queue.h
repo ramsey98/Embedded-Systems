@@ -34,6 +34,8 @@
 #define PID_AFTER 20
 #define SENSOR_ENABLE 21
 #define PIXY_ENABLE 22
+#define CONFIG_MSG 23
+#define START 24
 
 #define PIXY_X_RANGE 315
 #define PIXY_Y_RANGE 207
