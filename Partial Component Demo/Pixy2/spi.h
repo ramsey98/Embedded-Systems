@@ -23,7 +23,7 @@
 #define SPI_TX_MSG_SERVOS 8
 #define CONNECTED_PACKET_LENGTH 14
 #define CONNECTED_LENGTH_LOC 18
-#define MAX_BLOCKS 10
+#define MAX_BLOCKS 5
 
 typedef struct
 {

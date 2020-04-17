@@ -18,11 +18,14 @@
 #include "pixy_queue.h"
 #include "sensor_queue.h"
 #include "debug_queue.h"
+#include "sensorstate_queue.h"
 
 //thread imports
 #include "spi_thread.h"
 #include "distance_thread.h"
 #include "sensor_thread.h"
+#include "sensorstate_thread.h"
+
 #include <pthread.h>
 #include <timer.h>
 
@@ -32,7 +35,7 @@ extern void runMQTT();
 
 void *mainThread(void *arg0)
 {
-    pthread_t spi, distance, sensor;//, mqtt; //pixy, sensor;
+    pthread_t spi, distance, sensor, sensor_state; //, mqtt; //pixy, sensor;
     pthread_attr_t attrs;
     struct sched_param  priParam;
     int detachState;
@@ -54,6 +57,7 @@ void *mainThread(void *arg0)
     createMQTTQueue();
     createConfigQueue();
     createSensorQueue();
+    createSensorStateQueue();
 
     captureInit();
     spiInit();
@@ -70,6 +74,7 @@ void *mainThread(void *arg0)
     if(pthread_create(&spi, &attrs, spiThread, NULL) != 0) ERROR;
     if(pthread_create(&distance, &attrs, distanceThread, NULL) != 0) ERROR;
     if(pthread_create(&sensor, &attrs, sensorThread, NULL) != 0) ERROR;
+    //if(pthread_create(&sensor_state, &attrs, sensorStateThread, NULL) != 0) ERROR;
     //if(pthread_create(&UARTDebug, &attrs, UARTDebugThread, NULL) != 0) ERROR;  //todo, this is currently overlapped with MQTT debug queu
 
     timer100MSInit();
