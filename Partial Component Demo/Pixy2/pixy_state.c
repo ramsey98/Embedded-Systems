@@ -90,7 +90,7 @@ void checkSendVersionResponse(int * complete, PIXY_DATA *curState) {
 }
 
 void checkSendConnectedBlockRequest(int * timeInc, PIXY_DATA * curState){
-    if (*timeInc > 2)
+    if (*timeInc > 0)
     {
         dbgOutputLoc(SPI_SEND_CONNECTED_PACKET);
         spiGetConnectedBlocks(curState->rx_buffer, curState->tx_buffer);

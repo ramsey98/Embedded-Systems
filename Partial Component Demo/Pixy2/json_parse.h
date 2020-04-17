@@ -25,13 +25,16 @@
 #define JSON_TYPE_ERROR (3)
 #define JSON_TYPE_PIXY  (4)
 #define JSON_TYPE_ULTRASONIC (5)
+#define JSON_TYPE_POLLS (6)
+
 
 #define PUBLISH_TOPIC_0 "/team20/stats"
 #define PUBLISH_TOPIC_1 "/team20/debug"
 #define PUBLISH_TOPIC_2 "/team20/errors"
 #define PUBLISH_TOPIC_3 "/team20/pixy"
 #define PUBLISH_TOPIC_4 "/team20/ultrasonic"
-#define PUBLISH_TOPIC_COUNT 5
+#define PUBLISH_TOPIC_5 "/team20/sensorpolls"
+#define PUBLISH_TOPIC_COUNT 6
 
 #define JSON_STATS      \
 "{"                        \
@@ -98,6 +101,20 @@
 "{"                        \
     "\"ID\": 0,"        \
     "\"Distance\": 0"    \
+"}"
+
+#define JSON_POLLS      \
+"{"                        \
+    "\"ID\": int32,"        \
+    "\"PixyPolls\": int32,"    \
+    "\"SensorPolls\": int32"    \
+"}"
+
+#define JSON_POLLS_BUF      \
+"{"                        \
+    "\"ID\": 0,"        \
+    "\"PixyPolls\": 0,"    \
+    "\"SensorPolls\": 0"    \
 "}"
 
 #define SUBSCRIPTION_TOPIC "/team20/config"

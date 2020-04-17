@@ -129,6 +129,19 @@ void json_send_ultrasonic(MQTTMsg msg, Json_Handle objectHandle) {
     ultrasonicID++;
 }
 
+
+void json_send_polls(MQTTMsg msg, Json_Handle objectHandle) {
+    dbgOutputLoc(ENTER_SEND_POLLS);
+    static int pollID = 0;
+    int pixy = msg.value1;
+    int sensor = msg.value2;
+    if(Json_parse(objectHandle, JSON_POLLS_BUF, strlen(JSON_POLLS_BUF)) != 0) ERROR;
+    if(Json_setValue(objectHandle, "\"ID\"", &pollID, sizeof(pollID)) != 0) ERROR;
+    if(Json_setValue(objectHandle, "\"PixyPolls\"", &pixy, sizeof(pixy)) != 0) ERROR;
+    if(Json_setValue(objectHandle, "\"SensorPolls\"", &sensor, sizeof(sensor)) != 0) ERROR;
+    pollID++;
+}
+
 void json_send(char *publish_topic, char *publish_data, MQTTMsg msg)
 {
     Json_Handle templateHandle, objectHandle;
@@ -166,6 +179,12 @@ void json_send(char *publish_topic, char *publish_data, MQTTMsg msg)
             if(Json_createObject(&objectHandle, templateHandle, 0) != 0) ERROR;
             json_send_ultrasonic(msg, objectHandle);
             strncpy(publish_topic, PUBLISH_TOPIC_4, sizeof(PUBLISH_TOPIC_4));
+            break;
+        case JSON_TYPE_POLLS:
+            if(Json_createTemplate(&templateHandle, JSON_POLLS, strlen(JSON_POLLS)) != 0) ERROR;
+            if(Json_createObject(&objectHandle, templateHandle, 0) != 0) ERROR;
+            json_send_polls(msg, objectHandle);
+            strncpy(publish_topic, PUBLISH_TOPIC_5, sizeof(PUBLISH_TOPIC_5));
             break;
         default:
             ERROR;
