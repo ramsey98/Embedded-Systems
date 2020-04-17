@@ -73,25 +73,25 @@ int findDistances(DISTANCE_DATA *data, int * transfer) {
         *transfer = 0;
         if(data->blockCount == 0) { //send empty message if no blocks
             sendMsgToMQTTQFromISR(msg);
-        }
+            //todo send empty block data to SensorState queue
+        } else {
 
-        for(i=0; i < data->blockCount/CONNECTED_PACKET_LENGTH; i++) {   //acts almost as an else statement
-            if(data->blocks[i].xPos > 10) {     //ensuring a proper size
-                if(data->blocks[i].colorCode < 4) { //egg
-                    findObjectDistanceAndOffset(&(data->blocks[i]));
-                } else {    //zumo
-                    findZumoDistanceAndOffset(&(data->blocks[i]));
+            for(i=0; i < data->blockCount/CONNECTED_PACKET_LENGTH; i++) {   //acts almost as an else statement
+                if(data->blocks[i].xPos > 10) {             //ensuring a proper size
+                    if(data->blocks[i].colorCode < 4) {     //egg
+                        findObjectDistanceAndOffset(&(data->blocks[i]));
+                    } else {                                //zumo
+                        findZumoDistanceAndOffset(&(data->blocks[i]));
+                    }
+                    if(data->blocks[i].distance < closest_object_distance) {
+                        closest_object_distance = data->blocks[i].distance;
+                        closest_index = i;
+                    }
+                    sendMQTTMessageToPixy(&(data->blocks[i]));
                 }
-                if(data->blocks[i].distance < closest_object_distance) {
-                    closest_object_distance = data->blocks[i].distance;
-                    closest_index = i;
-                }
-
-                //send data to
-                sendMQTTMessageToPixy(&(data->blocks[i]));
             }
+            //todo send closest block to SensorState queue
         }
-        //todo send closest block to SensorState queue
 
     }
     return success;
