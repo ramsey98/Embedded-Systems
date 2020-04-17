@@ -34,7 +34,9 @@
 #include "mqtt_queue.h"
 
 int findDistances(DISTANCE_DATA *data, int * transfer);
-void findDistanceAndOffset(BLOCK_DATA *data);
+void findObjectDistanceAndOffset(BLOCK_DATA *data);
+void findZumoDistanceAndOffset(BLOCK_DATA *data);
+void sendMQTTMessageToPixy(BLOCK_DATA *data);
 void *distanceThread(void *arg0);
 
 
