@@ -50,6 +50,9 @@ void * configThread(void *arg0)
             case CONFIG_PIXY_ENABLE:
                 sendMsgToNaviQ(PIXY_ENABLE, value);
                 break;
+            case CONFIG_MOVEMENT_ENABLE:
+                sendMsgToNaviQ(MOVEMENT_ENABLE, value);
+                break;
             default:
                 break;
         }

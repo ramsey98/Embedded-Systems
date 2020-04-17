@@ -6,7 +6,7 @@
  */
 
 #include <navigation.h>
-static int enablePID = 0, enableSensor = 0, enablePixy = 0;
+static int enablePID = 0, enableSensor = 0, enablePixy = 0, enableMovement;
 
 const naviLookupTable naviLookup[NAVILOOKUPLEN] = {{0,0}, //{expected, measured}
                                                 {10,0},
@@ -243,7 +243,10 @@ void naviEvent(MOTORS_DATA *motorsState, uint32_t type, uint32_t value)
     switch(type)
     {
         case TIMER:
-            updateMotors(*motorsState);
+            if(enableMovement == 1)
+            {
+                updateMotors(*motorsState);
+            }
             motorsState->realLeftSpeed = motorsState->setLeftSpeed;
             motorsState->realRightSpeed = motorsState->setRightSpeed;
             if(started == 1)
@@ -338,6 +341,16 @@ void naviEvent(MOTORS_DATA *motorsState, uint32_t type, uint32_t value)
             else
             {
                 enablePixy = 1;
+            }
+            break;
+        case MOVEMENT_ENABLE:
+            if(value == 0)
+            {
+                enableMovement = 0;
+            }
+            else
+            {
+                enableMovement = 1;
             }
             break;
         case START:

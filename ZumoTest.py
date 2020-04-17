@@ -16,7 +16,8 @@ tests = {"pause": False,
          "distance": False,
          "movement": False,
          "capture": False,
-         "sync": False}
+         "sync": False,
+         "approach": False}
 
 topics = {"/team20/debug": ["ID", "Type", "Value"]}
 test_keys = ["ID", "Type", "Value"]
@@ -27,7 +28,7 @@ capRightVals = []
 sensorVal = 0
 PIDBeforeVals = []
 PIDAfterVals = []
-pixyVersionVal = 0
+stateVal = 0
 
 def on_connect(client, data, flag, rc):
     global connected
@@ -40,7 +41,7 @@ def on_disconnect(client, data, rc):
     print("Disconnected w/ result", str(rc),"@",round(time.time() - starttime,2))
 
 def on_msg_debug(decoded):
-    global debugval, sensorVal
+    global debugval, sensorVal, stateVal
     if decoded["Type"] == 4:
         capLeftVals.append(decoded["Value"])
     elif decoded["Type"] == 5:
@@ -51,6 +52,8 @@ def on_msg_debug(decoded):
         PIDBeforeVals.append(decoded["Value"])
     elif decoded["Type"] == 8:
         PIDAfterVals.append(decoded["Value"])
+    elif decoded["Type"] == 11:
+        stateVal = decoded["Value"]
 
 def on_message(client, data, msg):
     global pub_results, tests, reset, started 
@@ -128,15 +131,18 @@ def test_distance():
     check1 = False
     check2 = False
     check3 = False
-    send_config(2, 1)#enable PID
+    send_config(8, 0) #disable movement
+    send_config(7, 0) #disable pixy
+    send_config(6, 0) #disable sensor
+    send_config(2, 0) #disable PID
     time.sleep(10)
-    if sensorVal < 22 and sensorVal > 18:
+    if 18 < sensorVal < 22:
         check1 = True
     time.sleep(10)
-    if sensorVal < 14 and sensorVal > 10:
+    if 10 < sensorVal < 14:
         check2 = True
     time.sleep(10)
-    if sensorVal < 8 and sensorVal > 4:
+    if 4 < sensorVal < 8:
         check3 = True
     if check1 and check2 and check3:
         tests["distance"] = True
@@ -174,9 +180,17 @@ def test_movement():
 def test_sync():
     global tests
     print("Running test: sync @",round(time.time() - starttime,2))
+    while(stateVal != 26):
+        pass #wait for pixy to lose poster
     time.sleep(10)
-    detected = False
-    if sensorVal < 20 and detected: #send pixy offset?
+    if stateVal == 27: #27 == PIXY_TRACKING
+        tests["sync"] = True
+
+def test_approach():
+    global tests
+    print("Running test: approach @",round(time.time() - starttime,2))
+    time.sleep(20)
+    if 4 < sensorVal < 6 and stateVal == 27: #27 == PIXY_TRACKING
         tests["sync"] = True
 
 def run_tests():
@@ -188,9 +202,10 @@ def run_tests():
         print("Waiting for connection:", waiting)
         waiting+=1
     run_tests = ["distance", "movement", "pause", "sync", "capture", "PID_straight", "PID_turning"]
-    run_tests = ["capture"]
+    run_tests = ["distance", "movement"]
     for func in run_tests:
         globals()["test_"+func]()
+        input("Press Enter to continue to test: " + func)
         time.sleep(delay)    
     print("Completed Tests @",round(time.time() - starttime,2))
     print(tests)
