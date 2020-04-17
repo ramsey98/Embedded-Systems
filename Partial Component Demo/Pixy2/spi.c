@@ -14,6 +14,9 @@ void spiCallback(SPI_Handle handle, SPI_Transaction *transaction)
        dbgOutputLoc(SPI_SUCCESS_TRANSFER);
        sendSpiMsgToPixyQ1();
    }
+   else {
+       ERROR;
+   }
 
    return;
 }

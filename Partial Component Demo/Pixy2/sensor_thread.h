@@ -11,6 +11,7 @@
 #include "debug.h"
 #include "sensor_queue.h"
 #include "timertrigger.h"
+#include "mqtt_queue.h"
 
 #define CM_PER_US (0.0343)
 

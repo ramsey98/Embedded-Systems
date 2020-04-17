@@ -61,56 +61,39 @@ void *distanceThread(void *arg0) {
         {
             ERROR;
         }
-
     }
-
 }
 
 int findDistances(DISTANCE_DATA *data, int * transfer) {
     int success = 0;
-    int i;
+    int i, closest_object_distance = 1000, closest_index = 0;
     int first = 1;
+    MQTTMsg msg = {4, 0, 0, 0, 0};
 
     if(*transfer > 0){
         *transfer = 0;
-        //dbgUARTStr("{ ");
-        for(i=0; i < data->blockCount/CONNECTED_PACKET_LENGTH; i++) {
+        if(data->blockCount == 0) { //send empty message if no blocks
+            sendMsgToMQTTQFromISR(msg);
+        }
 
+        for(i=0; i < data->blockCount/CONNECTED_PACKET_LENGTH; i++) {   //acts almost as an else statement
             if(data->blocks[i].xPos > 10) {     //ensuring a proper size
-                MQTTMsg msg = {4, 0, 0};
-
-                /*
-                if(first) {
-                    first = 0;
-                    dbgUARTStr("{ ");
-                } else {
-                    dbgUARTStr(" {");
-                }
-                dbgUARTStr("color:");
-                if(data->blocks[i].colorCode == 1) {
-                    dbgUARTStr("r ");
-                } else if(data->blocks[i].colorCode == 2) {
-                    dbgUARTStr("g ");
-                } else if(data->blocks[i].colorCode == 3) {
-                    dbgUARTStr("y ");
-                } else {
-                    dbgUARTStr("?");
-                } */
-
                 findDistanceAndOffset(&(data->blocks[i]));
-                //dbgUARTStr(", distance:");
-                //dbgUARTNumAsChars(data->blocks[i].distance);
-                //dbgUARTStr("}");
+                if(data->blocks[i].distance < closest_object_distance) {
+                    closest_object_distance = data->blocks[i].distance;
+                    closest_index = i;
+                }
 
+                //with closest block, send data
                 msg.value1 = data->blocks[i].colorCode;
                 msg.value2 = data->blocks[i].distance;
                 msg.value4 = data->blocks[i].angle;
                 sendMsgToMQTTQFromISR(msg);
             }
         }
-        //dbgUARTStr("}\n\r");
-    }
+        //todo send closest block to SensorState
 
+    }
     return success;
 }
 
@@ -136,4 +119,5 @@ void findDistanceAndOffset(BLOCK_DATA *data) {
 
     data->distance = EGG_WIDTH * focus/data->xPixels;
     int xFromCenterInCm = (157.5 - data->xPos)/(data->xPixels/EGG_WIDTH);
-    data->angle = xFromCenterInCm;}
+    data->angle = xFromCenterInCm;
+}

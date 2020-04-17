@@ -48,7 +48,8 @@
 #define ENTER_SEND_ERROR 30
 #define ENTER_SEND_STATS 31
 #define ENTER_SEND_PIXY 32
-#define MQTT_MSG_RECEIVED 33
+#define ENTER_SEND_ULTRASONIC 33
+#define MQTT_MSG_RECEIVED 34
 
 #define DBG_ERROR_LED_TIME (250000)
 #define ERROR halt(__LINE__, __func__);
