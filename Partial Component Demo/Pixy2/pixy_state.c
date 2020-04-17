@@ -104,12 +104,17 @@ void checkSendConnectedBlockResponse(int * complete, int * valid_data, PIXY_DATA
         dbgOutputLoc(SPI_RECEIVE_CONNECTED_PACKET);
         *complete = 0;
 
-        if(curState->rx_buffer[CONNECTED_LENGTH_LOC-1] != 33) {
-           curState->state = PixyWaitingForTime1;
-        } else {
+        if(curState->rx_buffer[CONNECTED_LENGTH_LOC-1] == 33) { //valid data, 1 or more blocks
             curState->blockCount = curState->rx_buffer[CONNECTED_LENGTH_LOC];
             curState->state = PixyWaitingForBlocks;
             *valid_data = 1;
+
+        } else if(curState->rx_buffer[CONNECTED_LENGTH_LOC-2] == 33 && curState->rx_buffer[CONNECTED_LENGTH_LOC-1] == 0) {  //valid data, no blocks
+            curState->blockCount = 0;
+            curState->state = PixyWaitingForBlocks;
+            *valid_data = 1;
+        } else {
+           curState->state = PixyWaitingForTime1;
         }
     }
 }

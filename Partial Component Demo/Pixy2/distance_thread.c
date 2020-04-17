@@ -66,25 +66,30 @@ void *distanceThread(void *arg0) {
 
 int findDistances(DISTANCE_DATA *data, int * transfer) {
     int success = 0;
-    int i;
+    int i, closest_object_distance = 1000, closest_index = 0;
     int first = 1;
+    MQTTMsg msg = {4, 0, 0, 0, 0};
 
     if(*transfer > 0){
         *transfer = 0;
         for(i=0; i < data->blockCount/CONNECTED_PACKET_LENGTH; i++) {
             if(data->blocks[i].xPos > 10) {     //ensuring a proper size
                 findDistanceAndOffset(&(data->blocks[i]));
-                MQTTMsg msg = {4, 0, 0};
-                msg.value1 = data->blocks[i].colorCode;
-                msg.value2 = data->blocks[i].distance;
-                msg.value4 = data->blocks[i].angle;
-                sendMsgToMQTTQFromISR(msg); //todo add case to ensure only sending largest
+                if(data->blocks[i].distance < closest_object_distance) {
+                    closest_object_distance = data->blocks[i].distance;
+                    closest_index = i;
+                }
             }
         }
 
-        if(data->blockCount == 0) { //todo handle this case of no blocks
-
+        if(data->blockCount > 0) { //todo handle this case of no blocks
+            //with closest block, send data
+            msg.value1 = data->blocks[closest_index].colorCode;
+            msg.value2 = data->blocks[closest_index].distance;
+            msg.value4 = data->blocks[closest_index].angle;
         }
+
+        sendMsgToMQTTQFromISR(msg);
     }
     return success;
 }
