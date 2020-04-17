@@ -32,12 +32,13 @@
 #include "spi.h"
 #include "distance_queue.h"
 #include "mqtt_queue.h"
+#include "sensorstate_queue.h"
 
 int findDistances(DISTANCE_DATA *data, int * transfer);
-void findObjectDistanceAndOffset(BLOCK_DATA *data);
-void findZumoDistanceAndOffset(BLOCK_DATA *data);
-void sendMQTTMessageToPixy(BLOCK_DATA *data);
+void findObjectDistanceAndOffset(DISTANCE_BLOCK *data);
+void findZumoDistanceAndOffset(DISTANCE_BLOCK *data);
+void sendMQTTMessageToPixy(DISTANCE_BLOCK *data);
+void sendSensorStatePixyInfo(int color, int distance, int offset);
 void *distanceThread(void *arg0);
-
 
 #endif /* DISTANCE_THREAD_H_ */

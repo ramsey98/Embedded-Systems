@@ -35,14 +35,7 @@ typedef struct
     int angle;
     uint8_t trackIndex;
     uint8_t age;
-    uint8_t distance;
 } BLOCK_DATA;
-
-typedef struct
-{
-    BLOCK_DATA blocks[MAX_BLOCKS];
-    uint8_t blockCount;
-} DISTANCE_DATA;
 
 void spiInit();
 void spiCallback(SPI_Handle handle, SPI_Transaction *transaction);

@@ -12,7 +12,11 @@ void initDistanceData(DISTANCE_DATA *d, PIXY_DATA *p) {
     int j;
     d->blockCount = p->blockCount;
     for(j=0; j < d->blockCount/CONNECTED_PACKET_LENGTH; j++) {
-        d->blocks[j] = p->blocks[j];
+        d->blocks[j].colorCode = p->blocks[j].colorCode;
+        d->blocks[j].xPos = p->blocks[j].xPos;
+        d->blocks[j].xPixels = p->blocks[j].xPixels;
+        d->blocks[j].angle = p->blocks[j].angle;
+        d->blocks[j].distance = 0;
     }
 }
 
@@ -30,7 +34,6 @@ void initBlockData(PIXY_DATA *curState) {
          curState->blocks[i].angle = 0;
          curState->blocks[i].trackIndex = 0;
          curState->blocks[i].age = 0;
-         curState->blocks[i].distance = 0;
     }
     curState->state = PixySendVersion;
 }

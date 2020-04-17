@@ -32,6 +32,7 @@ void *sensorThread(void *arg0) {
                 MQTTMsg msg = {5, 0, 0};
                 msg.value1 = distance;
                 sendMsgToMQTTQFromISR(msg);
+                sendSensorStateUSInfo(distance);
                 break;
 
             default:
@@ -41,3 +42,9 @@ void *sensorThread(void *arg0) {
     }
 }
 
+void sendSensorStateUSInfo(int distance) {
+    SENSORSTATE_QUEUE_DATA data;
+    data.type = ultrasonic_data;
+    data.distance = distance;
+    sendSensorStateMsgToQ(&data);
+}

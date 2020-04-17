@@ -20,6 +20,7 @@ typedef enum {
 typedef struct {
     int type;
     int distance;
+    int color;
     int offset;
 } SENSORSTATE_QUEUE_DATA;
 

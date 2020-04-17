@@ -12,6 +12,22 @@
 #include "queue.h"
 #include "spi.h"
 
+typedef struct {
+    uint8_t colorCode;
+    uint16_t xPos;
+    uint16_t xPixels;
+    int angle;
+    uint8_t distance;
+} DISTANCE_BLOCK;
+
+typedef struct
+{
+    DISTANCE_BLOCK blocks[MAX_BLOCKS];
+    uint8_t blockCount;
+} DISTANCE_DATA;
+
+
+
 void createDistanceQueue();
 int sendBlockMsgToDistanceQ1(DISTANCE_DATA *data);
 int recieveMsgFromDistanceQ1(DISTANCE_DATA *data, int * transfer);

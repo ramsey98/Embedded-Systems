@@ -73,7 +73,7 @@ int findDistances(DISTANCE_DATA *data, int * transfer) {
         *transfer = 0;
         if(data->blockCount == 0) { //send empty message if no blocks
             sendMsgToMQTTQFromISR(msg);
-            //todo send empty block data to SensorState queue
+            sendSensorStatePixyInfo(0, 0, 0);
         } else {
 
             for(i=0; i < data->blockCount/CONNECTED_PACKET_LENGTH; i++) {   //acts almost as an else statement
@@ -90,14 +90,14 @@ int findDistances(DISTANCE_DATA *data, int * transfer) {
                     sendMQTTMessageToPixy(&(data->blocks[i]));
                 }
             }
-            //todo send closest block to SensorState queue
+            sendSensorStatePixyInfo(data->blocks[closest_index].colorCode, data->blocks[closest_index].distance, data->blocks[closest_index].angle);
         }
 
     }
     return success;
 }
 
-void findObjectDistanceAndOffset(BLOCK_DATA *data) {
+void findObjectDistanceAndOffset(DISTANCE_BLOCK *data) {
     int i;
     int computed = 0, focus = 0;
 
@@ -122,14 +122,23 @@ void findObjectDistanceAndOffset(BLOCK_DATA *data) {
     data->angle = xFromCenterInCm;
 }
 
-void findZumoDistanceAndOffset(BLOCK_DATA *data) {  //todo fill this in.
+void findZumoDistanceAndOffset(DISTANCE_BLOCK *data) {  //todo fill this in.
     data->distance = 50;
 }
 
-void sendMQTTMessageToPixy(BLOCK_DATA *data) {
+void sendMQTTMessageToPixy(DISTANCE_BLOCK *data) {
     MQTTMsg msg = {4, 0, 0, 0, 0};
     msg.value1 = data->colorCode;
     msg.value2 = data->distance;
     msg.value4 = data->angle;
     sendMsgToMQTTQFromISR(msg);
+}
+
+void sendSensorStatePixyInfo(int color, int distance, int offset) {
+    SENSORSTATE_QUEUE_DATA data;
+    data.type = pixy2_data;
+    data.color = color;
+    data.distance = distance;
+    data.offset = offset;
+    sendSensorStateMsgToQ(&data);
 }

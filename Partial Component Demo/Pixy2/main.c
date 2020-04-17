@@ -74,8 +74,7 @@ void *mainThread(void *arg0)
     if(pthread_create(&spi, &attrs, spiThread, NULL) != 0) ERROR;
     if(pthread_create(&distance, &attrs, distanceThread, NULL) != 0) ERROR;
     if(pthread_create(&sensor, &attrs, sensorThread, NULL) != 0) ERROR;
-    //if(pthread_create(&sensor_state, &attrs, sensorStateThread, NULL) != 0) ERROR;
-    //if(pthread_create(&UARTDebug, &attrs, UARTDebugThread, NULL) != 0) ERROR;  //todo, this is currently overlapped with MQTT debug queu
+    if(pthread_create(&sensor_state, &attrs, sensorStateThread, NULL) != 0) ERROR;
 
     timer100MSInit();
     timerTriggerInit();
