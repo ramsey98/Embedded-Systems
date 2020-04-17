@@ -59,10 +59,12 @@ void processColor(PIXY_DATA *curState)
         curState->blockCount = curState->rx_buffer[start+1]/14;
         if(curState->blockCount > 0)
         {
-            if(paused == PIXY_SYNC)
+            if(paused == 1)
             {
                 paused = 0;
                 sendMsgToNaviQ(RESUME, 0);
+                MQTTMsg msg = {.topic = JSON_TOPIC_DEBUG, .type = JSON_STATE, .value = STATE_TRACKING};
+                sendMsgToMQTTQ(msg);
             }
             curState->block.xPos = (curState->rx_buffer[start+7] << 8) | curState->rx_buffer[start+6];
             curState->block.yPos = curState->rx_buffer[start+8];
@@ -74,8 +76,10 @@ void processColor(PIXY_DATA *curState)
         else
         {
             /*
+            MQTTMsg msg = {.topic = JSON_TOPIC_DEBUG, .type = JSON_STATE, .value = STATE_SYNCING};
+            sendMsgToMQTTQ(msg);
             sendMsgToNaviQ(PAUSE, 0); //send pause to movement
-            paused = PIXY_SYNC;
+            paused = 1;
             panx = 10;
             */
         }

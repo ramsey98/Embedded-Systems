@@ -36,6 +36,9 @@
 #define PIXY_ENABLE 22
 #define CONFIG_MSG 23
 #define START 24
+#define MOVEMENT_ENABLE 25
+#define STATE_SYNCING 26
+#define STATE_TRACKING 27
 
 #define PIXY_X_RANGE 315
 #define PIXY_Y_RANGE 207
