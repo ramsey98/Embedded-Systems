@@ -19,7 +19,6 @@ void timer100MSCallback(Timer_Handle myHandle)
     //Sensor Section
     sendSensorMsgToQ(SENSOR_TYPE_TRIGGER);
 
-    //MQTT Section
     MQTTMsg msg = {0, 0};
     if(count == 10)
     {
