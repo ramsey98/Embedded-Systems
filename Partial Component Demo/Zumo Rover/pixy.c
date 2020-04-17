@@ -10,6 +10,15 @@
 
 static SPI_Handle masterSpi;
 
+void SPICallback(SPI_Handle handle, SPI_Transaction *trans)
+{
+    if(trans->status == SPI_TRANSFER_COMPLETED)
+    {
+        sendMsgToPixyQFromISR(PIXY_COMPLETE);
+    }
+    else if(trans->status == SPI_TRANSFER_FAILED) ERROR;
+}
+
 void pixyInit()
 {
     SPI_Params spiParams;
@@ -26,7 +35,7 @@ void pixy_transfer(uint8_t *rx_buffer, uint8_t *tx_buffer)
     transaction.txBuf = (void *) tx_buffer;
     transaction.rxBuf = (void *) rx_buffer;
     if(SPI_transfer(masterSpi, &transaction) == 0) ERROR;
-    sendMsgToPixyQFromISR(PIXY_COMPLETE);
+    sendMsgToPixyQ(PIXY_COMPLETE);
 }
 
 void *pixyThread(void *arg0)

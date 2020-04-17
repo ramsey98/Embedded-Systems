@@ -6,8 +6,7 @@
  */
 
 #include <navigation.h>
-static float curKP = KP, curKI = KI;
-static int enablePID = 0;
+static int enablePID = 0, enableSensor = 0, enablePixy = 1;
 
 const naviLookupTable naviLookup[NAVILOOKUPLEN] = {{0,0}, //{expected, measured}
                                                 {10,0},
@@ -182,7 +181,7 @@ uint8_t PIDAdjust(uint8_t setSpeed, uint32_t measuredSpeed)
     if(enablePID == 1)
     {
         MQTTMsg msg = {.topic = JSON_TOPIC_DEBUG, .type = JSON_PID_BEFORE, .value = setSpeed};
-        sendMsgToMQTTQFromISR(msg);
+        sendMsgToMQTTQ(msg);
         sendMsgToUARTDebugQ(PID_BEFORE, setSpeed);
         int i;
         static int error = 0, integral = 0;
@@ -195,7 +194,7 @@ uint8_t PIDAdjust(uint8_t setSpeed, uint32_t measuredSpeed)
             }
         }
         integral += error;
-        PIDResult = (curKP*error) + (curKI*integral*measuredSpeed);
+        PIDResult = (KP*error) + (KI*integral*measuredSpeed);
         if(setSpeed + PIDResult > 127)
         {
             ret = 127;
@@ -209,7 +208,7 @@ uint8_t PIDAdjust(uint8_t setSpeed, uint32_t measuredSpeed)
             ret = setSpeed + PIDResult;
         }
         MQTTMsg msg2 = {.topic = JSON_TOPIC_DEBUG, .type = JSON_PID_AFTER, .value = setSpeed};
-        sendMsgToMQTTQFromISR(msg2);
+        sendMsgToMQTTQ(msg2);
         sendMsgToUARTDebugQ(PID_AFTER, ret);
     }
     else
@@ -246,42 +245,48 @@ void naviEvent(MOTORS_DATA *motorsState, uint32_t type, uint32_t value)
             rightMsg.value = motorsState->measuredRightSpeed;
             break;
         case SENSOR:
-            if(value >= 20)
+            if(enableSensor == 1)
             {
-                updateValues(motorsState, ACCEL, value - 12);
-            }
-            else if(value <= 12 & value >= 6)
-            {
-                updateValues(motorsState, DECEL, ((12 - value)*2));
-            }
-            else if(value < 6)
-            {
-                updateValues(motorsState, FORWARD, 0);
+                if(value >= 20)
+                {
+                    updateValues(motorsState, ACCEL, value - 12);
+                }
+                else if(value <= 12 & value >= 6)
+                {
+                    updateValues(motorsState, DECEL, ((12 - value)*2));
+                }
+                else if(value < 6)
+                {
+                    updateValues(motorsState, FORWARD, 0);
+                }
             }
             break;
         case PIXY:
-            halfway = (PIXY_X_RANGE/2.0);
-            if(value < (PIXY_X_RANGE*.25))
+            if(enablePixy == 1)
             {
-                diff = halfway - value;
-                scaled = 127.0-(127.0*(diff / halfway));
-                updateValues(motorsState, TURNLEFT, scaled);
-            }
-            else if(value > (PIXY_X_RANGE*.75))
-            {
-                diff = value - halfway;
-                scaled = 127.0*(diff / halfway);
-                updateValues(motorsState, TURNRIGHT, scaled);
-            }
-            else
-            {
-                if(motorsState->setLeftSpeed > motorsState->setRightSpeed)
+                halfway = (PIXY_X_RANGE/2.0);
+                if(value < (PIXY_X_RANGE*.25))
                 {
-                    updateValues(motorsState, FORWARD, motorsState->setLeftSpeed);
+                    diff = halfway - value;
+                    scaled = 127.0-(127.0*(diff / halfway));
+                    updateValues(motorsState, TURNLEFT, scaled);
+                }
+                else if(value > (PIXY_X_RANGE*.75))
+                {
+                    diff = value - halfway;
+                    scaled = 127.0*(diff / halfway);
+                    updateValues(motorsState, TURNRIGHT, scaled);
                 }
                 else
                 {
-                    updateValues(motorsState, FORWARD, motorsState->setRightSpeed);
+                    if(motorsState->setLeftSpeed > motorsState->setRightSpeed)
+                    {
+                        updateValues(motorsState, FORWARD, motorsState->setLeftSpeed);
+                    }
+                    else
+                    {
+                        updateValues(motorsState, FORWARD, motorsState->setRightSpeed);
+                    }
                 }
             }
             break;
@@ -293,6 +298,26 @@ void naviEvent(MOTORS_DATA *motorsState, uint32_t type, uint32_t value)
             else
             {
                 enablePID = 1;
+            }
+            break;
+        case SENSOR_ENABLE:
+            if(value == 0)
+            {
+                enableSensor = 0;
+            }
+            else
+            {
+                enableSensor = 1;
+            }
+            break;
+        case PIXY_ENABLE:
+            if(value == 0)
+            {
+                enablePixy = 0;
+            }
+            else
+            {
+                enablePixy = 1;
             }
             break;
         default:

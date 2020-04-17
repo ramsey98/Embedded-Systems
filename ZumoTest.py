@@ -17,7 +17,7 @@ tests = {"pause": False,
          "capture": False,
          "sync": False}
 
-topics = {"/team20/debug": ["ID", "value"]}
+topics = {"/team20/debug": ["ID", "Type", "Value"]}
 test_keys = ["ID", "Type", "Value"]
 
 ID = {"/team20/config": 0}
@@ -26,7 +26,7 @@ capRightVals = []
 sensorVal = 0
 PIDBeforeVal = 0
 PIDAfterVal = 0
-PIXYVersionVal = 0
+pixyVersionVal = 0
 
 def on_connect(client, data, flag, rc):
     global connected
@@ -39,7 +39,7 @@ def on_disconnect(client, data, rc):
     print("Disconnected w/ result", str(rc),"@",round(time.time() - starttime,2))
 
 def on_msg_debug(decoded):
-    global debugval
+    global debugval, capLeftVal, capRightVal, sensorVal, PIDBeforeVal, PIDAfterVal, pixyVersionVal
     if decoded["Type"] == 4:
         capLeftVal = decoded["Value"]
     elif decoded["Type"] == 5:
@@ -51,7 +51,7 @@ def on_msg_debug(decoded):
     elif decoded["Type"] == 8:
         PIDAfterVal = decoded["Value"]
     elif decoded["Type"] == 9:
-        PixyVersionVal = decoded["Value"]
+        pixyVersionVal = decoded["Value"]
 
 def on_message(client, data, msg):
     global pub_results, tests, reset, started 
@@ -65,51 +65,42 @@ def on_message(client, data, msg):
     else:
         print("Error:", topic.split("/")[-1], "@", round(time.time() - starttime,2))
 
+def send_config(msgType, msgValue):
+    global ID
+    topic = "/team20/config"
+    data = {"ID": ID[topic],
+            "Type": msgType,
+            "Value": msgValue}
+    package = json.dumps(data)
+    client.publish(topic,package)
+    ID[topic] += 1
+    print("Sent",package,"to",topic,"@",round(time.time() - starttime,2))
+
 def test_pause():
-    global ID, tests
+    global ID, tests, capLeftVal
     print("Running test: pause @",round(time.time() - starttime,2))
     check1 = False
     check2 = False
     topic = "/team20/config"
-    while(leftCapVal == 0):
+    capLeftVal = 0
+    while(capLeftVal == 0):
         time.sleep(.1) #wait until moving
-    data = {"ID": ID[topic],
-            "Type": 1, #CONFIG_STATE
-            "value": 2}#ROVER_LOADING
-    package = json.dumps(data)
-    client.publish(topic,package)
-    ID[topic] += 1
-    print("Sent",package,"to",topic,"@",round(time.time() - starttime,2))
+    print("Pause: detected movement")
+    send_config(1, 2) #rover loading
     time.sleep(2)
     if capLeftVal == 0 and capRightVal == 0:
-        check2 = True
-    data = {"ID": ID[topic],
-            "Type": 1,
-            "Value": 1}#ROVER_MOVING
-    package = json.dumps(data)
-    client.publish(topic,package)
-    ID[topic] += 1
-    print("Sent",package,"to",topic,"@",round(time.time() - starttime,2))
+        check1 = True
+    send_config(1, 1) #rover moving
     time.sleep(2)
-    if capLeftVal != 0 and capRightVal != 0:
+    if capLeftVal != 0 or capRightVal != 0:
         check2 = True
     if check1 and check2:
         tests["pause"] = True
 
 def test_PID_straight():
     global ID, tests
-    data = {"ID": ID[topic],
-            "Type": 2,#PID_ENABLE
-            "Value": 1}#enabled
-    client.publish(topic,package)
-    ID[topic] += 1
-    print("Sent",package,"to",topic,"@",round(time.time() - starttime,2))
-    data = {"ID": ID[topic],
-            "Type": 3,#SET_SPEED
-            "Value": 50}#50/127
-    client.publish(topic,package)
-    ID[topic] += 1
-    print("Sent",package,"to",topic,"@",round(time.time() - starttime,2))
+    send_config(16, 1)#enable PID
+    send_config(3, 50)#set speed
     time.sleep(1)
     x = [PIDBeforeVal]
     y = [PIDAfterVal]
@@ -123,18 +114,8 @@ def test_PID_straight():
 
 def test_PID_turning():
     global ID, tests
-    data = {"ID": ID[topic],
-            "Type": 2,#PID_ENABLE
-            "Value": 1}#enabled
-    client.publish(topic,package)
-    ID[topic] += 1
-    print("Sent",package,"to",topic,"@",round(time.time() - starttime,2))
-    data = {"ID": ID[topic],
-            "Type": 5,#TURN_LEFT
-            "Value": 50}#50/127
-    client.publish(topic,package)
-    ID[topic] += 1
-    print("Sent",package,"to",topic,"@",round(time.time() - starttime,2))
+    send_config(16, 1)#enable PID
+    send_config(5, 50)#turn left
     time.sleep(1)
     x = [PIDBeforeVal]
     y = [PIDAfterVal]
@@ -151,7 +132,6 @@ def test_distance():
     check1 = False
     check2 = False
     check3 = False
-    print("Running test: distance @",round(time.time() - starttime,2))
     time.sleep(10)
     if sensorVal < 22 and sensorVal > 18:
         check1 = True
@@ -166,12 +146,13 @@ def test_distance():
 
 def test_capture():
     global tests
+    print("Running test: capture @",round(time.time() - starttime,2))
     check1 = False
     check2 = False
     check3 = False
     capLeftVals = []
     capRightVals = []
-    print("Running test: capture @",round(time.time() - starttime,2))
+    send_config(3, 50) #set speed  
     time.sleep(5)
     if len(capLeftVals) >= 50 and len(capRightVals) >= 50:
         check1 = True
@@ -186,7 +167,7 @@ def test_movement():
     global tests
     print("Running test: movement @",round(time.time() - starttime,2))
     time.sleep(10)
-    if sensorVal < 8 and sensorVal > 4:
+    if sensorVal <= 8 and sensorVal >= 4:
         tests["movement"] = True
 
 def test_sync():
@@ -206,6 +187,7 @@ def run_tests():
         print("Waiting for connection:", waiting)
         waiting+=1
     run_tests = ["distance", "movement", "pause", "sync", "capture", "PID_straight", "PID_turning"]
+    run_tests = ["pause"]
     for func in run_tests:
         globals()["test_"+func]()
         time.sleep(delay)    
