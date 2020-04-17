@@ -24,7 +24,7 @@ void captureInit()
 
 void captureCallback(Capture_Handle handle, uint32_t interval)
 {
-    if(interval < 90000) { //should capture every other edge (ie falling)
+    if(interval < 90000) { //to filter out values between echo
         curInterval = interval;
         sendSensorMsgToQ(curInterval);
     }

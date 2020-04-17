@@ -61,9 +61,7 @@ void *distanceThread(void *arg0) {
         {
             ERROR;
         }
-
     }
-
 }
 
 int findDistances(DISTANCE_DATA *data, int * transfer) {
@@ -73,44 +71,21 @@ int findDistances(DISTANCE_DATA *data, int * transfer) {
 
     if(*transfer > 0){
         *transfer = 0;
-        //dbgUARTStr("{ ");
         for(i=0; i < data->blockCount/CONNECTED_PACKET_LENGTH; i++) {
-
             if(data->blocks[i].xPos > 10) {     //ensuring a proper size
-                MQTTMsg msg = {4, 0, 0};
-
-                /*
-                if(first) {
-                    first = 0;
-                    dbgUARTStr("{ ");
-                } else {
-                    dbgUARTStr(" {");
-                }
-                dbgUARTStr("color:");
-                if(data->blocks[i].colorCode == 1) {
-                    dbgUARTStr("r ");
-                } else if(data->blocks[i].colorCode == 2) {
-                    dbgUARTStr("g ");
-                } else if(data->blocks[i].colorCode == 3) {
-                    dbgUARTStr("y ");
-                } else {
-                    dbgUARTStr("?");
-                } */
-
                 findDistanceAndOffset(&(data->blocks[i]));
-                //dbgUARTStr(", distance:");
-                //dbgUARTNumAsChars(data->blocks[i].distance);
-                //dbgUARTStr("}");
-
+                MQTTMsg msg = {4, 0, 0};
                 msg.value1 = data->blocks[i].colorCode;
                 msg.value2 = data->blocks[i].distance;
                 msg.value4 = data->blocks[i].angle;
-                sendMsgToMQTTQFromISR(msg);
+                sendMsgToMQTTQFromISR(msg); //todo add case to ensure only sending largest
             }
         }
-        //dbgUARTStr("}\n\r");
-    }
 
+        if(data->blockCount == 0) { //todo handle this case of no blocks
+
+        }
+    }
     return success;
 }
 
@@ -136,4 +111,5 @@ void findDistanceAndOffset(BLOCK_DATA *data) {
 
     data->distance = EGG_WIDTH * focus/data->xPixels;
     int xFromCenterInCm = (157.5 - data->xPos)/(data->xPixels/EGG_WIDTH);
-    data->angle = xFromCenterInCm;}
+    data->angle = xFromCenterInCm;
+}

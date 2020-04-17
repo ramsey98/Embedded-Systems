@@ -25,9 +25,6 @@ void *sensorThread(void *arg0) {
             case SENSOR_TYPE_SUM:
                 averageTime = sumSensorTime/numberOfPolls;
                 distance = (CM_PER_US * averageTime)/2;
-                dbgUARTStr("Sensord: ");
-                dbgUARTNumAsChars(distance);
-                dbgUARTStr("\n\r");
                 sumSensorTime = 0;
                 numberOfPolls = 0;
 
