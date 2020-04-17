@@ -46,10 +46,6 @@ void *mainThread(void *arg0)
     createMQTTQueue();
     createConfigQueue();
 
-    captureInit();
-    motorsUARTInit();
-    adcInit();
-    pixyInit();
     MQTTInit();
 
     pthread_attr_init(&attrs);
@@ -67,7 +63,12 @@ void *mainThread(void *arg0)
     if(pthread_create(&UARTDebug, &attrs, UARTDebugThread, NULL) != 0) ERROR;
     //if(pthread_create(&test, &attrs, testThread, NULL) != 0) ERROR;
 
+    captureInit();
+    motorsUARTInit();
+    adcInit();
+    pixyInit();
     timerInit();
+
     return(NULL);
 }
 

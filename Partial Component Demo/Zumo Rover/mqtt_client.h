@@ -39,6 +39,7 @@
 
 #include "debug.h"
 #include "json_parse.h"
+#include "navi_queue.h"
 #include "mqtt_queue.h"
 #include "timer.h"
 //*****************************************************************************

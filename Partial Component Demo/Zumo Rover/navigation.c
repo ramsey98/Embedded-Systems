@@ -6,7 +6,7 @@
  */
 
 #include <navigation.h>
-static int enablePID = 0, enableSensor = 0, enablePixy = 1;
+static int enablePID = 0, enableSensor = 0, enablePixy = 0;
 
 const naviLookupTable naviLookup[NAVILOOKUPLEN] = {{0,0}, //{expected, measured}
                                                 {10,0},
@@ -112,17 +112,33 @@ void updateValues(MOTORS_DATA *motorsState, uint32_t type, uint32_t value)
         case FORWARD:
         {
             motorsState->leftDir = 0;
-            motorsState->setLeftSpeed = value;
             motorsState->rightDir = 0;
-            motorsState->setRightSpeed = value;
+            if(value > 127)
+            {
+                motorsState->setLeftSpeed = 127;
+                motorsState->setRightSpeed = 127;
+            }
+            else
+            {
+                motorsState->setLeftSpeed = value;
+                motorsState->setRightSpeed = value;
+            }
             break;
         }
         case REVERSE:
         {
             motorsState->leftDir = 1;
-            motorsState->setLeftSpeed = value;
             motorsState->rightDir = 1;
-            motorsState->setRightSpeed = value;
+            if(value > 127)
+            {
+                motorsState->setLeftSpeed = 127;
+                motorsState->setRightSpeed = 127;
+            }
+            else
+            {
+                motorsState->setLeftSpeed = value;
+                motorsState->setRightSpeed = value;
+            }
             break;
         }
         case ACCEL:
@@ -221,16 +237,20 @@ uint8_t PIDAdjust(uint8_t setSpeed, uint32_t measuredSpeed)
 void naviEvent(MOTORS_DATA *motorsState, uint32_t type, uint32_t value)
 {
     float scaled, halfway, diff;
-    static MQTTMsg leftMsg = {.topic = JSON_TOPIC_DEBUG, .type = JSON_CAPTURE_LEFT};
-    static MQTTMsg rightMsg = {.topic = JSON_TOPIC_DEBUG, .type = JSON_CAPTURE_RIGHT};
+    static int started = 0;
+    static MQTTMsg leftMsg = {.topic = JSON_TOPIC_DEBUG, .type = JSON_CAPTURE_LEFT, .value = 0};
+    static MQTTMsg rightMsg = {.topic = JSON_TOPIC_DEBUG, .type = JSON_CAPTURE_RIGHT, .value = 0};
     switch(type)
     {
         case TIMER:
             updateMotors(*motorsState);
             motorsState->realLeftSpeed = motorsState->setLeftSpeed;
             motorsState->realRightSpeed = motorsState->setRightSpeed;
-            sendMsgToMQTTQ(leftMsg);
-            sendMsgToMQTTQ(rightMsg);
+            if(started == 1)
+            {
+                sendMsgToMQTTQ(leftMsg);
+                sendMsgToMQTTQ(rightMsg);
+            }
             leftMsg.value = 0;
             rightMsg.value = 0;
             break;
@@ -319,6 +339,9 @@ void naviEvent(MOTORS_DATA *motorsState, uint32_t type, uint32_t value)
             {
                 enablePixy = 1;
             }
+            break;
+        case START:
+            started = 1;
             break;
         default:
             updateValues(motorsState, type, value);

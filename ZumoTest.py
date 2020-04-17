@@ -2,6 +2,7 @@ import paho.mqtt.client as mqtt
 import time
 import json
 import threading
+import statistics
 #import matplotlib.pyplot as plt
 
 connected = False
@@ -24,8 +25,8 @@ ID = {"/team20/config": 0}
 capLeftVals = []
 capRightVals = []
 sensorVal = 0
-PIDBeforeVal = 0
-PIDAfterVal = 0
+PIDBeforeVals = []
+PIDAfterVals = []
 pixyVersionVal = 0
 
 def on_connect(client, data, flag, rc):
@@ -39,19 +40,17 @@ def on_disconnect(client, data, rc):
     print("Disconnected w/ result", str(rc),"@",round(time.time() - starttime,2))
 
 def on_msg_debug(decoded):
-    global debugval, capLeftVal, capRightVal, sensorVal, PIDBeforeVal, PIDAfterVal, pixyVersionVal
+    global debugval, sensorVal
     if decoded["Type"] == 4:
-        capLeftVal = decoded["Value"]
+        capLeftVals.append(decoded["Value"])
     elif decoded["Type"] == 5:
-        capRightVal = decoded["Value"]
+        capRightVals.append(decoded["Value"])
     elif decoded["Type"] == 6:
         sensorVal = decoded["Value"]
     elif decoded["Type"] == 7:
-        PIDBeforeVal = decoded["Value"]
+        PIDBeforeVals.append(decoded["Value"])
     elif decoded["Type"] == 8:
-        PIDAfterVal = decoded["Value"]
-    elif decoded["Type"] == 9:
-        pixyVersionVal = decoded["Value"]
+        PIDAfterVals.append(decoded["Value"])
 
 def on_message(client, data, msg):
     global pub_results, tests, reset, started 
@@ -75,7 +74,7 @@ def send_config(msgType, msgValue):
     client.publish(topic,package)
     ID[topic] += 1
     print("Sent",package,"to",topic,"@",round(time.time() - starttime,2))
-
+    
 def test_pause():
     global ID, tests, capLeftVal
     print("Running test: pause @",round(time.time() - starttime,2))
@@ -99,39 +98,37 @@ def test_pause():
 
 def test_PID_straight():
     global ID, tests
-    send_config(16, 1)#enable PID
+    print("Running test: PID straight @",round(time.time() - starttime,2))
+    send_config(2, 1)#enable PID
     send_config(3, 50)#set speed
+    PIDBeforeVals = []
+    PIDAfterVals = []
     time.sleep(1)
-    x = [PIDBeforeVal]
-    y = [PIDAfterVal]
-##    plt.plot(x,y)
+##    plt.plot(PIDBeforeVals,PIDAfterVals)
 ##    plt.ylabel('y')
 ##    plt.xlabel('x')
 ##    plt.show()
-    time.sleep(10)
-    if sensorVal == 0:
-        tests["PID"] = True
 
 def test_PID_turning():
     global ID, tests
-    send_config(16, 1)#enable PID
+    print("Running test: PID turning @",round(time.time() - starttime,2))
+    send_config(2, 1)#enable PID
     send_config(5, 50)#turn left
+    PIDBeforeVals = []
+    PIDAfterVals = []
     time.sleep(1)
-    x = [PIDBeforeVal]
-    y = [PIDAfterVal]
-##    plt.plot(x,y)
+##    plt.plot(PIDBeforeVals,PIDAfterVals)
 ##    plt.ylabel('y')
 ##    plt.xlabel('x')
 ##    plt.show()
-    time.sleep(10)
-    if sensorVal == 0:
-        tests["PID"] = True
 
 def test_distance():
     global tests
+    print("Running test: distance @",round(time.time() - starttime,2))
     check1 = False
     check2 = False
     check3 = False
+    send_config(2, 1)#enable PID
     time.sleep(10)
     if sensorVal < 22 and sensorVal > 18:
         check1 = True
@@ -150,15 +147,18 @@ def test_capture():
     check1 = False
     check2 = False
     check3 = False
-    capLeftVals = []
-    capRightVals = []
-    send_config(3, 50) #set speed  
+    send_config(7, 0) #disable pixy
+    send_config(6, 0) #disable sensor
+    send_config(2, 0) #disable PID
+    send_config(3, 50) #set speed
+    capLeftVals.clear()
+    capRightVals.clear()
     time.sleep(5)
-    if len(capLeftVals) >= 50 and len(capRightVals) >= 50:
+    if len(capLeftVals) >= 25 and len(capRightVals) >= 25:
         check1 = True
-    if max(capLeftVals) < 1000 and min(capLeftVals) > 0:
+    if statistics.mean(capLeftVals) < 7000 and statistics.mean(capLeftVals) > 4400:
         check2 = True
-    if max(capRightVals) < 1000 and min(capRightVals) > 0:
+    if statistics.mean(capRightVals) < 7000 and statistics.mean(capRightVals) > 4400:
         check3 = True
     if check1 and check2 and check3:
         tests["capture"] = True 
@@ -166,6 +166,7 @@ def test_capture():
 def test_movement():
     global tests
     print("Running test: movement @",round(time.time() - starttime,2))
+    send_config(7, 0) #disable pixy
     time.sleep(10)
     if sensorVal <= 8 and sensorVal >= 4:
         tests["movement"] = True
@@ -187,7 +188,7 @@ def run_tests():
         print("Waiting for connection:", waiting)
         waiting+=1
     run_tests = ["distance", "movement", "pause", "sync", "capture", "PID_straight", "PID_turning"]
-    run_tests = ["pause"]
+    run_tests = ["capture"]
     for func in run_tests:
         globals()["test_"+func]()
         time.sleep(delay)    

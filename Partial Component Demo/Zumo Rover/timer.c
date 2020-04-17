@@ -37,7 +37,7 @@ void timerCallback(Timer_Handle myHandle)
     {
         sendMsgToPixyQFromISR(PIXY_COLOR);
     }
-    if(count % 10 == 0)
+    if(count % 20 == 0)
     {
         MQTTMsg msg = {.topic = JSON_TOPIC_STATS, .type = 0, .value = 0};
         sendMsgToMQTTQFromISR(msg);

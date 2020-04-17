@@ -183,6 +183,7 @@ void * MqttClient(void *pvParameters)
     char publish_topic[JSON_TOPIC_BUFFER_SIZE] = {0};
 
     if(MqttClient_start() == -1) ERROR;
+    sendMsgToNaviQ(START, 0);
     for(;;)
     {
         MQTTMsg msg;
