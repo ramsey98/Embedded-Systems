@@ -72,24 +72,27 @@ int findDistances(DISTANCE_DATA *data, int * transfer) {
 
     if(*transfer > 0){
         *transfer = 0;
-        for(i=0; i < data->blockCount/CONNECTED_PACKET_LENGTH; i++) {
+        if(data->blockCount == 0) { //send empty message if no blocks
+            sendMsgToMQTTQFromISR(msg);
+        }
+
+        for(i=0; i < data->blockCount/CONNECTED_PACKET_LENGTH; i++) {   //acts almost as an else statement
             if(data->blocks[i].xPos > 10) {     //ensuring a proper size
                 findDistanceAndOffset(&(data->blocks[i]));
                 if(data->blocks[i].distance < closest_object_distance) {
                     closest_object_distance = data->blocks[i].distance;
                     closest_index = i;
                 }
+
+                //with closest block, send data
+                msg.value1 = data->blocks[i].colorCode;
+                msg.value2 = data->blocks[i].distance;
+                msg.value4 = data->blocks[i].angle;
+                sendMsgToMQTTQFromISR(msg);
             }
         }
+        //todo send closest block to SensorState
 
-        if(data->blockCount > 0) { //todo handle this case of no blocks
-            //with closest block, send data
-            msg.value1 = data->blocks[closest_index].colorCode;
-            msg.value2 = data->blocks[closest_index].distance;
-            msg.value4 = data->blocks[closest_index].angle;
-        }
-
-        sendMsgToMQTTQFromISR(msg);
     }
     return success;
 }
