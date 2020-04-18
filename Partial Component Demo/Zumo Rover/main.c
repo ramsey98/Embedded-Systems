@@ -22,7 +22,7 @@ extern void MQTTInit();
 
 void *mainThread(void *arg0)
 {
-    pthread_t UARTTx, navi, UARTDebug, config, pixy;//, test, pixy;
+    pthread_t UARTTx, navi, UARTDebug, config, pixy, test;
     pthread_attr_t attrs;
     struct sched_param  priParam;
     int detachState;
@@ -61,7 +61,7 @@ void *mainThread(void *arg0)
     if(pthread_create(&config, &attrs, configThread, NULL) != 0) ERROR;
     if(pthread_create(&UARTTx, &attrs, UARTTxThread, NULL) != 0) ERROR;
     if(pthread_create(&UARTDebug, &attrs, UARTDebugThread, NULL) != 0) ERROR;
-    //if(pthread_create(&test, &attrs, testThread, NULL) != 0) ERROR;
+    if(pthread_create(&test, &attrs, testThread, NULL) != 0) ERROR;
 
     captureInit();
     motorsUARTInit();

@@ -30,6 +30,8 @@ void *UARTTxThread(void *arg0)
     dbgOutputLoc(ENTER_TASK);
     uint8_t byte1;
     uint16_t value;
+    //char mybuffer[5] = {0x84, 0x02, 0x00, 0x55, 0x2A};
+    //UART_write(motors_uart, &mybuffer, sizeof(mybuffer));
     dbgOutputLoc(WHILE1);
     while(1)
     {
@@ -44,6 +46,7 @@ void *UARTTxThread(void *arg0)
         {
             UART_write(motors_uart, &value, sizeof(value));
         }
+
     }
 }
 
