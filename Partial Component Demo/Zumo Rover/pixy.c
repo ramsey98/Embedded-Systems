@@ -24,6 +24,7 @@ void pixyInit()
     SPI_Params spiParams;
     SPI_Params_init(&spiParams);
     spiParams.bitRate = SPI_RATE;
+    //spiParams.transferCallbackFxn = SPICallback;
     masterSpi = SPI_open(CONFIG_SPI_0, &spiParams);
     if (masterSpi == NULL) ERROR;
 }
@@ -46,6 +47,7 @@ void *pixyThread(void *arg0)
     pixyState.state = PixyInit;
     initBuffers(pixyState.rx_buffer, pixyState.tx_buffer);
     pixy_fsm(&pixyState, &type);
+    sendMsgToPixyQ(PIXY_PAN);
     dbgOutputLoc(WHILE1);
     while(1)
     {
@@ -91,10 +93,10 @@ void pixyGetVersion(uint8_t *rx_buffer, uint8_t *tx_buffer)
 
 void pixySetServos(uint8_t *rx_buffer, uint8_t *tx_buffer, uint16_t panX, uint16_t panY)
 {
-    uint8_t msg4 = (panX >> 8);
-    uint8_t msg5 = panX;
-    uint8_t msg6 = (panY >> 8);
-    uint8_t msg7 = panY;
+    uint8_t msg4 = panX;
+    uint8_t msg5 = panX >> 8;
+    uint8_t msg6 = panY;
+    uint8_t msg7 = panY >> 8;
     uint8_t txMsgServos[SPI_TX_MSG_SERVOS] = {
                                                      0xae,  // first byte of no_checksum_sync (little endian -> least-significant byte first)
                                                      0xc1,  // second byte of no_checksum_sync
@@ -104,7 +106,6 @@ void pixySetServos(uint8_t *rx_buffer, uint8_t *tx_buffer, uint16_t panX, uint16
                                                      msg5,
                                                      msg6,
                                                      msg7
-
                                                };
     memset(rx_buffer, 0, SPI_MSG_LENGTH);
     setTxBuffer(tx_buffer, txMsgServos, SPI_MSG_LENGTH, SPI_TX_MSG_SERVOS);

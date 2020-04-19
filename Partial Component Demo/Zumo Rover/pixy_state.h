@@ -32,6 +32,12 @@
 #define TYPE_VERSION 15
 #define TYPE_COLOR 33
 
+#define PAN_LEFT 500
+#define PAN_CENTER 260
+#define PAN_RIGHT 0
+#define TILT_UP 0
+#define TILT_DOWN 500
+
 typedef struct
 {
     uint16_t xPos;

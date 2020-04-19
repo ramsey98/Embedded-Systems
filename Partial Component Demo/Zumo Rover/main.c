@@ -56,12 +56,12 @@ void *mainThread(void *arg0)
     priParam.sched_priority = 1;
     pthread_attr_setschedparam(&attrs, &priParam);
 
-    if(pthread_create(&pixy, &attrs, pixyThread, NULL) != 0) ERROR;
     if(pthread_create(&navi, &attrs, naviThread, NULL) != 0) ERROR;
     if(pthread_create(&config, &attrs, configThread, NULL) != 0) ERROR;
     if(pthread_create(&UARTTx, &attrs, UARTTxThread, NULL) != 0) ERROR;
     if(pthread_create(&UARTDebug, &attrs, UARTDebugThread, NULL) != 0) ERROR;
-    if(pthread_create(&test, &attrs, testThread, NULL) != 0) ERROR;
+    if(pthread_create(&pixy, &attrs, pixyThread, NULL) != 0) ERROR;
+    //if(pthread_create(&test, &attrs, testThread, NULL) != 0) ERROR;
 
     captureInit();
     motorsUARTInit();
