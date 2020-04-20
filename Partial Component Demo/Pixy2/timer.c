@@ -36,13 +36,14 @@ void timer100MSCallback(Timer_Handle myHandle)
         //Poll stats
         MQTTMsg msgPoll = {6, pixy_polls, sensor_polls};
         sendMsgToMQTTQFromISR(msgPoll);
+        sendMsgToMQTTQFromISR(msg);
         count = sensor_polls = pixy_polls = 0;
     }
-    else
+    else if(count % 5 == 0)
     {
         msg.type = 2;
+        sendMsgToMQTTQFromISR(msg);
     }
-    sendMsgToMQTTQFromISR(msg);
     count++;
 
     dbgOutputLoc(LEAVE_ISR_TIMER2);
