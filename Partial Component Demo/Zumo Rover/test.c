@@ -9,12 +9,12 @@
 
 void *testThread(void *arg0)
 {
-    //test_num num = test1;
+    test_num num = test1;
     while(1)
     {
         //pixytests(&num);
-        //motortests(&num);
-        capturetests();
+        motortests(&num);
+        //capturetests();
     }
 }
 
@@ -98,7 +98,7 @@ void motortests(test_num* num)
         sendMsgToUARTTxQ(PWM_PARAM, GET_CONFIG);
         sendMsgToUARTTxQ(SHUTDOWN_ON_ERROR, GET_CONFIG);
         sendMsgToUARTTxQ(SERIAL_TIMEOUT, GET_CONFIG);
-        *num = test2;
+        *num = end;//test2;
         break;
     case test2:
         //left motor forward max speed

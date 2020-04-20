@@ -6,7 +6,7 @@
  */
 
 #include <navigation.h>
-static int enablePID = 0, enableSensor = 0, enablePixy = 0, enableMovement;
+static int enablePID = 0, enableSensor = 1, enablePixy = 1, enableMovement = 1;
 
 const naviLookupTable naviLookup[NAVILOOKUPLEN] = {{0,0}, //{expected, measured}
                                                 {10,0},
@@ -29,19 +29,47 @@ void updateMotors(MOTORS_DATA motorsState)
     {
         if(motorsState.leftDir == 0)
         {
-            sendMsgToUARTTxQ(motorsState.realLeftSpeed, M0_FORWARD_8BIT);
+            if(motorsState.realLeftSpeed > 127)
+            {
+                sendMsgToUARTTxQ(motorsState.realLeftSpeed - 128, M0_FORWARD_8BIT);
+            }
+            else
+            {
+                sendMsgToUARTTxQ(motorsState.realLeftSpeed, M0_FORWARD);
+            }
         }
         else
         {
-            sendMsgToUARTTxQ(motorsState.realLeftSpeed, M0_REVERSE_8BIT);
+            if(motorsState.realLeftSpeed > 127)
+            {
+                sendMsgToUARTTxQ(motorsState.realLeftSpeed - 128, M0_REVERSE_8BIT);
+            }
+            else
+            {
+                sendMsgToUARTTxQ(motorsState.realLeftSpeed, M0_REVERSE);
+            }
         }
         if(motorsState.rightDir == 0)
         {
-            sendMsgToUARTTxQ(motorsState.realRightSpeed, M1_FORWARD_8BIT);
+            if(motorsState.realRightSpeed > 127)
+            {
+                sendMsgToUARTTxQ(motorsState.realRightSpeed - 128, M1_FORWARD_8BIT);
+            }
+            else
+            {
+                sendMsgToUARTTxQ(motorsState.realRightSpeed, M1_FORWARD);
+            }
         }
         else
         {
-            sendMsgToUARTTxQ(motorsState.realRightSpeed, M1_REVERSE_8BIT);
+            if(motorsState.realRightSpeed > 127)
+            {
+                sendMsgToUARTTxQ(motorsState.realRightSpeed - 128, M1_REVERSE_8BIT);
+            }
+            else
+            {
+                sendMsgToUARTTxQ(motorsState.realRightSpeed, M1_REVERSE);
+            }
         }
     }
     else if(motorsState.paused == 1)
@@ -77,9 +105,9 @@ void updateValues(MOTORS_DATA *motorsState, uint32_t type, uint32_t value)
             {
                 motorsState->setLeftSpeed = 0;
             }
-            if(motorsState->setRightSpeed + value > 127)
+            if(motorsState->setRightSpeed + value > MAX_SPEED)
             {
-                motorsState->setRightSpeed = 127;
+                motorsState->setRightSpeed = MAX_SPEED;
             }
             else
             {
@@ -99,9 +127,9 @@ void updateValues(MOTORS_DATA *motorsState, uint32_t type, uint32_t value)
             {
                 motorsState->setRightSpeed = 0;
             }
-            if(motorsState->setLeftSpeed + value > 127)
+            if(motorsState->setLeftSpeed + value > MAX_SPEED)
             {
-                motorsState->setLeftSpeed = 127;
+                motorsState->setLeftSpeed = MAX_SPEED;
             }
             else
             {
@@ -113,10 +141,10 @@ void updateValues(MOTORS_DATA *motorsState, uint32_t type, uint32_t value)
         {
             motorsState->leftDir = 0;
             motorsState->rightDir = 0;
-            if(value > 127)
+            if(value > MAX_SPEED)
             {
-                motorsState->setLeftSpeed = 127;
-                motorsState->setRightSpeed = 127;
+                motorsState->setLeftSpeed = MAX_SPEED;
+                motorsState->setRightSpeed = MAX_SPEED;
             }
             else
             {
@@ -129,10 +157,10 @@ void updateValues(MOTORS_DATA *motorsState, uint32_t type, uint32_t value)
         {
             motorsState->leftDir = 1;
             motorsState->rightDir = 1;
-            if(value > 127)
+            if(value > MAX_SPEED)
             {
-                motorsState->setLeftSpeed = 127;
-                motorsState->setRightSpeed = 127;
+                motorsState->setLeftSpeed = MAX_SPEED;
+                motorsState->setRightSpeed = MAX_SPEED;
             }
             else
             {
@@ -143,21 +171,21 @@ void updateValues(MOTORS_DATA *motorsState, uint32_t type, uint32_t value)
         }
         case ACCEL:
         {
-            if((motorsState->setLeftSpeed + value) < 127)
+            if((motorsState->setLeftSpeed + value) < MAX_SPEED)
             {
                 motorsState->setLeftSpeed += value;
             }
             else
             {
-                motorsState->setLeftSpeed = 127;
+                motorsState->setLeftSpeed = MAX_SPEED;
             }
-            if((motorsState->setRightSpeed + value) < 127)
+            if((motorsState->setRightSpeed + value) < MAX_SPEED)
             {
                 motorsState->setRightSpeed += value;
             }
             else
             {
-                motorsState->setRightSpeed = 127;
+                motorsState->setRightSpeed = MAX_SPEED;
             }
             break;
         }
@@ -211,9 +239,9 @@ uint8_t PIDAdjust(uint8_t setSpeed, uint32_t measuredSpeed)
         }
         integral += error;
         PIDResult = (KP*error) + (KI*integral*measuredSpeed);
-        if(setSpeed + PIDResult > 127)
+        if(setSpeed + PIDResult > MAX_SPEED)
         {
-            ret = 127;
+            ret = MAX_SPEED;
         }
         else if(setSpeed + PIDResult < 0)
         {
@@ -291,7 +319,7 @@ void naviEvent(MOTORS_DATA *motorsState, uint32_t type, uint32_t value)
                 if(value < (PIXY_X_RANGE*.25))
                 {
                     diff = halfway - value;
-                    scaled = 127.0-(127.0*(diff / halfway));
+                    scaled = MAX_SPEED-(MAX_SPEED*(diff / halfway));
                     updateValues(motorsState, TURNLEFT, scaled);
                 }
                 else if(value > (PIXY_X_RANGE*.75))

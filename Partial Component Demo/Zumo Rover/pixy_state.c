@@ -12,7 +12,7 @@ extern void pixySetServos(uint8_t *rx_buffer, uint8_t *tx_buffer, uint16_t panX,
 extern void pixySetColor(uint8_t *rx_buffer, uint8_t *tx_buffer, uint8_t r, uint8_t g, uint8_t b);
 extern void pixyGetConnectedBlocks(uint8_t *rx_buffer, uint8_t *tx_buffer);
 
-static int panx = 0, pany = 0;
+uint16_t panx = 0, pany = 0;
 
 int processBuffer(PIXY_DATA *curState)
 {
@@ -50,6 +50,26 @@ void processVersion(PIXY_DATA *curState)
     sendMsgToMQTTQ(msg);
 }
 
+void set_pan_tilt()
+{
+    static uint8_t panPos = 0;
+    if(panPos == 0)
+    {
+        panx = PAN_RIGHT;
+        panPos = 1;
+    }
+    else if(panPos == 1)
+    {
+        panx = PAN_CENTER;
+        panPos = 2;
+    }
+    else if(panPos == 2)
+    {
+        panx = PAN_LEFT;
+        panPos = 0;
+    }
+}
+
 void processColor(PIXY_DATA *curState)
 {
     static int paused = 0;
@@ -68,19 +88,20 @@ void processColor(PIXY_DATA *curState)
             }
             curState->block.xPos = (curState->rx_buffer[start+7] << 8) | curState->rx_buffer[start+6];
             curState->block.yPos = curState->rx_buffer[start+8];
-            panx = (PIXY_X_RANGE/2.0) - curState->block.xPos;
-            pany = curState->block.yPos - (PIXY_Y_RANGE/2.0);
+            //panx = PAN_CENTER;
+            pany = curState->block.yPos*2;
             sendMsgToNaviQ(PIXY, curState->block.xPos);
-            //sendMsgToPixyQ(PIXY_PAN);
+            sendMsgToPixyQ(PIXY_PAN);
         }
         else
         {
+            set_pan_tilt();
+            sendMsgToPixyQ(PIXY_PAN);
             /*
             MQTTMsg msg = {.topic = JSON_TOPIC_DEBUG, .type = JSON_STATE, .value = STATE_SYNCING};
             sendMsgToMQTTQ(msg);
             sendMsgToNaviQ(PAUSE, 0); //send pause to movement
             paused = 1;
-            panx = 10;
             */
         }
     }

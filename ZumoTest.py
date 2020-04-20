@@ -83,8 +83,10 @@ def test_pause():
     print("Running test: pause @",round(time.time() - starttime,2))
     check1 = False
     check2 = False
-    topic = "/team20/config"
     capLeftVal = 0
+    send_config(8, 1) #enable movement
+    send_config(7, 0) #disable pixy
+    send_config(6, 0) #disable sensor
     while(capLeftVal == 0):
         time.sleep(.1) #wait until moving
     print("Pause: detected movement")
@@ -102,6 +104,9 @@ def test_pause():
 def test_PID_straight():
     global ID, tests
     print("Running test: PID straight @",round(time.time() - starttime,2))
+    send_config(8, 1) #enable movement
+    send_config(7, 0) #disable pixy
+    send_config(6, 0) #disable sensor
     send_config(2, 1)#enable PID
     send_config(3, 50)#set speed
     PIDBeforeVals = []
@@ -115,7 +120,10 @@ def test_PID_straight():
 def test_PID_turning():
     global ID, tests
     print("Running test: PID turning @",round(time.time() - starttime,2))
-    send_config(2, 1)#enable PID
+    send_config(8, 1) #enable movement
+    send_config(7, 0) #disable pixy
+    send_config(6, 0) #disable sensor
+    send_config(2, 1) #enable PID
     send_config(5, 50)#turn left
     PIDBeforeVals = []
     PIDAfterVals = []
@@ -153,6 +161,7 @@ def test_capture():
     check1 = False
     check2 = False
     check3 = False
+    send_config(8, 1) #enable movement
     send_config(7, 0) #disable pixy
     send_config(6, 0) #disable sensor
     send_config(2, 0) #disable PID
@@ -180,15 +189,23 @@ def test_movement():
 def test_sync():
     global tests
     print("Running test: sync @",round(time.time() - starttime,2))
-    while(stateVal != 26):
+    send_config(8, 0) #disable movement
+    send_config(7, 0) #disable pixy
+    send_config(6, 0) #disable sensor
+    send_config(2, 0) #disable PID
+    while(stateVal != 27): #26
         pass #wait for pixy to lose poster
     time.sleep(10)
-    if stateVal == 27: #27 == PIXY_TRACKING
+    if stateVal == 27: #PIXY_TRACKING
         tests["sync"] = True
 
 def test_approach():
     global tests
     print("Running test: approach @",round(time.time() - starttime,2))
+    send_config(8, 1) #enable movement
+    send_config(7, 1) #enable pixy
+    send_config(6, 1) #enable sensor
+    send_config(2, 1) #enable PID
     time.sleep(20)
     if 4 < sensorVal < 6 and stateVal == 27: #27 == PIXY_TRACKING
         tests["sync"] = True
@@ -202,7 +219,7 @@ def run_tests():
         print("Waiting for connection:", waiting)
         waiting+=1
     run_tests = ["distance", "movement", "pause", "sync", "capture", "PID_straight", "PID_turning"]
-    run_tests = ["distance", "movement"]
+    run_tests = ["distance"]
     for func in run_tests:
         globals()["test_"+func]()
         input("Press Enter to continue to test: " + func)
