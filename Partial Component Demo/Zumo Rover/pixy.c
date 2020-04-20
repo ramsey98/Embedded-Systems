@@ -9,6 +9,7 @@
 #include "debug_queue.h"
 
 static SPI_Handle masterSpi;
+static SPI_Transaction transaction;
 
 void SPICallback(SPI_Handle handle, SPI_Transaction *trans)
 {
@@ -24,19 +25,19 @@ void pixyInit()
     SPI_Params spiParams;
     SPI_Params_init(&spiParams);
     spiParams.bitRate = SPI_RATE;
-    //spiParams.transferCallbackFxn = SPICallback;
+    spiParams.transferCallbackFxn = SPICallback;
+    spiParams.transferMode = SPI_MODE_CALLBACK;
+    spiParams.frameFormat = SPI_POL0_PHA1;
     masterSpi = SPI_open(CONFIG_SPI_0, &spiParams);
     if (masterSpi == NULL) ERROR;
 }
 
 void pixy_transfer(uint8_t *rx_buffer, uint8_t *tx_buffer)
 {
-    SPI_Transaction transaction;
     transaction.count = SPI_MSG_LENGTH;
     transaction.txBuf = (void *) tx_buffer;
     transaction.rxBuf = (void *) rx_buffer;
     if(SPI_transfer(masterSpi, &transaction) == 0) ERROR;
-    sendMsgToPixyQ(PIXY_COMPLETE);
 }
 
 void *pixyThread(void *arg0)
@@ -47,7 +48,6 @@ void *pixyThread(void *arg0)
     pixyState.state = PixyInit;
     initBuffers(pixyState.rx_buffer, pixyState.tx_buffer);
     pixy_fsm(&pixyState, &type);
-    sendMsgToPixyQ(PIXY_PAN);
     dbgOutputLoc(WHILE1);
     while(1)
     {
@@ -101,7 +101,7 @@ void pixySetServos(uint8_t *rx_buffer, uint8_t *tx_buffer, uint16_t panX, uint16
                                                      0xae,  // first byte of no_checksum_sync (little endian -> least-significant byte first)
                                                      0xc1,  // second byte of no_checksum_sync
                                                      0x12,  // this is the version request type
-                                                     0x04,  // data_length is 0
+                                                     0x04,  // data_length is 4
                                                      msg4,
                                                      msg5,
                                                      msg6,
@@ -111,23 +111,6 @@ void pixySetServos(uint8_t *rx_buffer, uint8_t *tx_buffer, uint16_t panX, uint16
     setTxBuffer(tx_buffer, txMsgServos, SPI_MSG_LENGTH, SPI_TX_MSG_SERVOS);
     pixy_transfer(rx_buffer, tx_buffer);
 }
-
-void pixySetColor(uint8_t *rx_buffer, uint8_t *tx_buffer, uint8_t r, uint8_t g, uint8_t b)
-{
-    uint8_t txMsgColor[SPI_TX_MSG_COLOR] = {
-                                                     0xae,  // first byte of no_checksum_sync (little endian -> least-significant byte first)
-                                                     0xc1,  // second byte of no_checksum_sync
-                                                     0x14,  // this is the version request type
-                                                     0x03,  // data_length is 0
-                                                     r,
-                                                     g,
-                                                     b
-                                               };
-    memset(rx_buffer, 0, SPI_MSG_LENGTH);
-    setTxBuffer(tx_buffer, txMsgColor, SPI_MSG_LENGTH, SPI_TX_MSG_COLOR);
-    pixy_transfer(rx_buffer, tx_buffer);
-}
-
 
 void pixyGetConnectedBlocks(uint8_t *rx_buffer, uint8_t *tx_buffer)
 {

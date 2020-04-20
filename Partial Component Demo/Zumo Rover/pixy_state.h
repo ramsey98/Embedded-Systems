@@ -62,6 +62,7 @@ typedef struct
 } PIXY_DATA;
 
 void pixy_fsm(PIXY_DATA *curState, uint8_t *type);
+void set_pan_tilt();
 int processBuffer(PIXY_DATA *curState);
 void processColor(PIXY_DATA *curState);
 void processVersion(PIXY_DATA *curState);

@@ -6,207 +6,151 @@
  */
 
 #include <navigation.h>
-static int enablePID = 0, enableSensor = 1, enablePixy = 1, enableMovement = 1;
+static int enablePID = 1, enableSensor = 1, enablePixy = 1, enableMovement = 1;
 
-const naviLookupTable naviLookup[NAVILOOKUPLEN] = {{0,0}, //{expected, measured}
-                                                {10,0},
-                                                {20,18000},
-                                                {30,10000},
-                                                {40,7000},
-                                                {50,5400},
-                                                {60,4400},
-                                                {70,3700},
-                                                {80,3200},
-                                                {90,2800},
-                                                {100,2500},
-                                                {110,2290},
-                                                {120,2100},
-                                                {127,1940}};
+const naviLookupTable naviLookup[NAVILOOKUPLEN] = {
+                                                {40,18000},//{expected, measured}
+                                                {60,10000},
+                                                {80,7000},
+                                                {100,5400},
+                                                {120,4400},
+                                                {140,3700},
+                                                {160,3200},
+                                                {180,2800},
+                                                {200,2500},
+                                                {220,2290},
+                                                {240,2100},
+                                                {255,1940}};
 
-void updateMotors(MOTORS_DATA motorsState)
+void updateMotors(MOTORS_STATE motorsState, MOTOR_DATA motor)
 {
     if(motorsState.paused == 0)
     {
-        if(motorsState.leftDir == 0)
+        if(motor.direction == 0)
         {
-            if(motorsState.realLeftSpeed > 127)
+            if(motor.adjustedSpeed > 127)
             {
-                sendMsgToUARTTxQ(motorsState.realLeftSpeed - 128, M0_FORWARD_8BIT);
+                sendMsgToUARTTxQ(motor.adjustedSpeed - 128, motor.forward8Bit);
             }
             else
             {
-                sendMsgToUARTTxQ(motorsState.realLeftSpeed, M0_FORWARD);
+                sendMsgToUARTTxQ(motor.adjustedSpeed, motor.forward);
             }
         }
         else
         {
-            if(motorsState.realLeftSpeed > 127)
+            if(motor.adjustedSpeed > 127)
             {
-                sendMsgToUARTTxQ(motorsState.realLeftSpeed - 128, M0_REVERSE_8BIT);
+                sendMsgToUARTTxQ(motor.adjustedSpeed - 128, motor.reverse8Bit);
             }
             else
             {
-                sendMsgToUARTTxQ(motorsState.realLeftSpeed, M0_REVERSE);
-            }
-        }
-        if(motorsState.rightDir == 0)
-        {
-            if(motorsState.realRightSpeed > 127)
-            {
-                sendMsgToUARTTxQ(motorsState.realRightSpeed - 128, M1_FORWARD_8BIT);
-            }
-            else
-            {
-                sendMsgToUARTTxQ(motorsState.realRightSpeed, M1_FORWARD);
-            }
-        }
-        else
-        {
-            if(motorsState.realRightSpeed > 127)
-            {
-                sendMsgToUARTTxQ(motorsState.realRightSpeed - 128, M1_REVERSE_8BIT);
-            }
-            else
-            {
-                sendMsgToUARTTxQ(motorsState.realRightSpeed, M1_REVERSE);
+                sendMsgToUARTTxQ(motor.adjustedSpeed, motor.reverse);
             }
         }
     }
     else if(motorsState.paused == 1)
     {
-        sendMsgToUARTTxQ(0, M0_FORWARD_8BIT);
-        sendMsgToUARTTxQ(0, M1_FORWARD_8BIT);
+        sendMsgToUARTTxQ(0, motor.forward);
     }
 }
 
-void updateValues(MOTORS_DATA *motorsState, uint32_t type, uint32_t value)
+void motorSet(MOTOR_DATA *motor, uint8_t value)
 {
+    if(value > MAX_SPEED)
+    {
+        motor->setSpeed = MAX_SPEED;
+    }
+    else
+    {
+        motor->setSpeed = value;
+    }
+}
+
+void motorAccel(MOTOR_DATA *motor, uint8_t value)
+{
+    if(motor->setSpeed + value < MAX_SPEED)
+    {
+        motor->setSpeed += value;
+    }
+    else
+    {
+        motor->setSpeed = MAX_SPEED;
+    }
+}
+
+void motorDecel(MOTOR_DATA *motor, uint8_t value)
+{
+    if(motor->setSpeed > value)
+    {
+        motor->setSpeed -= value;
+    }
+    else
+    {
+        motor->setSpeed = 0;
+    }
+}
+
+void updateValues(MOTORS_STATE *motorsState, uint32_t type, uint32_t value)
+{
+    MQTTMsg pauseMsg = {.topic = JSON_TOPIC_DEBUG, .type = JSON_STATE, .value = STATE_SYNCING};
+    MQTTMsg resumeMsg = {.topic = JSON_TOPIC_DEBUG, .type = JSON_STATE, .value = STATE_TRACKING};
     switch(type)
     {
         case PAUSE:
         {
             motorsState->paused = 1;
+            sendMsgToMQTTQ(pauseMsg);
             break;
         }
         case RESUME:
         {
             motorsState->paused = 0;
+            sendMsgToMQTTQ(resumeMsg);
             break;
         }
         case TURNLEFT:
         {
-            motorsState->leftDir = 0;
-            motorsState->rightDir = 0;
-            if(motorsState->setLeftSpeed > value)
-            {
-                motorsState->setLeftSpeed -= value;
-            }
-            else
-            {
-                motorsState->setLeftSpeed = 0;
-            }
-            if(motorsState->setRightSpeed + value > MAX_SPEED)
-            {
-                motorsState->setRightSpeed = MAX_SPEED;
-            }
-            else
-            {
-                motorsState->setRightSpeed += value;
-            }
+            motorsState->leftMotor.direction = 0;
+            motorsState->rightMotor.direction = 0;
+            motorDecel(&motorsState->leftMotor, value);
+            motorAccel(&motorsState->rightMotor, value);
             break;
         }
         case TURNRIGHT:
         {
-            motorsState->leftDir = 0;
-            motorsState->rightDir = 0;
-            if(motorsState->setRightSpeed > value)
-            {
-                motorsState->setRightSpeed -= value;
-            }
-            else
-            {
-                motorsState->setRightSpeed = 0;
-            }
-            if(motorsState->setLeftSpeed + value > MAX_SPEED)
-            {
-                motorsState->setLeftSpeed = MAX_SPEED;
-            }
-            else
-            {
-                motorsState->setLeftSpeed += value;
-            }
+            motorsState->leftMotor.direction = 0;
+            motorsState->rightMotor.direction = 0;
+            motorAccel(&motorsState->leftMotor, value);
+            motorDecel(&motorsState->rightMotor, value);
             break;
         }
         case FORWARD:
         {
-            motorsState->leftDir = 0;
-            motorsState->rightDir = 0;
-            if(value > MAX_SPEED)
-            {
-                motorsState->setLeftSpeed = MAX_SPEED;
-                motorsState->setRightSpeed = MAX_SPEED;
-            }
-            else
-            {
-                motorsState->setLeftSpeed = value;
-                motorsState->setRightSpeed = value;
-            }
+            motorsState->leftMotor.direction = 0;
+            motorsState->rightMotor.direction = 0;
+            motorSet(&motorsState->leftMotor, value);
+            motorSet(&motorsState->rightMotor, value);
             break;
         }
         case REVERSE:
         {
-            motorsState->leftDir = 1;
-            motorsState->rightDir = 1;
-            if(value > MAX_SPEED)
-            {
-                motorsState->setLeftSpeed = MAX_SPEED;
-                motorsState->setRightSpeed = MAX_SPEED;
-            }
-            else
-            {
-                motorsState->setLeftSpeed = value;
-                motorsState->setRightSpeed = value;
-            }
+            motorsState->leftMotor.direction = 1;
+            motorsState->rightMotor.direction = 1;
+            motorSet(&motorsState->leftMotor, value);
+            motorSet(&motorsState->rightMotor, value);
             break;
         }
         case ACCEL:
         {
-            if((motorsState->setLeftSpeed + value) < MAX_SPEED)
-            {
-                motorsState->setLeftSpeed += value;
-            }
-            else
-            {
-                motorsState->setLeftSpeed = MAX_SPEED;
-            }
-            if((motorsState->setRightSpeed + value) < MAX_SPEED)
-            {
-                motorsState->setRightSpeed += value;
-            }
-            else
-            {
-                motorsState->setRightSpeed = MAX_SPEED;
-            }
+            motorAccel(&motorsState->leftMotor, value);
+            motorAccel(&motorsState->rightMotor, value);
             break;
         }
         case DECEL:
         {
-            if(motorsState->setLeftSpeed > value)
-            {
-                motorsState->setLeftSpeed -= value;
-            }
-            else
-            {
-                motorsState->setLeftSpeed = 0;
-            }
-            if(motorsState->setRightSpeed > value)
-            {
-                motorsState->setRightSpeed -= value;
-            }
-            else
-            {
-                motorsState->setRightSpeed = 0;
-            }
+            motorDecel(&motorsState->leftMotor, value);
+            motorDecel(&motorsState->rightMotor, value);
             break;
         }
         default:
@@ -215,96 +159,94 @@ void updateValues(MOTORS_DATA *motorsState, uint32_t type, uint32_t value)
             break;
         }
     }
-
 }
 
 //https://softwareengineering.stackexchange.com/questions/186124/programming-pid-loops-in-c
-uint8_t PIDAdjust(uint8_t setSpeed, uint32_t measuredSpeed)
+void PIDAdjust(MOTOR_DATA *motor)
 {
-    uint8_t ret;
-    if(enablePID == 1)
+    //int i;
+    //static int error = 0, integral = 0;
+    //int PIDResult = 0;
+    //MQTTMsg msg = {.topic = JSON_TOPIC_DEBUG, .type = JSON_PID_BEFORE, .value = setSpeed};
+    //sendMsgToMQTTQ(msg);
+    /*
+    for(i = 0; i < NAVILOOKUPLEN; i++)
     {
-        MQTTMsg msg = {.topic = JSON_TOPIC_DEBUG, .type = JSON_PID_BEFORE, .value = setSpeed};
-        sendMsgToMQTTQ(msg);
-        sendMsgToUARTDebugQ(PID_BEFORE, setSpeed);
-        int i;
-        static int error = 0, integral = 0;
-        int PIDResult = 0, ret = 0;
-        for(i = 0; i < NAVILOOKUPLEN; i++)
+        if(measuredSpeed > naviLookup[i].measured)
         {
-            if(measuredSpeed >= naviLookup[i].measured)
-            {
-                error = naviLookup[i].expected - setSpeed;
-            }
+            realSpeed = naviLookup[i].expected;
+            break;
         }
-        integral += error;
-        PIDResult = (KP*error) + (KI*integral*measuredSpeed);
-        if(setSpeed + PIDResult > MAX_SPEED)
-        {
-            ret = MAX_SPEED;
-        }
-        else if(setSpeed + PIDResult < 0)
-        {
-            ret = 0;
-        }
-        else
-        {
-            ret = setSpeed + PIDResult;
-        }
-        MQTTMsg msg2 = {.topic = JSON_TOPIC_DEBUG, .type = JSON_PID_AFTER, .value = setSpeed};
-        sendMsgToMQTTQ(msg2);
-        sendMsgToUARTDebugQ(PID_AFTER, ret);
     }
-    else
+    if(realSpeed < setSpeed)
     {
-        ret = setSpeed;
+        //error = (int) naviLookup[i].expected - setSpeed;
+        motorAccel(&motor);
     }
-    return ret;
+    else if(realSpeed > setSpeed)
+    {
+        //error = (int) naviLookup[i].expected - setSpeed;
+        motorDecel(&motor);
+    }
+    */
+    /*
+    integral += error;
+    PIDResult = (KP*error);// + (KI*integral*measuredSpeed);
+    */
+    //MQTTMsg msg2 = {.topic = JSON_TOPIC_DEBUG, .type = JSON_PID_AFTER, .value = ret};
+    //sendMsgToMQTTQ(msg2);
+    //sendMsgToUARTDebugQ(PID_AFTER, ret);
+    motor->adjustedSpeed = motor->setSpeed;
 }
 
-void naviEvent(MOTORS_DATA *motorsState, uint32_t type, uint32_t value)
+void naviEvent(MOTORS_STATE *motorsState, uint32_t type, uint32_t value)
 {
-    float scaled, halfway, diff;
+    float diff, scaled;
     static int started = 0;
     static MQTTMsg leftMsg = {.topic = JSON_TOPIC_DEBUG, .type = JSON_CAPTURE_LEFT, .value = 0};
     static MQTTMsg rightMsg = {.topic = JSON_TOPIC_DEBUG, .type = JSON_CAPTURE_RIGHT, .value = 0};
     switch(type)
     {
         case TIMER:
-            if(enableMovement == 1)
+            if(enablePID != 0)
             {
-                updateMotors(*motorsState);
+                PIDAdjust(&motorsState->leftMotor);
+                PIDAdjust(&motorsState->rightMotor);
             }
-            motorsState->realLeftSpeed = motorsState->setLeftSpeed;
-            motorsState->realRightSpeed = motorsState->setRightSpeed;
+            else
+            {
+                motorsState->leftMotor.adjustedSpeed = motorsState->leftMotor.setSpeed;
+                motorsState->rightMotor.adjustedSpeed = motorsState->rightMotor.setSpeed;
+            }
+            if(enableMovement != 0)
+            {
+                updateMotors(*motorsState, motorsState->leftMotor);
+                updateMotors(*motorsState, motorsState->rightMotor);
+            }
+            leftMsg.value = motorsState->leftMotor.measuredSpeed;
+            rightMsg.value = motorsState->rightMotor.measuredSpeed;
             if(started == 1)
             {
                 sendMsgToMQTTQ(leftMsg);
                 sendMsgToMQTTQ(rightMsg);
             }
-            leftMsg.value = 0;
-            rightMsg.value = 0;
             break;
         case LEFTCAP:
-            motorsState->measuredLeftSpeed = value;
-            motorsState->realLeftSpeed = PIDAdjust(motorsState->setLeftSpeed, motorsState->measuredLeftSpeed);
-            leftMsg.value = motorsState->measuredLeftSpeed;
+            motorsState->leftMotor.measuredSpeed = value;
             break;
         case RIGHTCAP:
-            motorsState->measuredRightSpeed = value;
-            motorsState->realRightSpeed = PIDAdjust(motorsState->setRightSpeed, motorsState->measuredRightSpeed);
-            rightMsg.value = motorsState->measuredRightSpeed;
+            motorsState->rightMotor.measuredSpeed = value;
             break;
         case SENSOR:
-            if(enableSensor == 1)
+            if(enableSensor != 0 & started != 0)
             {
                 if(value >= 20)
                 {
-                    updateValues(motorsState, ACCEL, value - 12);
+                    updateValues(motorsState, ACCEL, 20);
                 }
                 else if(value <= 12 & value >= 6)
                 {
-                    updateValues(motorsState, DECEL, ((12 - value)*2));
+                    updateValues(motorsState, DECEL, 20);
                 }
                 else if(value < 6)
                 {
@@ -313,79 +255,49 @@ void naviEvent(MOTORS_DATA *motorsState, uint32_t type, uint32_t value)
             }
             break;
         case PIXY:
-            if(enablePixy == 1)
+            if(enablePixy != 0)
             {
-                halfway = (PIXY_X_RANGE/2.0);
-                if(value < (PIXY_X_RANGE*.25))
+                if(value < PIXY_X_LEFT)
                 {
-                    diff = halfway - value;
-                    scaled = MAX_SPEED-(MAX_SPEED*(diff / halfway));
+                    diff = PIXY_X_MIDDLE - value;
+                    scaled = MAX_SPEED-(MAX_SPEED*(diff / PIXY_X_MIDDLE));
                     updateValues(motorsState, TURNLEFT, scaled);
                 }
-                else if(value > (PIXY_X_RANGE*.75))
+                else if(value > PIXY_X_RIGHT)
                 {
-                    diff = value - halfway;
-                    scaled = 127.0*(diff / halfway);
+                    diff = value - PIXY_X_MIDDLE;
+                    scaled = MAX_SPEED*(diff / PIXY_X_MIDDLE);
                     updateValues(motorsState, TURNRIGHT, scaled);
                 }
                 else
                 {
-                    if(motorsState->setLeftSpeed > motorsState->setRightSpeed)
+                    if(motorsState->leftMotor.setSpeed > motorsState->rightMotor.setSpeed)
                     {
-                        updateValues(motorsState, FORWARD, motorsState->setLeftSpeed);
+                        updateValues(motorsState, FORWARD, motorsState->leftMotor.setSpeed);
                     }
                     else
                     {
-                        updateValues(motorsState, FORWARD, motorsState->setRightSpeed);
+                        updateValues(motorsState, FORWARD, motorsState->rightMotor.setSpeed);
                     }
                 }
             }
             break;
         case PID_ENABLE:
-            if(value == 0)
-            {
-                enablePID = 0;
-            }
-            else
-            {
-                enablePID = 1;
-            }
+            enablePID = value;
             break;
         case SENSOR_ENABLE:
-            if(value == 0)
-            {
-                enableSensor = 0;
-            }
-            else
-            {
-                enableSensor = 1;
-            }
+            enableSensor = value;
             break;
         case PIXY_ENABLE:
-            if(value == 0)
-            {
-                enablePixy = 0;
-            }
-            else
-            {
-                enablePixy = 1;
-            }
+            enablePixy = value;
             break;
         case MOVEMENT_ENABLE:
-            if(value == 0)
-            {
-                enableMovement = 0;
-            }
-            else
-            {
-                enableMovement = 1;
-            }
+            enableMovement = value;
             break;
         case START:
             started = 1;
             break;
         default:
-            updateValues(motorsState, type, value);
             break;
     }
 }
@@ -394,15 +306,25 @@ void *naviThread(void *arg0)
 {
     dbgOutputLoc(ENTER_TASK);
     uint32_t type = 0, value = 0;
-    MOTORS_DATA motorsState = {.setLeftSpeed = 0,
-                               .setRightSpeed = 0,
-                               .realLeftSpeed = 0,
-                               .realRightSpeed = 0,
-                               .measuredLeftSpeed = 0,
-                               .measuredRightSpeed = 0,
-                               .leftDir = 0,
-                               .rightDir = 0,
-                               .paused = 0};
+    MOTOR_DATA leftMotor = {.direction = 0,
+                             .setSpeed = 0,
+                             .adjustedSpeed = 0,
+                             .measuredSpeed = 0,
+                             .forward = M0_FORWARD,
+                             .forward8Bit = M0_FORWARD_8BIT,
+                             .reverse = M0_REVERSE,
+                             .reverse8Bit = M0_REVERSE_8BIT};
+    MOTOR_DATA rightMotor = {.direction = 0,
+                             .setSpeed = 0,
+                             .adjustedSpeed = 0,
+                             .measuredSpeed = 0,
+                             .forward = M1_FORWARD,
+                             .forward8Bit = M1_FORWARD_8BIT,
+                             .reverse = M1_REVERSE,
+                             .reverse8Bit = M1_REVERSE_8BIT};
+    MOTORS_STATE motorsState = {.paused = 0,
+                                .leftMotor = leftMotor,
+                                .rightMotor = rightMotor};
     dbgOutputLoc(WHILE1);
     while(1)
     {

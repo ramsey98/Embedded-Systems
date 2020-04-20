@@ -135,24 +135,6 @@ MQTTClient_Will will_param =
     WILL_RETAIN
 };
 
-//*****************************************************************************
-//
-//! Application startup display on UART
-//!
-//! \param  none
-//!
-//! \return none
-//!
-//*****************************************************************************
-static void DisplayBanner(char * AppName)
-{
-    UART_PRINT("\n\n\n\r");
-    UART_PRINT("\t\t *************************************************\n\r");
-    UART_PRINT("\t\t    CC32xx %s Application       \n\r", AppName);
-    UART_PRINT("\t\t *************************************************\n\r");
-    UART_PRINT("\n\n\n\r");
-}
-
 void * MqttClientThread(void * pvParameters)
 {
     MQTTClient_run((MQTTClient_Handle)pvParameters);
@@ -229,7 +211,7 @@ int32_t Mqtt_IF_Connect()
     }
 
     /*Display Application Banner                                             */
-    DisplayBanner(APPLICATION_NAME);
+    //DisplayBanner(APPLICATION_NAME);
 
     /*Reset The state of the machine                                         */
     Network_IF_ResetMCUStateMachine();
