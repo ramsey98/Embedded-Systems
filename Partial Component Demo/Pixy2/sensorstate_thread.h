@@ -12,6 +12,8 @@
 #include "sensorstate_queue.h"
 #include "mqtt_queue.h"
 
+#define SENSOR_OFFSET 5 //sensor is currently 5 cm closer than pixy due to setup limitations
+
 typedef enum {
     None,
     RedEgg,

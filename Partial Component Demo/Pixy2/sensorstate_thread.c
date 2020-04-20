@@ -35,14 +35,15 @@ void determineSensorState(SENSORSTATE_QUEUE_DATA * sensorData, SENSORSTATE_QUEUE
     MQTTMsg msg = {7, 0, 0, 0, 0};
 
     msg.value1 = pixyData->color;
-    msg.value3 = sensorData->distance;
+    msg.value3 = sensorData->distance + SENSOR_OFFSET;
     msg.value4 = pixyData->offset;
 
     if(sensorData->distance < 100 && pixyData->color == 0) { //handle obstacle case
         msg.value1 = Obstacle;
+        msg.value2 = Center;
     }
 
-    if(pixyData->color == 4 && sensorData->distance > 100) { //for zumo, left and right sometimes misses US distance
+    if(pixyData->color == 4 && msg.value3 > 100) { //for zumo, left and right sometimes misses US distance
         msg.value3 = pixyData->distance;
     }
 
