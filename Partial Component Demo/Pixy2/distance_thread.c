@@ -26,24 +26,26 @@ const int objectFocalPixels[FOCAL_LENGTH] = {
                                          12,      //100 cm
                                 };
 
+
 const int zumoFocalPixels[FOCAL_LENGTH] = {
-                                         78,      //25 cm
-                                         76,      //30 cm
-                                         70,      //35 cm
-                                         64,      //40 cm
-                                         56,      //45 cm
-                                         52,      //50 cm
-                                         48,      //55 cm
-                                         43,      //60 cm
-                                         40,      //65 cm
-                                         38,      //70 cm
-                                         36,      //75 cm
+                                         108,      //25 cm
+                                         88,      //30 cm
+                                         77,      //35 cm
+                                         70,      //40 cm
+                                         64,      //45 cm
+                                         56,      //50 cm
+                                         52,      //55 cm
+                                         46,      //60 cm
+                                         43,      //65 cm
+                                         40,      //70 cm
+                                         37,      //75 cm
                                          30,      //80 cm
                                          28,      //85 cm
-                                         24,      //90 cm
-                                         22,      //95 cm
+                                         26,      //90 cm
+                                         24,      //95 cm
                                          20,      //100 cm
                                 };
+
 
 const int focalDistances[FOCAL_LENGTH] = {
                                          25,
@@ -106,9 +108,10 @@ int findDistances(DISTANCE_DATA *data, int * transfer) {
                         closest_object_distance = data->blocks[i].distance;
                         closest_index = i;
                     }
-                    sendMQTTMessageToPixy(&(data->blocks[i]));
+                    //sendMQTTMessageToPixy(&(data->blocks[i]));
                 }
             }
+            sendMQTTMessageToPixy(&(data->blocks[closest_index]));
             sendSensorStatePixyInfo(data->blocks[closest_index].colorCode, data->blocks[closest_index].distance, data->blocks[closest_index].angle);
         }
     }
@@ -143,6 +146,10 @@ void findObjectDistanceAndOffset(DISTANCE_BLOCK *data) {
 void findZumoDistanceAndOffset(DISTANCE_BLOCK *data) {  //todo fill this in.
     int i;
     int computed = 0, focus = 0;
+
+    dbgUARTStr("Type: ");
+    dbgUARTNumAsChars(data->xPixels);
+    dbgUARTStr("\n\r");
 
     if(data->xPixels > zumoFocalPixels[0]) {
         computed = 1;
