@@ -164,31 +164,53 @@ void updateValues(MOTORS_STATE *motorsState, uint32_t type, uint32_t value)
 //https://softwareengineering.stackexchange.com/questions/186124/programming-pid-loops-in-c
 void PIDAdjust(MOTOR_DATA *motor)
 {
-    //int i;
+    int i;
     //static int error = 0, integral = 0;
     //int PIDResult = 0;
+    int adjustment = 0;
+    uint8_t realSpeed = motor->setSpeed;
     //MQTTMsg msg = {.topic = JSON_TOPIC_DEBUG, .type = JSON_PID_BEFORE, .value = setSpeed};
     //sendMsgToMQTTQ(msg);
-    /*
     for(i = 0; i < NAVILOOKUPLEN; i++)
     {
-        if(measuredSpeed > naviLookup[i].measured)
+        if(motor->measuredSpeed > naviLookup[i].measured)
         {
             realSpeed = naviLookup[i].expected;
             break;
         }
     }
-    if(realSpeed < setSpeed)
+    if(realSpeed < motor->setSpeed)
     {
         //error = (int) naviLookup[i].expected - setSpeed;
-        motorAccel(&motor);
+        adjustment = 20;
     }
-    else if(realSpeed > setSpeed)
+    else if(realSpeed > motor->setSpeed)
     {
         //error = (int) naviLookup[i].expected - setSpeed;
-        motorDecel(&motor);
+        adjustment = -20;
     }
-    */
+    if(adjustment < 0)
+    {
+        if(motor->adjustedSpeed + adjustment >= 0)
+        {
+            motor->adjustedSpeed += adjustment;
+        }
+        else
+        {
+            motor->adjustedSpeed = 0;
+        }
+    }
+    else if(adjustment > 0)
+    {
+        if(motor->adjustedSpeed + adjustment <= MAX_SPEED)
+        {
+            motor->adjustedSpeed += adjustment;
+        }
+        else
+        {
+            motor->adjustedSpeed = MAX_SPEED;
+        }
+    }
     /*
     integral += error;
     PIDResult = (KP*error);// + (KI*integral*measuredSpeed);
@@ -196,7 +218,6 @@ void PIDAdjust(MOTOR_DATA *motor)
     //MQTTMsg msg2 = {.topic = JSON_TOPIC_DEBUG, .type = JSON_PID_AFTER, .value = ret};
     //sendMsgToMQTTQ(msg2);
     //sendMsgToUARTDebugQ(PID_AFTER, ret);
-    motor->adjustedSpeed = motor->setSpeed;
 }
 
 void naviEvent(MOTORS_STATE *motorsState, uint32_t type, uint32_t value)
