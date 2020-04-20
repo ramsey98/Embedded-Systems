@@ -147,10 +147,6 @@ void findZumoDistanceAndOffset(DISTANCE_BLOCK *data) {
     int i;
     int computed = 0, focus = 0;
 
-    dbgUARTStr("xPix: ");   //todo remove these 3 lines
-    dbgUARTNumAsChars(data->xPixels);
-    dbgUARTStr("\n\r");
-
     if(data->xPixels > zumoFocalPixels[0]) {
         computed = 1;
         focus = zumoFocalPixels[0] * focalDistances[0]/ZUMO_WIDTH;
