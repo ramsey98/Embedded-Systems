@@ -24,7 +24,7 @@ void *sensorThread(void *arg0) {
                 break;
             case SENSOR_TYPE_SUM:
                 averageTime = sumSensorTime/numberOfPolls;
-                distance = (CM_PER_US * averageTime)/2;
+                distance = (CM_PER_US * averageTime)/2 + SENSOR_OFFSET;
                 sumSensorTime = 0;
                 numberOfPolls = 0;
 
