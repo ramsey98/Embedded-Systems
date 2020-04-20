@@ -15,7 +15,7 @@ extern void pixyGetConnectedBlocks(uint8_t *rx_buffer, uint8_t *tx_buffer);
 uint16_t panx = 0, pany = 0;
 uint8_t panPos = 0;
 
-const uint16_t panTiltVals[4] = {PAN_RIGHT, PAN_CENTER, PAN_LEFT, PAN_CENTER-150};
+const uint16_t panTiltVals[4] = {PAN_RIGHT, PAN_CENTER, PAN_LEFT, PAN_CENTER-100};
 
 int processBuffer(PIXY_DATA *curState)
 {
