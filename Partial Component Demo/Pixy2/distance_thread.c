@@ -108,7 +108,7 @@ int findDistances(DISTANCE_DATA *data, int * transfer) {
                         closest_object_distance = data->blocks[i].distance;
                         closest_index = i;
                     }
-                    //sendMQTTMessageToPixy(&(data->blocks[i]));
+                    //sendMQTTMessageToPixy(&(data->blocks[i]));  //this overloaded MQTT
                 }
             }
             sendMQTTMessageToPixy(&(data->blocks[closest_index]));
@@ -139,15 +139,15 @@ void findObjectDistanceAndOffset(DISTANCE_BLOCK *data) {
     }
 
     data->distance = EGG_WIDTH * focus/data->xPixels;
-    int xFromCenterInCm = (157.5 - data->xPos)/(data->xPixels/EGG_WIDTH);
+    int xFromCenterInCm = (data->xPos - 157.5)/(data->xPixels/EGG_WIDTH);
     data->angle = xFromCenterInCm;
 }
 
-void findZumoDistanceAndOffset(DISTANCE_BLOCK *data) {  //todo fill this in.
+void findZumoDistanceAndOffset(DISTANCE_BLOCK *data) {
     int i;
     int computed = 0, focus = 0;
 
-    dbgUARTStr("Type: ");
+    dbgUARTStr("xPix: ");   //todo remove these 3 lines
     dbgUARTNumAsChars(data->xPixels);
     dbgUARTStr("\n\r");
 
@@ -168,7 +168,7 @@ void findZumoDistanceAndOffset(DISTANCE_BLOCK *data) {  //todo fill this in.
     }
 
     data->distance = ZUMO_WIDTH * focus/data->xPixels;
-    int xFromCenterInCm = (157.5 - data->xPos)/(data->xPixels/ZUMO_WIDTH);
+    int xFromCenterInCm = (data->xPos - 157.5)/(data->xPixels/ZUMO_WIDTH);
     data->angle = xFromCenterInCm;
 }
 

@@ -26,6 +26,7 @@
 #define JSON_TYPE_PIXY  (4)
 #define JSON_TYPE_ULTRASONIC (5)
 #define JSON_TYPE_POLLS (6)
+#define JSON_TYPE_SENSORSTATE (7)
 
 
 #define PUBLISH_TOPIC_0 "/team20/stats"
@@ -34,7 +35,8 @@
 #define PUBLISH_TOPIC_3 "/team20/pixy"
 #define PUBLISH_TOPIC_4 "/team20/ultrasonic"
 #define PUBLISH_TOPIC_5 "/team20/sensorpolls"
-#define PUBLISH_TOPIC_COUNT 6
+#define PUBLISH_TOPIC_6 "/team20/sensorstate"
+#define PUBLISH_TOPIC_COUNT 7
 
 #define JSON_STATS      \
 "{"                        \
@@ -117,6 +119,24 @@
     "\"SensorPolls\": 0"    \
 "}"
 
+#define JSON_SENSORSTATE     \
+"{"                        \
+    "\"ID\": int32,"        \
+    "\"Type\": int32,"    \
+    "\"Position\": int32,"    \
+    "\"Distance\": int32,"    \
+    "\"Offset\": int32"    \
+"}"
+
+#define JSON_SENSORSTATE_BUF      \
+"{"                        \
+    "\"ID\": 0,"        \
+    "\"Type\": 0,"    \
+    "\"Position\": 0,"    \
+    "\"Distance\": 0,"    \
+    "\"Offset\": 0"    \
+"}"
+
 #define SUBSCRIPTION_TOPIC "/team20/config"
 #define SUBSCRIPTION_TOPIC_COUNT 1
 #define JSON_CONFIG      \
@@ -138,6 +158,7 @@ void json_send_debug(MQTTMsg msg, Json_Handle objectHandle);
 void json_send_error(MQTTMsg msg, Json_Handle objectHandle);
 void json_send_pixy(MQTTMsg msg, Json_Handle objectHandle);
 void json_send_ultrasonic(MQTTMsg msg, Json_Handle objectHandle);
+void json_send_sensorstate(MQTTMsg msg, Json_Handle objectHandle);
 void json_send(char *publish_topic, char *publish_data, MQTTMsg msg);
 
 #endif /* JSON_PARSE_H_ */

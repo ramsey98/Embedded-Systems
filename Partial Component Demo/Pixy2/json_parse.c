@@ -142,6 +142,23 @@ void json_send_polls(MQTTMsg msg, Json_Handle objectHandle) {
     pollID++;
 }
 
+void json_send_sensorstate(MQTTMsg msg, Json_Handle objectHandle) {
+    dbgOutputLoc(ENTER_SEND_SENSORSTATE);
+    static int sensorstateID = 0;
+    int type = msg.value1;
+    int pos = msg.value2;
+    int distance = msg.value3;
+    int offset = msg.value4;
+    if(Json_parse(objectHandle, JSON_SENSORSTATE_BUF, strlen(JSON_SENSORSTATE_BUF)) != 0) ERROR;
+    if(Json_setValue(objectHandle, "\"ID\"", &sensorstateID, sizeof(sensorstateID)) != 0) ERROR;
+    if(Json_setValue(objectHandle, "\"Type\"", &type, sizeof(type)) != 0) ERROR;
+    if(Json_setValue(objectHandle, "\"Position\"", &pos, sizeof(pos)) != 0) ERROR;
+    if(Json_setValue(objectHandle, "\"Distance\"", &distance, sizeof(distance)) != 0) ERROR;
+    if(Json_setValue(objectHandle, "\"Offset\"", &offset, sizeof(offset)) != 0) ERROR;
+    sensorstateID++;
+}
+
+
 void json_send(char *publish_topic, char *publish_data, MQTTMsg msg)
 {
     Json_Handle templateHandle, objectHandle;
@@ -185,6 +202,12 @@ void json_send(char *publish_topic, char *publish_data, MQTTMsg msg)
             if(Json_createObject(&objectHandle, templateHandle, 0) != 0) ERROR;
             json_send_polls(msg, objectHandle);
             strncpy(publish_topic, PUBLISH_TOPIC_5, sizeof(PUBLISH_TOPIC_5));
+            break;
+        case JSON_TYPE_SENSORSTATE:
+            if(Json_createTemplate(&templateHandle, JSON_SENSORSTATE, strlen(JSON_SENSORSTATE)) != 0) ERROR;
+            if(Json_createObject(&objectHandle, templateHandle, 0) != 0) ERROR;
+            json_send_sensorstate(msg, objectHandle);
+            strncpy(publish_topic, PUBLISH_TOPIC_6, sizeof(PUBLISH_TOPIC_6));
             break;
         default:
             ERROR;
