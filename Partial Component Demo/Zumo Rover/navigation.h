@@ -16,7 +16,7 @@
 #include "mqtt_queue.h"
 #include "json_parse.h"
 
-#define KP 0.5
+#define KP 1.0
 #define KI 0.5
 #define NAVILOOKUPLEN 14
 
@@ -28,14 +28,23 @@ typedef struct
 
 typedef struct
 {
-    uint8_t setLeftSpeed, setRightSpeed, leftDir, rightDir, paused;//, distance, distLeft, distRight;
-    uint8_t realLeftSpeed, realRightSpeed;
-    uint32_t measuredLeftSpeed, measuredRightSpeed;
-} MOTORS_DATA;
+    uint8_t setSpeed, direction, adjustedSpeed;
+    uint8_t forward8Bit, forward, reverse8Bit, reverse;
+    uint32_t measuredSpeed;
+} MOTOR_DATA;
 
-uint8_t PIDAdjust(uint8_t setSpeed, uint32_t measuredSpeed);
-void updateMotors(MOTORS_DATA motorsState);
-void updateValues(MOTORS_DATA * motorsState, uint32_t type, uint32_t value);
+typedef struct
+{
+    uint8_t paused;
+    MOTOR_DATA leftMotor, rightMotor;
+} MOTORS_STATE;
+
+void PIDAdjust(MOTOR_DATA *motor);
+void motorAccel(MOTOR_DATA *motor, uint8_t value);
+void motorDecel(MOTOR_DATA *motor, uint8_t value);
+void motorSet(MOTOR_DATA *motor, uint8_t value);
+void updateMotors(MOTORS_STATE motorsState, MOTOR_DATA motor);
+void updateValues(MOTORS_STATE * motorsState, uint32_t type, uint32_t value);
 void *naviThread(void *arg0);
 
 #endif /* NAVIGATION_H_ */

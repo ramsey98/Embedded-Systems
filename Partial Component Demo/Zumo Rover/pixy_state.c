@@ -13,6 +13,9 @@ extern void pixySetColor(uint8_t *rx_buffer, uint8_t *tx_buffer, uint8_t r, uint
 extern void pixyGetConnectedBlocks(uint8_t *rx_buffer, uint8_t *tx_buffer);
 
 uint16_t panx = 0, pany = 0;
+uint8_t panPos = 0;
+
+const uint16_t panTiltVals[4] = {PAN_RIGHT, PAN_CENTER, PAN_LEFT, PAN_CENTER-150};
 
 int processBuffer(PIXY_DATA *curState)
 {
@@ -52,57 +55,49 @@ void processVersion(PIXY_DATA *curState)
 
 void set_pan_tilt()
 {
-    static uint8_t panPos = 0;
-    if(panPos == 0)
+    panx = panTiltVals[panPos];
+    if(panPos >= 3)
     {
-        panx = PAN_RIGHT;
-        panPos = 1;
-    }
-    else if(panPos == 1)
-    {
-        panx = PAN_CENTER;
-        panPos = 2;
-    }
-    else if(panPos == 2)
-    {
-        panx = PAN_LEFT;
         panPos = 0;
+    }
+    else
+    {
+        panPos++;
     }
 }
 
 void processColor(PIXY_DATA *curState)
 {
-    static int paused = 0;
     int start = processBuffer(curState);
+    static int skip = 0;
     if(curState->rx_buffer[start] == TYPE_COLOR)
     {
         curState->blockCount = curState->rx_buffer[start+1]/14;
         if(curState->blockCount > 0)
         {
-            if(paused == 1)
-            {
-                paused = 0;
-                sendMsgToNaviQ(RESUME, 0);
-                MQTTMsg msg = {.topic = JSON_TOPIC_DEBUG, .type = JSON_STATE, .value = STATE_TRACKING};
-                sendMsgToMQTTQ(msg);
-            }
             curState->block.xPos = (curState->rx_buffer[start+7] << 8) | curState->rx_buffer[start+6];
             curState->block.yPos = curState->rx_buffer[start+8];
-            //panx = PAN_CENTER;
-            pany = curState->block.yPos*2;
+            if(panPos == 0)
+            {
+                panPos = 1;
+                skip = 1;
+            }
+            else if(panPos == 2)
+            {
+                panPos = 3;
+                skip = 1;
+            }
+            pany = (curState->block.yPos*2.4);
             sendMsgToNaviQ(PIXY, curState->block.xPos);
-            sendMsgToPixyQ(PIXY_PAN);
         }
         else
         {
+            skip = 0;
+        }
+        if(skip != 1)
+        {
             set_pan_tilt();
             sendMsgToPixyQ(PIXY_PAN);
-            /*
-            MQTTMsg msg = {.topic = JSON_TOPIC_DEBUG, .type = JSON_STATE, .value = STATE_SYNCING};
-            sendMsgToMQTTQ(msg);
-            sendMsgToNaviQ(PAUSE, 0); //send pause to movement
-            paused = 1;
-            */
         }
     }
 }
