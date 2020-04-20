@@ -10,7 +10,7 @@ static QueueHandle_t xQueue = NULL;
 
 void createMQTTQueue()
 {
-    xQueue = xQueueCreate(16, sizeof(MQTTMsg));
+    xQueue = xQueueCreate(32, sizeof(MQTTMsg));
     if(xQueue == NULL) ERROR;
 }
 

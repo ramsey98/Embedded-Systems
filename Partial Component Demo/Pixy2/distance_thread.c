@@ -26,7 +26,26 @@ const int objectFocalPixels[FOCAL_LENGTH] = {
                                          12,      //100 cm
                                 };
 
-const int objectFocalDistances[FOCAL_LENGTH] = {
+const int zumoFocalPixels[FOCAL_LENGTH] = {
+                                         78,      //25 cm
+                                         76,      //30 cm
+                                         70,      //35 cm
+                                         64,      //40 cm
+                                         56,      //45 cm
+                                         52,      //50 cm
+                                         48,      //55 cm
+                                         43,      //60 cm
+                                         40,      //65 cm
+                                         38,      //70 cm
+                                         36,      //75 cm
+                                         30,      //80 cm
+                                         28,      //85 cm
+                                         24,      //90 cm
+                                         22,      //95 cm
+                                         20,      //100 cm
+                                };
+
+const int focalDistances[FOCAL_LENGTH] = {
                                          25,
                                          30,
                                          35,
@@ -92,7 +111,6 @@ int findDistances(DISTANCE_DATA *data, int * transfer) {
             }
             sendSensorStatePixyInfo(data->blocks[closest_index].colorCode, data->blocks[closest_index].distance, data->blocks[closest_index].angle);
         }
-
     }
     return success;
 }
@@ -103,18 +121,18 @@ void findObjectDistanceAndOffset(DISTANCE_BLOCK *data) {
 
     if(data->xPixels > objectFocalPixels[0]) {
         computed = 1;
-        focus = objectFocalPixels[0] * objectFocalDistances[0]/EGG_WIDTH;
+        focus = objectFocalPixels[0] * focalDistances[0]/EGG_WIDTH;
     }
 
     for(i=1; i < FOCAL_LENGTH-1; i++) {
         if(data->xPixels > (objectFocalPixels[i] + objectFocalPixels[i+1])/2 && data->xPixels < (objectFocalPixels[i] + objectFocalPixels[i-1])/2) {
             computed = 1;
-            focus = objectFocalPixels[i] * objectFocalDistances[i]/EGG_WIDTH;
+            focus = objectFocalPixels[i] * focalDistances[i]/EGG_WIDTH;
         }
     }
 
     if(computed == 0) {
-        focus = objectFocalPixels[FOCAL_LENGTH-1] * objectFocalDistances[FOCAL_LENGTH-1]/EGG_WIDTH;
+        focus = objectFocalPixels[FOCAL_LENGTH-1] * focalDistances[FOCAL_LENGTH-1]/EGG_WIDTH;
     }
 
     data->distance = EGG_WIDTH * focus/data->xPixels;
@@ -123,7 +141,28 @@ void findObjectDistanceAndOffset(DISTANCE_BLOCK *data) {
 }
 
 void findZumoDistanceAndOffset(DISTANCE_BLOCK *data) {  //todo fill this in.
-    data->distance = 50;
+    int i;
+    int computed = 0, focus = 0;
+
+    if(data->xPixels > zumoFocalPixels[0]) {
+        computed = 1;
+        focus = zumoFocalPixels[0] * focalDistances[0]/ZUMO_WIDTH;
+    }
+
+    for(i=1; i < FOCAL_LENGTH-1; i++) {
+        if(data->xPixels > (zumoFocalPixels[i] + zumoFocalPixels[i+1])/2 && data->xPixels < (zumoFocalPixels[i] + zumoFocalPixels[i-1])/2) {
+            computed = 1;
+            focus = zumoFocalPixels[i] * focalDistances[i]/ZUMO_WIDTH;
+        }
+    }
+
+    if(computed == 0) {
+        focus = zumoFocalPixels[FOCAL_LENGTH-1] * focalDistances[FOCAL_LENGTH-1]/ZUMO_WIDTH;
+    }
+
+    data->distance = ZUMO_WIDTH * focus/data->xPixels;
+    int xFromCenterInCm = (157.5 - data->xPos)/(data->xPixels/ZUMO_WIDTH);
+    data->angle = xFromCenterInCm;
 }
 
 void sendMQTTMessageToPixy(DISTANCE_BLOCK *data) {

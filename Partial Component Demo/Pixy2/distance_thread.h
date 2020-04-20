@@ -25,6 +25,7 @@
 #define FOCAL_LENGTH_70_Y 299.21
 #define FOCAL_LENGTH_90_Y 344.206
 #define EGG_WIDTH 4.445
+#define ZUMO_WIDTH 8.89
 
 #define FOCAL_LENGTH 16
 

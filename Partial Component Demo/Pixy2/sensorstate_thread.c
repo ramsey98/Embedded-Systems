@@ -13,8 +13,8 @@ void *sensorStateThread(void *arg0) {
 
     while(1) {
         receiveFromSensorStateQ(&sensorStateData);
-        dbgUARTStr("Type: ");
-        dbgUARTNumAsChars(sensorStateData.type);
-        dbgUARTStr("\n\r");
+        //dbgUARTStr("Type: ");
+        //dbgUARTNumAsChars(sensorStateData.type);
+        //dbgUARTStr("\n\r");
     }
 }
