@@ -122,7 +122,7 @@ void json_send_pixy(MQTTMsg msg, Json_Handle objectHandle) {
 void json_send_ultrasonic(MQTTMsg msg, Json_Handle objectHandle) {
     dbgOutputLoc(ENTER_SEND_ULTRASONIC);
     static int ultrasonicID = 0;
-    int dist = msg.value1;
+    int dist = msg.value4;
     if(Json_parse(objectHandle, JSON_ULTRASONIC_BUF, strlen(JSON_ULTRASONIC_BUF)) != 0) ERROR;
     if(Json_setValue(objectHandle, "\"ID\"", &ultrasonicID, sizeof(ultrasonicID)) != 0) ERROR;
     if(Json_setValue(objectHandle, "\"Distance\"", &dist, sizeof(dist)) != 0) ERROR;

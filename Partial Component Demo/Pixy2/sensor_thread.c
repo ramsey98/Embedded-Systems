@@ -30,7 +30,7 @@ void *sensorThread(void *arg0) {
 
                 //send to queue
                 MQTTMsg msg = {5, 0, 0};
-                msg.value1 = distance;
+                msg.value4 = distance;
                 sendMsgToMQTTQFromISR(msg);
                 sendSensorStateUSInfo(distance);
                 break;

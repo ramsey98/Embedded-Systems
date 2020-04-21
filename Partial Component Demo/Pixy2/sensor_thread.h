@@ -15,7 +15,7 @@
 #include "sensorstate_queue.h"
 
 #define CM_PER_US (0.0343)
-#define SENSOR_OFFSET 5 //sensor is currently 5 cm closer than pixy due to setup limitations
+#define SENSOR_OFFSET 7.12 //sensor is currently 7 cm closer than pixy due to setup limitations
 
 void sendSensorStateUSInfo(int distance);
 void *sensorThread(void *arg0);
