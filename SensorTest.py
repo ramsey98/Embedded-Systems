@@ -168,7 +168,7 @@ def test_MQTTSendSensorState():
     time.sleep(1.1)
     most_recent = recieveTimes["/team20/sensorstate"]
 
-    print("\t" + str(most_recent - last))
+    print("\tTime between publishes: " + str(most_recent - last))
     if last != most_recent and most_recent - last < 1.1:
         tests["MQTTSendSensorState"] = True
     print("\tFinished test: MQTTSendSensorState @",round(time.time() - starttime,2))
@@ -180,7 +180,7 @@ def test_MQTTSendPixyData():
     time.sleep(1.1)
     most_recent = recieveTimes["/team20/pixy"]
 
-    print("\t" + str(most_recent - last))
+    print("\tTime between publishes: " + str(most_recent - last))
     if last != most_recent and most_recent - last < 1.1:
         tests["MQTTSendPixyData"] = True
     print("\tFinished test: MQTTSendPixyData @",round(time.time() - starttime,2))
@@ -192,7 +192,7 @@ def test_MQTTSendUltrasonicData():
     time.sleep(1.1)
     most_recent = recieveTimes["/team20/ultrasonic"]
 
-    print("\t" + str(most_recent - last))
+    print("\tTime between publishes: " + str(most_recent - last))
     if last != most_recent and most_recent - last < 1.1:
         tests["MQTTSendUltrasonicData"] = True
     print("\tFinished test: MQTTSendUltrasonicData @",round(time.time() - starttime,2))
@@ -282,6 +282,113 @@ def test_UltrasonicDistance():
     tests["UltrasonicDistance"] = True
     print("\tFinished test: UltrasonicDistance @",round(time.time() - starttime,2))
 
+def test_PixyDistance():
+    global tests, pixyJSON
+    print("\tRunning test: PixyDistance @",round(time.time() - starttime,2))
+    input("\tPlace an object at 25cm from the Pixy2, then press Enter")
+    time.sleep(1)
+    if abs(pixyJSON["Distance"] - 25) > (.2*25):
+        return
+    input("\tPlace an object at 35cm from the Pixy2, then press Enter")
+    time.sleep(1)
+    if abs(pixyJSON["Distance"] - 35) > (.2*35):
+        return
+    input("\tPlace an object at 45cm from the Pixy2, then press Enter")
+    time.sleep(1)
+    if abs(pixyJSON["Distance"] - 45) > (.2*45):
+        return
+    input("\tPlace an object at 55cm from the Pixy2, then press Enter")
+    time.sleep(1)
+    if abs(pixyJSON["Distance"] - 55) > (.2*55):
+        return
+    input("\tPlace an object at 65cm from the Pixy2, then press Enter")
+    time.sleep(1)
+    if abs(pixyJSON["Distance"] - 65) > (.2*65):
+        return
+    input("\tPlace an object at 75cm from the Pixy2, then press Enter")
+    time.sleep(1)
+    if abs(pixyJSON["Distance"] - 75) > (0.2*75):
+        return
+
+    tests["PixyDistance"] = True
+    print("\tFinished test: PixyDistance @",round(time.time() - starttime,2))
+
+def test_SensorState():
+    global tests, sensorStateJSON
+    print("\tRunning test: SensorState @",round(time.time() - starttime,2))
+    input("\tPlace an red object at 50cm from the Pixy2 to the left, then press Enter")
+    time.sleep(1)
+    if sensorStateJSON["Position"] != 0 or sensorStateJSON["Type"] != 1:
+        return
+
+    input("\tPlace an red object at 50cm from the Pixy2 centered, then press Enter")
+    time.sleep(1)
+    if sensorStateJSON["Position"] != 1 or sensorStateJSON["Type"] != 1:
+        return
+
+    input("\tPlace an red object at 50cm from the Pixy2 to the right, then press Enter")
+    time.sleep(1)
+    if sensorStateJSON["Position"] != 2 or sensorStateJSON["Type"] != 1:
+        return
+    
+    input("\tPlace an green object at 50cm from the Pixy2 to the left, then press Enter")
+    time.sleep(1)
+    if sensorStateJSON["Position"] != 0 or sensorStateJSON["Type"] != 2:
+        return
+
+    input("\tPlace an green object at 50cm from the Pixy2 centered, then press Enter")
+    time.sleep(1)
+    if sensorStateJSON["Position"] != 1 or sensorStateJSON["Type"] != 2:
+        return
+
+    input("\tPlace an green object at 50cm from the Pixy2 to the right, then press Enter")
+    time.sleep(1)
+    if sensorStateJSON["Position"] != 2 or sensorStateJSON["Type"] != 2:
+        return
+
+    input("\tPlace an yellow object at 50cm from the Pixy2 to the left, then press Enter")
+    time.sleep(1)
+    if sensorStateJSON["Position"] != 0 or sensorStateJSON["Type"] != 3:
+        return
+
+    input("\tPlace an yellow object at 50cm from the Pixy2 centered, then press Enter")
+    time.sleep(1)
+    if sensorStateJSON["Position"] != 1 or sensorStateJSON["Type"] != 3:
+        return
+
+    input("\tPlace an yellow object at 50cm from the Pixy2 to the right, then press Enter")
+    time.sleep(1)
+    if sensorStateJSON["Position"] != 2 or sensorStateJSON["Type"] != 3:
+        return
+
+    input("\tPlace a zumo object at 50cm from the Pixy2 to the left, then press Enter")
+    time.sleep(1)
+    if sensorStateJSON["Position"] != 0 or sensorStateJSON["Type"] != 4:
+        return
+
+    input("\tPlace a zumo object at 50cm from the Pixy2 centered, then press Enter")
+    time.sleep(1)
+    if sensorStateJSON["Position"] != 1 or sensorStateJSON["Type"] != 4:
+        return
+
+    input("\tPlace a zumo object at 50cm from the Pixy2 to the right, then press Enter")
+    time.sleep(1)
+    if sensorStateJSON["Position"] != 2 or sensorStateJSON["Type"] != 4:
+        return
+
+    input("\tRemove all objects and place an obstacle at 25cm, then press Enter")
+    time.sleep(1)
+    if sensorStateJSON["Type"] != 5:
+        return
+
+    input("\tRemove all objects, then press Enter")
+    time.sleep(1)
+    if sensorStateJSON["Type"] != 0:
+        return
+
+    tests["SensorState"] = True
+    print("\tFinished test: SensorState @",round(time.time() - starttime,2))
+
 def run_tests():
     print("Thread started: run_tests")
     delay = 1
@@ -290,7 +397,8 @@ def run_tests():
         time.sleep(1)
         print("Waiting for connection:", waiting)
         waiting+=1
-    run_tests = ["SensorPolls", "MQTTSendSensorState", "MQTTSendPixyData", "MQTTSendUltrasonicData", "PixyObjectDetection", "PixyZumoDetection", "UltrasonicDistance"]
+    run_tests = ["SensorPolls", "MQTTSendSensorState", "MQTTSendPixyData", "MQTTSendUltrasonicData", "PixyObjectDetection", "PixyZumoDetection", "UltrasonicDistance", "PixyDistance", "SensorState"]
+    run_tests = ["SensorState"]
     for func in run_tests:
         input("Press Enter to continue to test: " + func)
         globals()["test_"+func]()
