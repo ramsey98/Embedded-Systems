@@ -20,14 +20,14 @@ tests = {"pause": False,
          "approach": False}
 
 topics = {"/team20/debug": ["ID", "Type", "Value"]}
-test_keys = ["ID", "Type", "Value"]
 
 ID = {"/team20/config": 0}
 capLeftVals = []
 capRightVals = []
 sensorVals = []
 PIDVals = []
-stateVal = 0
+statePaused = 0
+stateTracking = 0
 
 def on_connect(client, data, flag, rc):
     global connected
@@ -40,29 +40,31 @@ def on_disconnect(client, data, rc):
     print("Disconnected w/ result", str(rc),"@",round(time.time() - starttime,2))
 
 def on_msg_debug(decoded):
-    global stateVal
-    if decoded["Type"] == 4:
+    if decoded["Type"] == 1:
         capLeftVals.append(decoded["Value"])
-    elif decoded["Type"] == 5:
+    elif decoded["Type"] == 2:
         capRightVals.append(decoded["Value"])
-    elif decoded["Type"] == 6:
+    elif decoded["Type"] == 3:
         sensorVals.append(decoded["Value"])
-    elif decoded["Type"] == 12:
+    elif decoded["Type"] == 5:
         PIDVals.append(decoded["Value"])
-    elif decoded["Type"] == 11:
-        stateVal = decoded["Value"]
+
+def on_msg_state(decoded):
+    global statePaused, stateTracking
+    elif decoded["Type"] == 1:
+        statePaused = decoded["Value"]
+    elif decoded["Type"] == 2:
+        stateTracking = decoded["Value"]
 
 def on_message(client, data, msg):
-    global pub_results, tests, reset, started 
     rcvtime = round(time.time() - starttime,2)
     topic = msg.topic
     package = msg.payload.decode()
     decoded = json.loads(package)
-    if(set(topics[topic]).issubset(set(decoded.keys()))):
-        if(topic == "/team20/debug"):
-            on_msg_debug(decoded)
-    else:
-        print("Error:", topic.split("/")[-1], "@", round(time.time() - starttime,2))
+    if(topic == "/team20/debug"):
+        on_msg_debug(decoded)
+    elif(topic == "/team20/state"):
+        on_msg_state(decoded)
 
 def send_config(msgType, msgValue):
     global ID
@@ -76,30 +78,27 @@ def send_config(msgType, msgValue):
     print("Sent",package,"to",topic,"@",round(time.time() - starttime,2))
     
 def test_pause():
-    global ID, tests, capLeftVal
+    global tests
     print("Running test: pause @",round(time.time() - starttime,2))
     check1 = False
     check2 = False
-    capLeftVal = 0
     send_config(8, 1) #enable movement
     send_config(7, 0) #disable pixy
     send_config(6, 0) #disable sensor
-    while(capLeftVal == 0):
-        time.sleep(.1) #wait until moving
-    print("Pause: detected movement")
+    send_config(3, 50)#set speed
+    time.sleep(2)
     send_config(1, 2) #rover loading
     time.sleep(2)
-    if capLeftVal == 0 and capRightVal == 0:
+    if statePaused == 1:
         check1 = True
     send_config(1, 1) #rover moving
     time.sleep(2)
-    if capLeftVal != 0 or capRightVal != 0:
+    if statePaused == 2:
         check2 = True
     if check1 and check2:
         tests["pause"] = True
 
 def test_PID_straight():
-    global ID, tests
     print("Running test: PID straight @",round(time.time() - starttime,2))
     send_config(8, 1) #enable movement
     send_config(7, 0) #disable pixy
@@ -114,7 +113,6 @@ def test_PID_straight():
     plt.show()
 
 def test_PID_turning():
-    global ID, tests
     print("Running test: PID turning @",round(time.time() - starttime,2))
     send_config(8, 1) #enable movement
     send_config(7, 0) #disable pixy
@@ -172,8 +170,8 @@ def test_capture():
     send_config(3, 40) #set speed
     capLeftVals.clear()
     capRightVals.clear()
-    time.sleep(5)
-    if len(capLeftVals) >= 25 and len(capRightVals) >= 25:
+    time.sleep(5.5)
+    if len(capLeftVals) >= 20 and len(capRightVals) >= 20:
         check1 = True
     if 4400 < statistics.mean(capLeftVals) < 7000:
         check2 = True
@@ -185,7 +183,10 @@ def test_capture():
 def test_movement():
     global tests
     print("Running test: movement @",round(time.time() - starttime,2))
+    send_config(8, 1) #enable movement
     send_config(7, 0) #disable pixy
+    send_config(6, 1) #enable sensor
+    send_config(2, 0) #disable PID
     time.sleep(10)
     sensorVals.clear()
     time.sleep(1)
@@ -199,10 +200,12 @@ def test_sync():
     send_config(7, 0) #disable pixy
     send_config(6, 0) #disable sensor
     send_config(2, 0) #disable PID
-    while(stateVal != 27): #26
-        pass #wait for pixy to lose poster
-    time.sleep(10)
-    if stateVal == 27: #found it
+    while(stateTracking != 0):
+        pass #wait for pixy to lose target
+    print("sync: target lost")
+    while(stateTracking != 1):
+        pass #wait for pixy to find target
+    if stateTracking == 1: #found it
         tests["sync"] = True
 
 def test_approach():
@@ -212,11 +215,11 @@ def test_approach():
     send_config(7, 1) #enable pixy
     send_config(6, 1) #enable sensor
     send_config(2, 1) #enable PID
-    time.sleep(20)
+    time.sleep(5)
     sensorVals.clear()
     time.sleep(1)
-    if 4 < statistics.mean(sensorVals) < 6 and stateVal == 27: #27 == PIXY_TRACKING
-        tests["sync"] = True
+    if 4 < statistics.mean(sensorVals) < 6 and stateTracking == 1:
+        tests["approach"] = True
 
 def run_tests():
     print("Thread started: run_tests")
@@ -225,7 +228,7 @@ def run_tests():
         time.sleep(1)
         print("Waiting for connection:", waiting)
         waiting+=1
-    run_tests = ["distance", "movement", "pause", "sync", "capture", "PID_straight", "PID_turning"]
+    run_tests = ["distance", "movement", "pause", "sync", "capture", "PID_straight", "PID_turning", "approach"]
     run_tests = ["capture"]
     for func in run_tests:
         input("Press Enter to continue to test: " + func)

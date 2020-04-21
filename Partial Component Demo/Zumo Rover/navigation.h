@@ -17,7 +17,7 @@
 #include "json_parse.h"
 
 #define KP 1.0
-#define KI 0.5
+#define KI 0.1
 #define NAVILOOKUPLEN 13
 
 typedef struct
