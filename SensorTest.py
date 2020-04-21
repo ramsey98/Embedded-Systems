@@ -27,7 +27,7 @@ tests = {"SensorPolls": False,              # testing Pixy and US sensor poll fr
          "UltrasonicDistance" : False,
          "PixyDistance" : False,
          "SensorState" : False,
-         "StatsAndDebug" : False }
+         "Stats" : False }
 
 ID = {"/team20/config": 0,
       "/team20/pixy" : 0,
@@ -389,6 +389,20 @@ def test_SensorState():
     tests["SensorState"] = True
     print("\tFinished test: SensorState @",round(time.time() - starttime,2))
 
+def test_Stats():
+    global tests, statsJSON, debugJSON
+    print("\tRunning test: Stats @",round(time.time() - starttime,2))
+    last = recieveTimes["/team20/stats"]
+    time.sleep(1.1)
+    most_recent = recieveTimes["/team20/stats"]
+
+    print("\tTime between stats publishes: " + str(most_recent - last))
+    if last == most_recent or most_recent - last > 1.1 or statsJSON["Missed"] > 0:
+        return
+
+    tests["Stats"] = True
+    print("\tFinished test: Stats @",round(time.time() - starttime,2))
+
 def run_tests():
     print("Thread started: run_tests")
     delay = 1
@@ -397,8 +411,8 @@ def run_tests():
         time.sleep(1)
         print("Waiting for connection:", waiting)
         waiting+=1
-    run_tests = ["SensorPolls", "MQTTSendSensorState", "MQTTSendPixyData", "MQTTSendUltrasonicData", "PixyObjectDetection", "PixyZumoDetection", "UltrasonicDistance", "PixyDistance", "SensorState"]
-    run_tests = ["SensorState"]
+    run_tests = ["SensorPolls", "MQTTSendSensorState", "MQTTSendPixyData", "MQTTSendUltrasonicData", "PixyObjectDetection", "PixyZumoDetection", "UltrasonicDistance", "PixyDistance", "SensorState", "Stats"]
+    #run_tests = ["Stats"]
     for func in run_tests:
         input("Press Enter to continue to test: " + func)
         globals()["test_"+func]()
