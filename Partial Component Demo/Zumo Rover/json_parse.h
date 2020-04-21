@@ -15,28 +15,34 @@
 
 #define JSON_DATA_BUFFER_SIZE (512)
 #define JSON_TOPIC_BUFFER_SIZE (256)
+
+#define JSON_TOPIC_STATS 1
+#define JSON_TOPIC_DEBUG 2
+#define JSON_TOPIC_ERROR 3
+#define JSON_TOPIC_STATE 4
+#define JSON_TOPIC_CONFIG 5
+
 #define JSON_ERROR_FORMAT (1)
 #define JSON_ERROR_OVERFLOW (2)
 #define JSON_ERROR_MISSED_ID (3)
 #define JSON_ERROR_REPEAT_ID (4)
 #define JSON_ERROR_NO_ID (5)
-#define JSON_TOPIC_STATS (1)
-#define JSON_TOPIC_DEBUG (2)
-#define JSON_TOPIC_ERROR (3)
-#define JSON_CAPTURE_LEFT (4)
-#define JSON_CAPTURE_RIGHT (5)
-#define JSON_SENSOR (6)
-#define JSON_PID_BEFORE (7)
-#define JSON_PID_AFTER (8)
-#define JSON_PIXY_VERSION (9)
-#define JSON_TOPIC_CONFIG (10)
-#define JSON_STATE 11
-#define JSON_PID_ADJUSTMENT 12
+
+#define JSON_CAPTURE_LEFT (1)
+#define JSON_CAPTURE_RIGHT (2)
+#define JSON_SENSOR (3)
+#define JSON_PIXY_VERSION (4)
+#define JSON_PID_ADJUSTMENT 5
+#define JSON_PIXY_TRACKING 6
+
+#define JSON_STATE_PAUSED 1
+#define JSON_STATE_TRACKING 2
 
 #define PUBLISH_TOPIC_0 "/team20/stats"
 #define PUBLISH_TOPIC_1 "/team20/debug"
 #define PUBLISH_TOPIC_2 "/team20/errors"
-#define PUBLISH_TOPIC_COUNT 3
+#define PUBLISH_TOPIC_3 "/team20/state"
+#define PUBLISH_TOPIC_COUNT 4
 
 #define JSON_STATS      \
 "{"                        \
@@ -60,7 +66,22 @@
     "\"Type\": int32,"        \
     "\"Value\": int32,"    \
 "}"
+
 #define JSON_DEBUG_BUF      \
+"{"                        \
+    "\"ID\": 0,"        \
+    "\"Type\": 0,"        \
+    "\"Value\": 0"    \
+"}"
+
+#define JSON_STATE      \
+"{"                        \
+    "\"ID\": int32,"        \
+    "\"Type\": int32,"        \
+    "\"Value\": int32,"    \
+"}"
+
+#define JSON_STATE_BUF      \
 "{"                        \
     "\"ID\": 0,"        \
     "\"Type\": 0,"        \

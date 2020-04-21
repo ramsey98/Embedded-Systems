@@ -70,6 +70,7 @@ void processColor(PIXY_DATA *curState)
 {
     int start = processBuffer(curState);
     static int skip = 0;
+    MQTTMsg msg = {.topic = JSON_TOPIC_STATE, .type = JSON_STATE_TRACKING, .value = 0};
     if(curState->rx_buffer[start] == TYPE_COLOR)
     {
         curState->blockCount = curState->rx_buffer[start+1]/14;
@@ -87,18 +88,21 @@ void processColor(PIXY_DATA *curState)
                 panPos = 3;
                 skip = 1;
             }
-            pany = (curState->block.yPos*2.4);
+            pany = (curState->block.yPos*3);
             sendMsgToNaviQ(PIXY, curState->block.xPos);
+            msg.value = 1;
         }
         else
         {
             skip = 0;
+            msg.value = 0;
         }
         if(skip != 1)
         {
             set_pan_tilt();
-            sendMsgToPixyQ(PIXY_PAN);
         }
+        sendMsgToPixyQ(PIXY_PAN);
+        sendMsgToMQTTQ(msg);
     }
 }
 

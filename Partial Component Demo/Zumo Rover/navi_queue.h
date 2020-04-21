@@ -37,8 +37,6 @@
 #define CONFIG_MSG 23
 #define START 24
 #define MOVEMENT_ENABLE 25
-#define STATE_SYNCING 26
-#define STATE_TRACKING 27
 
 #define MAX_SPEED 255
 #define PIXY_X_RANGE 315

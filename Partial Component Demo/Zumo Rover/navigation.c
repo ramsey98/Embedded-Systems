@@ -7,6 +7,7 @@
 
 #include <navigation.h>
 static int enablePID = 1, enableSensor = 1, enablePixy = 1, enableMovement = 1;
+static int started = 0;
 
 const naviLookupTable naviLookup[NAVILOOKUPLEN] = {{0, 25000},
                                                 {40,18000},//{expected, measured}
@@ -93,8 +94,8 @@ void motorDecel(MOTOR_DATA *motor, uint8_t value)
 
 void updateValues(MOTORS_STATE *motorsState, uint32_t type, uint32_t value)
 {
-    MQTTMsg pauseMsg = {.topic = JSON_TOPIC_DEBUG, .type = JSON_STATE, .value = STATE_SYNCING};
-    MQTTMsg resumeMsg = {.topic = JSON_TOPIC_DEBUG, .type = JSON_STATE, .value = STATE_TRACKING};
+    MQTTMsg pauseMsg = {.topic = JSON_TOPIC_STATE, .type = JSON_STATE_PAUSED, .value = 1};
+    MQTTMsg resumeMsg = {.topic = JSON_TOPIC_STATE, .type = JSON_STATE_PAUSED, .value = 0};
     switch(type)
     {
         case PAUSE:
@@ -167,19 +168,25 @@ void PIDAdjust(MOTOR_DATA *motor)
     int i;
     static int error = 0, integral = 0;
     int PIDResult = 0;
-    uint8_t realSpeed = motor->setSpeed;
-    for(i = 0; i < NAVILOOKUPLEN; i++)
+    uint8_t realSpeed;
+    if(motor->measuredSpeed == 0)
     {
-        if(motor->measuredSpeed > naviLookup[i].measured)
+        realSpeed = 0;
+    }
+    else
+    {
+        for(i = 0; i < NAVILOOKUPLEN; i++)
         {
-            realSpeed = naviLookup[i].expected;
-            break;
+            if(motor->measuredSpeed > naviLookup[i].measured)
+            {
+                realSpeed = naviLookup[i].expected;
+                break;
+            }
         }
     }
+    integral = error;
     error = (int) motor->setSpeed - realSpeed;
-    integral += error;
-    //PIDResult = (KP*error) + (KI*integral*motor->measuredSpeed);
-    PIDResult = error;
+    PIDResult = (KP*error) + (KI*integral);
     if(motor->adjustedSpeed + PIDResult < 0)
     {
         motor->adjustedSpeed = 0;
@@ -193,13 +200,15 @@ void PIDAdjust(MOTOR_DATA *motor)
         motor->adjustedSpeed += PIDResult;
     }
     MQTTMsg msg = {.topic = JSON_TOPIC_DEBUG, .type = JSON_PID_ADJUSTMENT, .value = PIDResult};
-    sendMsgToMQTTQ(msg);
+    if(started == 1)
+    {
+        sendMsgToMQTTQ(msg);
+    }
 }
 
 void naviEvent(MOTORS_STATE *motorsState, uint32_t type, uint32_t value)
 {
     float diff, scaled;
-    static int started = 0;
     static MQTTMsg leftMsg = {.topic = JSON_TOPIC_DEBUG, .type = JSON_CAPTURE_LEFT, .value = 0};
     static MQTTMsg rightMsg = {.topic = JSON_TOPIC_DEBUG, .type = JSON_CAPTURE_RIGHT, .value = 0};
     switch(type)

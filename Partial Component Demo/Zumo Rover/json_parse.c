@@ -108,6 +108,19 @@ void json_send_error(MQTTMsg msg, Json_Handle objectHandle)
     errorsID++;
 }
 
+void json_send_state(MQTTMsg msg, Json_Handle objectHandle)
+{
+    dbgOutputLoc(ENTER_SEND_ERROR);
+    static int stateID = 0;
+    int type = msg.type;
+    int value = msg.value;
+    if(Json_parse(objectHandle, JSON_STATE_BUF, strlen(JSON_STATE_BUF)) != 0) ERROR;
+    if(Json_setValue(objectHandle, "\"ID\"", &stateID, sizeof(stateID)) != 0) ERROR;
+    if(Json_setValue(objectHandle, "\"Type\"", &type, sizeof(type)) != 0) ERROR;
+    if(Json_setValue(objectHandle, "\"Value\"", &value, sizeof(value)) != 0) ERROR;
+    stateID++;
+}
+
 void json_send(char *publish_topic, char *publish_data, MQTTMsg msg)
 {
     Json_Handle templateHandle, objectHandle;
@@ -134,8 +147,15 @@ void json_send(char *publish_topic, char *publish_data, MQTTMsg msg)
             json_send_error(msg, objectHandle);
             strncpy(publish_topic, PUBLISH_TOPIC_2, sizeof(PUBLISH_TOPIC_2));
             break;
+        case JSON_TOPIC_STATE:
+            if(Json_createTemplate(&templateHandle, JSON_STATE, strlen(JSON_STATE)) != 0) ERROR;
+            if(Json_createObject(&objectHandle, templateHandle, 0) != 0) ERROR;
+            json_send_state(msg, objectHandle);
+            strncpy(publish_topic, PUBLISH_TOPIC_3, sizeof(PUBLISH_TOPIC_3));
+            break;
         default:
             ERROR;
+            break;
     }
     if(Json_build(objectHandle, publish_data, &buf) != 0) ERROR;
     if(Json_destroyTemplate(templateHandle) != 0) ERROR;
