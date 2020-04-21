@@ -3,7 +3,7 @@ import time
 import json
 import threading
 import statistics
-#import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 
 connected = False
 starttime = time.time()
@@ -25,9 +25,8 @@ test_keys = ["ID", "Type", "Value"]
 ID = {"/team20/config": 0}
 capLeftVals = []
 capRightVals = []
-sensorVal = 0
-PIDBeforeVals = []
-PIDAfterVals = []
+sensorVals = []
+PIDVals = []
 stateVal = 0
 
 def on_connect(client, data, flag, rc):
@@ -41,17 +40,15 @@ def on_disconnect(client, data, rc):
     print("Disconnected w/ result", str(rc),"@",round(time.time() - starttime,2))
 
 def on_msg_debug(decoded):
-    global debugval, sensorVal, stateVal
+    global stateVal
     if decoded["Type"] == 4:
         capLeftVals.append(decoded["Value"])
     elif decoded["Type"] == 5:
         capRightVals.append(decoded["Value"])
     elif decoded["Type"] == 6:
-        sensorVal = decoded["Value"]
-    elif decoded["Type"] == 7:
-        PIDBeforeVals.append(decoded["Value"])
-    elif decoded["Type"] == 8:
-        PIDAfterVals.append(decoded["Value"])
+        sensorVals.append(decoded["Value"])
+    elif decoded["Type"] == 12:
+        PIDVals.append(decoded["Value"])
     elif decoded["Type"] == 11:
         stateVal = decoded["Value"]
 
@@ -107,15 +104,14 @@ def test_PID_straight():
     send_config(8, 1) #enable movement
     send_config(7, 0) #disable pixy
     send_config(6, 0) #disable sensor
-    send_config(2, 1)#enable PID
+    send_config(2, 1) #enable PID
     send_config(3, 50)#set speed
-    PIDBeforeVals = []
-    PIDAfterVals = []
+    PIDVals.clear()
     time.sleep(1)
-##    plt.plot(PIDBeforeVals,PIDAfterVals)
-##    plt.ylabel('y')
-##    plt.xlabel('x')
-##    plt.show()
+    plt.plot(PIDVals)
+    plt.ylabel('PID adjustment')
+    plt.xlabel('trial')
+    plt.show()
 
 def test_PID_turning():
     global ID, tests
@@ -125,13 +121,12 @@ def test_PID_turning():
     send_config(6, 0) #disable sensor
     send_config(2, 1) #enable PID
     send_config(5, 50)#turn left
-    PIDBeforeVals = []
-    PIDAfterVals = []
+    PIDVals.clear()
     time.sleep(1)
-##    plt.plot(PIDBeforeVals,PIDAfterVals)
-##    plt.ylabel('y')
-##    plt.xlabel('x')
-##    plt.show()
+    plt.plot(PIDVals)
+    plt.ylabel('PID adjustment')
+    plt.xlabel('trial')
+    plt.show()
 
 def test_distance():
     global tests
@@ -143,14 +138,23 @@ def test_distance():
     send_config(7, 0) #disable pixy
     send_config(6, 0) #disable sensor
     send_config(2, 0) #disable PID
+    print("distance: checking 20 inches")
     time.sleep(10)
-    if 18 < sensorVal < 22:
+    sensorVals.clear()
+    time.sleep(1)
+    if 18 < statistics.mean(sensorVals) < 22:
         check1 = True
+    print("distance: checking 12 inches")    
     time.sleep(10)
-    if 10 < sensorVal < 14:
+    sensorVals.clear()
+    time.sleep(1)
+    if 10 < statistics.mean(sensorVals) < 14:
         check2 = True
+    print("distance: checking 6 inches")
     time.sleep(10)
-    if 4 < sensorVal < 8:
+    sensorVals.clear()
+    time.sleep(1)
+    if 4 < statistics.mean(sensorVals) < 8:
         check3 = True
     if check1 and check2 and check3:
         tests["distance"] = True
@@ -165,15 +169,15 @@ def test_capture():
     send_config(7, 0) #disable pixy
     send_config(6, 0) #disable sensor
     send_config(2, 0) #disable PID
-    send_config(3, 50) #set speed
+    send_config(3, 40) #set speed
     capLeftVals.clear()
     capRightVals.clear()
     time.sleep(5)
     if len(capLeftVals) >= 25 and len(capRightVals) >= 25:
         check1 = True
-    if statistics.mean(capLeftVals) < 7000 and statistics.mean(capLeftVals) > 4400:
+    if 4400 < statistics.mean(capLeftVals) < 7000:
         check2 = True
-    if statistics.mean(capRightVals) < 7000 and statistics.mean(capRightVals) > 4400:
+    if 4400 < statistics.mean(capRightVals) < 7000:
         check3 = True
     if check1 and check2 and check3:
         tests["capture"] = True 
@@ -183,7 +187,9 @@ def test_movement():
     print("Running test: movement @",round(time.time() - starttime,2))
     send_config(7, 0) #disable pixy
     time.sleep(10)
-    if sensorVal <= 8 and sensorVal >= 4:
+    sensorVals.clear()
+    time.sleep(1)
+    if 4 <= statistics.mean(sensorVal) <= 8:
         tests["movement"] = True
 
 def test_sync():
@@ -196,7 +202,7 @@ def test_sync():
     while(stateVal != 27): #26
         pass #wait for pixy to lose poster
     time.sleep(10)
-    if stateVal == 27: #PIXY_TRACKING
+    if stateVal == 27: #found it
         tests["sync"] = True
 
 def test_approach():
@@ -207,23 +213,24 @@ def test_approach():
     send_config(6, 1) #enable sensor
     send_config(2, 1) #enable PID
     time.sleep(20)
-    if 4 < sensorVal < 6 and stateVal == 27: #27 == PIXY_TRACKING
+    sensorVals.clear()
+    time.sleep(1)
+    if 4 < statistics.mean(sensorVals) < 6 and stateVal == 27: #27 == PIXY_TRACKING
         tests["sync"] = True
 
 def run_tests():
     print("Thread started: run_tests")
-    delay = 1
     waiting = 0
     while(not connected):
         time.sleep(1)
         print("Waiting for connection:", waiting)
         waiting+=1
     run_tests = ["distance", "movement", "pause", "sync", "capture", "PID_straight", "PID_turning"]
-    run_tests = ["distance"]
+    run_tests = ["capture"]
     for func in run_tests:
-        globals()["test_"+func]()
         input("Press Enter to continue to test: " + func)
-        time.sleep(delay)    
+        time.sleep(1)
+        globals()["test_"+func]()    
     print("Completed Tests @",round(time.time() - starttime,2))
     print(tests)
        

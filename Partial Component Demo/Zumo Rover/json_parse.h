@@ -31,6 +31,7 @@
 #define JSON_PIXY_VERSION (9)
 #define JSON_TOPIC_CONFIG (10)
 #define JSON_STATE 11
+#define JSON_PID_ADJUSTMENT 12
 
 #define PUBLISH_TOPIC_0 "/team20/stats"
 #define PUBLISH_TOPIC_1 "/team20/debug"

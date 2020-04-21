@@ -29,7 +29,7 @@ void timerCallback(Timer_Handle myHandle)
     {
         pollSensor();
     }
-    if(count % 4 == 0)
+    if(count % 2 == 0)
     {
         sendMsgToNaviQFromISR(TIMER, EMPTY);
     }

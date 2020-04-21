@@ -8,7 +8,7 @@
 #include <navigation.h>
 static int enablePID = 1, enableSensor = 1, enablePixy = 1, enableMovement = 1;
 
-const naviLookupTable naviLookup[NAVILOOKUPLEN] = {
+const naviLookupTable naviLookup[NAVILOOKUPLEN] = {{0, 25000},
                                                 {40,18000},//{expected, measured}
                                                 {60,10000},
                                                 {80,7000},
@@ -165,12 +165,9 @@ void updateValues(MOTORS_STATE *motorsState, uint32_t type, uint32_t value)
 void PIDAdjust(MOTOR_DATA *motor)
 {
     int i;
-    //static int error = 0, integral = 0;
-    //int PIDResult = 0;
-    int adjustment = 0;
+    static int error = 0, integral = 0;
+    int PIDResult = 0;
     uint8_t realSpeed = motor->setSpeed;
-    //MQTTMsg msg = {.topic = JSON_TOPIC_DEBUG, .type = JSON_PID_BEFORE, .value = setSpeed};
-    //sendMsgToMQTTQ(msg);
     for(i = 0; i < NAVILOOKUPLEN; i++)
     {
         if(motor->measuredSpeed > naviLookup[i].measured)
@@ -179,45 +176,24 @@ void PIDAdjust(MOTOR_DATA *motor)
             break;
         }
     }
-    if(realSpeed < motor->setSpeed)
-    {
-        //error = (int) naviLookup[i].expected - setSpeed;
-        adjustment = 20;
-    }
-    else if(realSpeed > motor->setSpeed)
-    {
-        //error = (int) naviLookup[i].expected - setSpeed;
-        adjustment = -20;
-    }
-    if(adjustment < 0)
-    {
-        if(motor->adjustedSpeed + adjustment >= 0)
-        {
-            motor->adjustedSpeed += adjustment;
-        }
-        else
-        {
-            motor->adjustedSpeed = 0;
-        }
-    }
-    else if(adjustment > 0)
-    {
-        if(motor->adjustedSpeed + adjustment <= MAX_SPEED)
-        {
-            motor->adjustedSpeed += adjustment;
-        }
-        else
-        {
-            motor->adjustedSpeed = MAX_SPEED;
-        }
-    }
-    /*
+    error = (int) motor->setSpeed - realSpeed;
     integral += error;
-    PIDResult = (KP*error);// + (KI*integral*measuredSpeed);
-    */
-    //MQTTMsg msg2 = {.topic = JSON_TOPIC_DEBUG, .type = JSON_PID_AFTER, .value = ret};
-    //sendMsgToMQTTQ(msg2);
-    //sendMsgToUARTDebugQ(PID_AFTER, ret);
+    //PIDResult = (KP*error) + (KI*integral*motor->measuredSpeed);
+    PIDResult = error;
+    if(motor->adjustedSpeed + PIDResult < 0)
+    {
+        motor->adjustedSpeed = 0;
+    }
+    else if(motor->adjustedSpeed + PIDResult > MAX_SPEED)
+    {
+        motor->adjustedSpeed = MAX_SPEED;
+    }
+    else
+    {
+        motor->adjustedSpeed += PIDResult;
+    }
+    MQTTMsg msg = {.topic = JSON_TOPIC_DEBUG, .type = JSON_PID_ADJUSTMENT, .value = PIDResult};
+    sendMsgToMQTTQ(msg);
 }
 
 void naviEvent(MOTORS_STATE *motorsState, uint32_t type, uint32_t value)
@@ -319,6 +295,7 @@ void naviEvent(MOTORS_STATE *motorsState, uint32_t type, uint32_t value)
             started = 1;
             break;
         default:
+            updateValues(motorsState, type, value);
             break;
     }
 }

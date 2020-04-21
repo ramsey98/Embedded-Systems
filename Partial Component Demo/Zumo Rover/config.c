@@ -19,7 +19,6 @@ void * configThread(void *arg0)
         receiveFromConfigQ(&msg);
         type = msg.type;
         value = msg.value;
-        sendMsgToUARTDebugQ(CONFIG_MSG, value);
         switch(type)
         {
             case CONFIG_STATE:
