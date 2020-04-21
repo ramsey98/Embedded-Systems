@@ -18,7 +18,7 @@
 
 #define KP 1.0
 #define KI 0.5
-#define NAVILOOKUPLEN 14
+#define NAVILOOKUPLEN 13
 
 typedef struct
 {

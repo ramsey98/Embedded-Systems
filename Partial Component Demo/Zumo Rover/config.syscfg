@@ -1,7 +1,7 @@
 // These arguments were used when this file was generated. They will be automatically applied on subsequent loads 
 // via the GUI or CLI invocations. Run CLI with '--help' for additional information on how to override these arguments.
 // @cliArgs --board "/ti/boards/CC3220SF_LAUNCHXL" --product "simplelink_cc32xx_sdk@3.30.01.02"
-// @versions {"data":"2019103101","timestamp":"2019103101","tool":"1.3.1030","templates":"2019103101"}
+// @versions {"data":"2020022712","timestamp":"2020022712","tool":"1.3.1030","templates":"2020022712"}
 
 var RTOS = scripting.addModule("/ti/drivers/RTOS");
 var Timer = scripting.addModule("/ti/drivers/Timer");
@@ -86,7 +86,11 @@ UART1.uart.$name = "MyUART1";
 // Name - The C/C++ identifier used in applications as the index parameter passed to LED runtime APIs
 LED1.$name = "CONFIG_LED_0";
 // Use Hardware - Select the hardware to use, or 'None' to use available header pins
-LED1.gpioPin.$hardware = system.deviceData.board.components.LED_RED;
+LED1.$hardware = system.deviceData.board.components.LED_RED;
+// Mode - Select the GPIO mode
+LED1.gpioPin.mode = "Output";
+// Callback Function - The name of the callback function called when this GPIO pin triggers an interrupt, or 'NULL' if it's specified at runtime
+LED1.gpioPin.callbackFunction = "";
 // Name - The C/C++ identifier used in applications as the index parameter passed to ADC runtime APIs
 ADC1.$name = "CONFIG_ADC_0";
 // Name
