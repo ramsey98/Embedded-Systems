@@ -56,6 +56,15 @@ sensorStateJSON = {"ID" :  0,
                    "Distance" : 0,
                    "Offset" : 0 }
 
+recieveTimes = { "/team20/config": starttime,
+                 "/team20/pixy" : starttime,
+                 "/team20/ultrasonic" : starttime,
+                 "/team20/sensorpolls" : starttime,
+                 "/team20/sensorstate" : starttime,
+                 "/team20/stats" : starttime,
+                 "/team20/errors" : starttime,
+                 "/team20/debug" : starttime }
+
 def on_connect(client, data, flag, rc):
     global connected
     print("Connected w/ result", str(rc),"@",round(time.time() - starttime,2))
@@ -69,18 +78,26 @@ def on_disconnect(client, data, rc):
 def on_msg_pixy(decoded):
     global pixyJSON
     pixyJSON = decoded
+    rcvtime = round(time.time() - starttime,2)
+    recieveTimes["/team20/pixy"] = rcvtime
 
 def on_msg_ultrasonic(decoded):
     global ultrasonicJSON
     ultrasonicJSON = decoded
+    rcvtime = round(time.time() - starttime,2)
+    recieveTimes["/team20/ultrasonic"] = rcvtime
     
 def on_msg_sensorpolls(decoded):
     global pollsJSON
     pollsJSON = decoded
+    rcvtime = round(time.time() - starttime,2)
+    recieveTimes["/team20/sensorpolls"] = rcvtime
 
 def on_msg_sensorstate(decoded):
     global sensorStateJSON
     sensorStateJSON = decoded
+    rcvtime = round(time.time() - starttime,2)
+    recieveTimes["/team20/sensorstate"] = rcvtime
 
 def on_message(client, data, msg):
     global pub_results, tests, reset, started 
@@ -115,6 +132,33 @@ def test_SensorPolls():
     if pollsJSON["PixyPolls"] == 5 and pollsJSON["SensorPolls"] == 10:
         tests["SensorPolls"] = True
 
+def test_MQTTSendSensorState():
+    global tests, recieveTimes
+    last = recieveTimes["/team20/sensorstate"]
+    time.sleep(1.05)
+    most_recent = recieveTimes["/team20/sensorstate"]
+
+    if last != most_recent and most_recent - last < 1.05:
+        tests["MQTTSendSensorState"] = True
+
+def test_MQTTSendPixyData():
+    global tests, sensorstateJSON, recieveTimes
+    last = recieveTimes["/team20/pixy"]
+    time.sleep(1.05)
+    most_recent = recieveTimes["/team20/pixy"]
+
+    if last != most_recent and most_recent - last < 1.05:
+        tests["MQTTSendPixyData"] = True
+
+def test_MQTTSendUltrasonicData():
+    global tests, recieveTimes
+    last = recieveTimes["/team20/ultrasonic"]
+    time.sleep(1.05)
+    most_recent = recieveTimes["/team20/ultrasonic"]
+
+    if last != most_recent and most_recent - last < 1.05:
+        tests["MQTTSendUltrasonicData"] = True
+
 def run_tests():
     print("Thread started: run_tests")
     delay = 1
@@ -123,7 +167,7 @@ def run_tests():
         time.sleep(1)
         print("Waiting for connection:", waiting)
         waiting+=1
-    run_tests = ["SensorPolls"]
+    run_tests = ["SensorPolls", "MQTTSendSensorState", "MQTTSendPixyData", "MQTTSendUltrasonicData"]
     for func in run_tests:
         globals()["test_"+func]()
         input("Press Enter to continue to test: " + func)
