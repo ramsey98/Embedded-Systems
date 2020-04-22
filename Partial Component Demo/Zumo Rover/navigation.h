@@ -28,6 +28,7 @@ typedef struct
 
 typedef struct
 {
+    uint8_t motorID;
     uint8_t setSpeed, direction, adjustedSpeed;
     uint8_t forward8Bit, forward, reverse8Bit, reverse;
     uint32_t measuredSpeed;

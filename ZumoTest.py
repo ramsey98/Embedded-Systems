@@ -11,21 +11,21 @@ IP = "192.168.1.45"
 PORT = 1883
 
 tests = {"pause": False,
-         "PID_straight": False,
-         "PID_turning": False,
          "distance": False,
          "movement": False,
          "capture": False,
          "sync": False,
          "approach": False}
 
-topics = {"/team20/debug": ["ID", "Type", "Value"]}
+topics = {"/team20/debug": ["ID", "Type", "Value"],
+          "/team20/state": ["ID", "Type", "Value"]}
 
 ID = {"/team20/config": 0}
 capLeftVals = []
 capRightVals = []
 sensorVals = []
-PIDVals = []
+PIDLeftVals = []
+PIDRightVals = []
 statePaused = 0
 stateTracking = 0
 
@@ -47,17 +47,18 @@ def on_msg_debug(decoded):
     elif decoded["Type"] == 3:
         sensorVals.append(decoded["Value"])
     elif decoded["Type"] == 5:
-        PIDVals.append(decoded["Value"])
+        PIDLeftVals.append(decoded["Value"])
+    elif decoded["Type"] == 6:
+        PIDRightVals.append(decoded["Value"])
 
 def on_msg_state(decoded):
     global statePaused, stateTracking
-    elif decoded["Type"] == 1:
+    if decoded["Type"] == 1:
         statePaused = decoded["Value"]
     elif decoded["Type"] == 2:
         stateTracking = decoded["Value"]
 
 def on_message(client, data, msg):
-    rcvtime = round(time.time() - starttime,2)
     topic = msg.topic
     package = msg.payload.decode()
     decoded = json.loads(package)
@@ -85,7 +86,8 @@ def test_pause():
     send_config(8, 1) #enable movement
     send_config(7, 0) #disable pixy
     send_config(6, 0) #disable sensor
-    send_config(3, 50)#set speed
+    send_config(2, 0) #disable PID
+    send_config(3, 100)#set speed
     time.sleep(2)
     send_config(1, 2) #rover loading
     time.sleep(2)
@@ -93,7 +95,7 @@ def test_pause():
         check1 = True
     send_config(1, 1) #rover moving
     time.sleep(2)
-    if statePaused == 2:
+    if statePaused == 0:
         check2 = True
     if check1 and check2:
         tests["pause"] = True
@@ -105,9 +107,18 @@ def test_PID_straight():
     send_config(6, 0) #disable sensor
     send_config(2, 1) #enable PID
     send_config(3, 50)#set speed
-    PIDVals.clear()
     time.sleep(1)
-    plt.plot(PIDVals)
+    PIDLeftVals.clear()
+    PIDRightVals.clear()
+    time.sleep(5)
+    send_config(3, 100)#set speed
+    time.sleep(5)
+    send_config(3, 150)#set speed
+    time.sleep(5)
+    send_config(3, 200)#set speed
+    time.sleep(5)
+    plt.plot(PIDLeftVals)
+    plt.plot(PIDRightVals)
     plt.ylabel('PID adjustment')
     plt.xlabel('trial')
     plt.show()
@@ -119,9 +130,18 @@ def test_PID_turning():
     send_config(6, 0) #disable sensor
     send_config(2, 1) #enable PID
     send_config(5, 50)#turn left
-    PIDVals.clear()
     time.sleep(1)
-    plt.plot(PIDVals)
+    PIDLeftVals.clear()
+    PIDRightVals.clear()
+    time.sleep(5)
+    send_config(5, 100)#set speed
+    time.sleep(5)
+    send_config(5, 150)#set speed
+    time.sleep(5)
+    send_config(5, 200)#set speed
+    time.sleep(5)
+    plt.plot(PIDLeftVals)
+    plt.plot(PIDRightVals)
     plt.ylabel('PID adjustment')
     plt.xlabel('trial')
     plt.show()
@@ -132,28 +152,29 @@ def test_distance():
     check1 = False
     check2 = False
     check3 = False
-    send_config(8, 0) #disable movement
+    send_config(3, 0) #set speed
     send_config(7, 0) #disable pixy
     send_config(6, 0) #disable sensor
     send_config(2, 0) #disable PID
-    print("distance: checking 20 inches")
-    time.sleep(10)
+    send_config(8, 1) #disable movement
+    input("distance: press enter to check 20 inches")
     sensorVals.clear()
-    time.sleep(1)
-    if 18 < statistics.mean(sensorVals) < 22:
+    time.sleep(2)
+    if 18 <= statistics.mean(sensorVals) <= 22:
         check1 = True
-    print("distance: checking 12 inches")    
-    time.sleep(10)
+    print("Average for 20 inches was:",statistics.mean(sensorVals))
+    input("distance: press enter to check 12 inches")    
     sensorVals.clear()
-    time.sleep(1)
-    if 10 < statistics.mean(sensorVals) < 14:
+    time.sleep(2)
+    if 10 <= statistics.mean(sensorVals) <= 14:
         check2 = True
-    print("distance: checking 6 inches")
-    time.sleep(10)
+    print("Average for 12 inches was:",statistics.mean(sensorVals))
+    input("distance: press enter to check 6 inches")
     sensorVals.clear()
-    time.sleep(1)
-    if 4 < statistics.mean(sensorVals) < 8:
+    time.sleep(2)
+    if 4 <= statistics.mean(sensorVals) <= 8:
         check3 = True
+    print("Average for 6 inches was:",statistics.mean(sensorVals))      
     if check1 and check2 and check3:
         tests["distance"] = True
 
@@ -167,11 +188,14 @@ def test_capture():
     send_config(7, 0) #disable pixy
     send_config(6, 0) #disable sensor
     send_config(2, 0) #disable PID
-    send_config(3, 40) #set speed
+    send_config(3, 100) #set speed
+    time.sleep(1)
     capLeftVals.clear()
     capRightVals.clear()
     time.sleep(5.5)
-    if len(capLeftVals) >= 20 and len(capRightVals) >= 20:
+    print(capLeftVals)
+    print(capRightVals)
+    if len(capLeftVals) >= 12 and len(capRightVals) >= 12:
         check1 = True
     if 4400 < statistics.mean(capLeftVals) < 7000:
         check2 = True
@@ -187,10 +211,11 @@ def test_movement():
     send_config(7, 0) #disable pixy
     send_config(6, 1) #enable sensor
     send_config(2, 0) #disable PID
+    send_config(3, 255) #set speed
     time.sleep(10)
     sensorVals.clear()
     time.sleep(1)
-    if 4 <= statistics.mean(sensorVal) <= 8:
+    if 6 <= statistics.mean(sensorVals) <= 12:
         tests["movement"] = True
 
 def test_sync():
@@ -229,7 +254,7 @@ def run_tests():
         print("Waiting for connection:", waiting)
         waiting+=1
     run_tests = ["distance", "movement", "pause", "sync", "capture", "PID_straight", "PID_turning", "approach"]
-    run_tests = ["capture"]
+    run_tests = ["distance"]
     for func in run_tests:
         input("Press Enter to continue to test: " + func)
         time.sleep(1)

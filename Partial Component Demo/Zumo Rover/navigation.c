@@ -162,7 +162,6 @@ void updateValues(MOTORS_STATE *motorsState, uint32_t type, uint32_t value)
     }
 }
 
-//https://softwareengineering.stackexchange.com/questions/186124/programming-pid-loops-in-c
 void PIDAdjust(MOTOR_DATA *motor)
 {
     int i;
@@ -199,9 +198,17 @@ void PIDAdjust(MOTOR_DATA *motor)
     {
         motor->adjustedSpeed += PIDResult;
     }
-    MQTTMsg msg = {.topic = JSON_TOPIC_DEBUG, .type = JSON_PID_ADJUSTMENT, .value = PIDResult};
     if(started == 1)
     {
+        MQTTMsg msg = {.topic = JSON_TOPIC_DEBUG, .type = 0, .value = PIDResult};
+        if(motor->motorID == 0)
+        {
+            msg.type = JSON_PID_LEFT;
+        }
+        else if(motor->motorID == 1)
+        {
+            msg.type = JSON_PID_RIGHT;
+        }
         sendMsgToMQTTQ(msg);
     }
 }
@@ -244,7 +251,7 @@ void naviEvent(MOTORS_STATE *motorsState, uint32_t type, uint32_t value)
             motorsState->rightMotor.measuredSpeed = value;
             break;
         case SENSOR:
-            if(enableSensor != 0 & started != 0)
+            if(enableSensor != 0)
             {
                 if(value >= 20)
                 {
@@ -313,7 +320,8 @@ void *naviThread(void *arg0)
 {
     dbgOutputLoc(ENTER_TASK);
     uint32_t type = 0, value = 0;
-    MOTOR_DATA leftMotor = {.direction = 0,
+    MOTOR_DATA leftMotor = {.motorID = 0,
+                            .direction = 0,
                              .setSpeed = 0,
                              .adjustedSpeed = 0,
                              .measuredSpeed = 0,
@@ -321,7 +329,8 @@ void *naviThread(void *arg0)
                              .forward8Bit = M0_FORWARD_8BIT,
                              .reverse = M0_REVERSE,
                              .reverse8Bit = M0_REVERSE_8BIT};
-    MOTOR_DATA rightMotor = {.direction = 0,
+    MOTOR_DATA rightMotor = {.motorID = 1,
+                             .direction = 0,
                              .setSpeed = 0,
                              .adjustedSpeed = 0,
                              .measuredSpeed = 0,
