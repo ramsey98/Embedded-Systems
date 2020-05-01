@@ -77,6 +77,15 @@ def send_config(msgType, msgValue):
     client.publish(topic,package)
     ID[topic] += 1
     print("Sent",package,"to",topic,"@",round(time.time() - starttime,2))
+
+def resetConfig():
+    send_config(3, 0) #set speed
+    time.sleep(1)
+    send_config(8, 0) #disable movement
+    send_config(7, 0) #disable pixy
+    send_config(6, 0) #disable sensor
+    send_config(2, 0) #disable PID
+    
     
 def test_pause():
     global tests
@@ -117,6 +126,9 @@ def test_PID_straight():
     time.sleep(5)
     send_config(3, 200)#set speed
     time.sleep(5)
+    send_config(3, 255)#set speed
+    time.sleep(5)
+    send_config(3, 0)#set speed
     plt.plot(PIDLeftVals)
     plt.plot(PIDRightVals)
     plt.ylabel('PID adjustment')
@@ -140,6 +152,9 @@ def test_PID_turning():
     time.sleep(5)
     send_config(5, 200)#set speed
     time.sleep(5)
+    send_config(5, 255)#set speed
+    time.sleep(5)
+    send_config(5, 0)#set speed
     plt.plot(PIDLeftVals)
     plt.plot(PIDRightVals)
     plt.ylabel('PID adjustment')
@@ -202,7 +217,25 @@ def test_capture():
     if 4400 < statistics.mean(capRightVals) < 7000:
         check3 = True
     if check1 and check2 and check3:
-        tests["capture"] = True 
+        tests["capture"] = True
+
+def test_pantilt():
+    print("Running test: pan/tilt @",round(time.time() - starttime,2))
+    send_config(8, 1) #enable movement
+    send_config(7, 0) #disable pixy
+    send_config(6, 0) #disable sensor
+    send_config(2, 0) #disable PID
+    time.sleep(10)
+    if stateTracking == 1: #found it
+        tests["pantilt"] = True
+
+def test_turning():
+    print("Running test: turning @",round(time.time() - starttime,2))
+    send_config(8, 1) #enable movement
+    send_config(7, 1) #enable pixy
+    send_config(6, 0) #disable sensor
+    send_config(2, 0) #disable PID
+    time.sleep(20)
 
 def test_movement():
     global tests
@@ -212,7 +245,7 @@ def test_movement():
     send_config(6, 1) #enable sensor
     send_config(2, 0) #disable PID
     send_config(3, 255) #set speed
-    time.sleep(10)
+    time.sleep(20)
     sensorVals.clear()
     time.sleep(1)
     if 6 <= statistics.mean(sensorVals) <= 12:
@@ -220,7 +253,7 @@ def test_movement():
 
 def test_sync():
     global tests
-    print("Running test: sync @",round(time.time() - starttime,2))
+    print("Running test: track @",round(time.time() - starttime,2))
     send_config(8, 0) #disable movement
     send_config(7, 0) #disable pixy
     send_config(6, 0) #disable sensor
@@ -240,11 +273,10 @@ def test_approach():
     send_config(7, 1) #enable pixy
     send_config(6, 1) #enable sensor
     send_config(2, 1) #enable PID
-    time.sleep(5)
+    time.sleep(15)
     sensorVals.clear()
-    time.sleep(1)
-    if 4 < statistics.mean(sensorVals) < 6 and stateTracking == 1:
-        tests["approach"] = True
+    time.sleep(2)
+    tests["approach"] = True
 
 def run_tests():
     print("Thread started: run_tests")
@@ -253,12 +285,14 @@ def run_tests():
         time.sleep(1)
         print("Waiting for connection:", waiting)
         waiting+=1
-    run_tests = ["distance", "movement", "pause", "sync", "capture", "PID_straight", "PID_turning", "approach"]
-    run_tests = ["distance"]
+    run_tests = ["pantilt", "distance", "movement", "sync", "turning", "pause", "capture", "PID_straight", "PID_turning", "approach"]
     for func in run_tests:
         input("Press Enter to continue to test: " + func)
         time.sleep(1)
-        globals()["test_"+func]()    
+        globals()["test_"+func]()
+        if func in tests:
+            print(tests[func],"\n\n")
+        resetConfig()
     print("Completed Tests @",round(time.time() - starttime,2))
     print(tests)
        
